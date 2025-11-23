@@ -2,6 +2,12 @@ gg_trg_Melee_Initialization = nil
 function InitGlobals()
 end
 
+function MakeCirclesOfPowerInvisible()
+    ForGroup(GetUnitsOfTypeIdAll(FourCC('ncop')), function()
+		SetUnitVertexColor(GetEnumUnit(), 255, 50, 255, 255)
+    end)	
+end
+
 function MakeBuildersInvulnerable()
     ForGroup(GetUnitsOfTypeIdAll(FourCC('hpea')), function()
         SetUnitInvulnerable(GetEnumUnit(), true)
@@ -19,6 +25,7 @@ function InitPlayers()
     end
 
 	MakeBuildersInvulnerable()
+	MakeCirclesOfPowerInvisible()
 end
 
 function Init()
@@ -50,6 +57,22 @@ u = BlzCreateUnitWithSkin(p, FourCC("ncop"), -128.0, 2176.0, 270.000, FourCC("nc
 u = BlzCreateUnitWithSkin(p, FourCC("ncop"), -128.0, 2304.0, 270.000, FourCC("ncop"))
 u = BlzCreateUnitWithSkin(p, FourCC("ncop"), 0.0, 2304.0, 270.000, FourCC("ncop"))
 u = BlzCreateUnitWithSkin(p, FourCC("ncop"), 128.0, 2304.0, 270.000, FourCC("ncop"))
+end
+
+function CreateUnitsForPlayer0()
+local p = Player(0)
+local u
+local unitID
+local t
+local life
+
+u = BlzCreateUnitWithSkin(p, FourCC("hpea"), 2491.0, 692.1, 177.360, FourCC("hpea"))
+UnitAddItemToSlotById(u, FourCC("tsct"), 0)
+UnitAddItemToSlotById(u, FourCC("tsct"), 1)
+UnitAddItemToSlotById(u, FourCC("tsct"), 2)
+UnitAddItemToSlotById(u, FourCC("tsct"), 3)
+UnitAddItemToSlotById(u, FourCC("tsct"), 4)
+UnitAddItemToSlotById(u, FourCC("tsct"), 5)
 end
 
 function CreateBuildingsForPlayer1()
@@ -266,6 +289,7 @@ CreateBuildingsForPlayer11()
 end
 
 function CreatePlayerUnits()
+CreateUnitsForPlayer0()
 end
 
 function CreateAllUnits()
