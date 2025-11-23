@@ -143,3 +143,9 @@ STRING 29
 Player 24
 }
 
+STRING 30
+// Units: h000 (Avatar), Name (Name)
+{
+Avatar
+}
+

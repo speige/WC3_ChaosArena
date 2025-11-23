@@ -1,0 +1,5 @@
+[Misc]
+FoodCeiling=9
+HeroExpRange=0.0
+MaxLevelHeroesDrainExp=0
+

@@ -2,15 +2,10 @@ gg_trg_Melee_Initialization = nil
 function InitGlobals()
 end
 
-function MakeCirclesOfPowerInvisible()
+function MakeCirclesOfPowerTranslucent()
     ForGroup(GetUnitsOfTypeIdAll(FourCC('ncop')), function()
+		BlzSetUnitName(GetEnumUnit(), 'Archer (Wind Fire Earth) 123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz')
 		SetUnitVertexColor(GetEnumUnit(), 255, 50, 255, 255)
-    end)	
-end
-
-function MakeBuildersInvulnerable()
-    ForGroup(GetUnitsOfTypeIdAll(FourCC('hpea')), function()
-        SetUnitInvulnerable(GetEnumUnit(), true)
     end)	
 end
 
@@ -24,8 +19,30 @@ function InitPlayers()
         end
     end
 
-	MakeBuildersInvulnerable()
-	MakeCirclesOfPowerInvisible()
+	MakeCirclesOfPowerTranslucent()
+end
+
+function OnBuiltOnCircle()
+    if GetUnitTypeId(GetSpellAbilityUnit()) == FourCC('hpea') and GetSpellAbilityId() == FourCC('AIbt') then
+		local circle
+        local g = CreateGroup()
+        GroupEnumUnitsInRange(g, GetSpellTargetX(), GetSpellTargetY(), 25, nil)        
+        ForGroup(g, function()
+            circle = GetEnumUnit()
+            if GetUnitTypeId(circle) == FourCC('ncop') then
+                RemoveUnit(circle)
+				return
+            end
+        end)
+        
+        DestroyGroup(g)
+    end
+end
+
+function InitBuiltOnCircle()
+    local t = CreateTrigger()
+    TriggerRegisterAnyUnitEventBJ(t, EVENT_PLAYER_UNIT_SPELL_EFFECT)
+    TriggerAddAction(t, OnBuiltOnCircle)
 end
 
 function Init()
@@ -34,7 +51,7 @@ function Init()
 	FogEnableOff()
 	FogMaskEnableOff()
 	InitPlayers()
-	SetAllTilesUnbuildable()
+	InitBuiltOnCircle()
 end
 
 --[[
@@ -66,13 +83,8 @@ local unitID
 local t
 local life
 
-u = BlzCreateUnitWithSkin(p, FourCC("hpea"), 2491.0, 692.1, 177.360, FourCC("hpea"))
-UnitAddItemToSlotById(u, FourCC("tsct"), 0)
-UnitAddItemToSlotById(u, FourCC("tsct"), 1)
-UnitAddItemToSlotById(u, FourCC("tsct"), 2)
-UnitAddItemToSlotById(u, FourCC("tsct"), 3)
-UnitAddItemToSlotById(u, FourCC("tsct"), 4)
-UnitAddItemToSlotById(u, FourCC("tsct"), 5)
+u = BlzCreateUnitWithSkin(p, FourCC("hpea"), 2553.2, 693.3, 120.095, FourCC("hpea"))
+u = BlzCreateUnitWithSkin(p, FourCC("Hpal"), 970.4, 606.4, 269.569, FourCC("Hpal"))
 end
 
 function CreateBuildingsForPlayer1()
