@@ -4,7 +4,6 @@ end
 
 function MakeCirclesOfPowerTranslucent()
     ForGroup(GetUnitsOfTypeIdAll(FourCC('ncop')), function()
-		BlzSetUnitName(GetEnumUnit(), 'Archer (Wind Fire Earth) 123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz')
 		SetUnitVertexColor(GetEnumUnit(), 255, 50, 255, 255)
     end)	
 end
@@ -84,7 +83,6 @@ local t
 local life
 
 u = BlzCreateUnitWithSkin(p, FourCC("hpea"), 2553.2, 693.3, 120.095, FourCC("hpea"))
-u = BlzCreateUnitWithSkin(p, FourCC("Hpal"), 970.4, 606.4, 269.569, FourCC("Hpal"))
 end
 
 function CreateBuildingsForPlayer1()
