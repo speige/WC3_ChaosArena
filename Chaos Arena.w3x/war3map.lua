@@ -195,6 +195,7 @@ function FindPlayerBuilder(playerIndex)
         local u = GetEnumUnit()
         if GetUnitTypeId(u) == BUILDER_ID then
             builder = u
+            return
         end
     end)
     
@@ -206,7 +207,9 @@ function InitPlayerBuilders()
     for i = 0, 11 do
         local p = Player(i)
         if GetPlayerSlotState(p) == PLAYER_SLOT_STATE_PLAYING then
-            playerBuilders[i] = FindPlayerBuilder(i)
+            local builder = FindPlayerBuilder(i)
+            playerBuilders[i] = builder
+            UnitRemoveAbility(builder, FourCC('Aatk'))
         end
     end
 end
@@ -230,11 +233,15 @@ function AddDraftAbilitiesToBuilder(playerIndex)
     end
 
     local builder = playerBuilders[playerIndex]
-    if not builder then return end
+    if not builder then
+        return
+    end
     
     local abilities = DrawChoicesFromDeck(playerIndex)
     for i = 1, #abilities do
+        --note: hack to add abilities to existing spellbook. adding 2nd spellbooks with identical "Data Base Order ID" merges them but also show 2 icons. Disable 2nd to hide its icon
         UnitAddAbility(builder, abilities[i])
+        BlzUnitDisableAbility(builder, abilities[i], false, true)
     end
 end
 
@@ -265,7 +272,7 @@ function OnUnitDrafted()
     GroupEnumUnitsInRange(g, GetSpellTargetX(), GetSpellTargetY(), 25, nil)        
     ForGroup(g, function()
         circle = GetEnumUnit()
-        if GetUnitTypeId(circle) == FourCC('ncop') then
+        if GetUnitTypeId(circle) == FourCC('n00A') then
             RemoveUnit(circle)
             return
         end
@@ -382,7 +389,7 @@ function GrantFoodCap()
 end
 
 function MakeCirclesOfPowerTranslucent()
-    ForGroup(GetUnitsOfTypeIdAll(FourCC('ncop')), function()
+    ForGroup(GetUnitsOfTypeIdAll(FourCC('n00A')), function()
 		SetUnitVertexColor(GetEnumUnit(), 255, 50, 255, 255)
     end)	
 end
@@ -418,7 +425,6 @@ function Init()
     local spellTrigger = CreateTrigger()
     TriggerRegisterAnyUnitEventBJ(spellTrigger, EVENT_PLAYER_UNIT_SPELL_EFFECT)
     TriggerAddAction(spellTrigger, OnSpellEffect)
-    InitCustomAbilities()
 end
 
 --[[
@@ -450,7 +456,7 @@ local unitID
 local t
 local life
 
-u = BlzCreateUnitWithSkin(p, FourCC("hpea"), 2553.2, 693.3, 120.095, FourCC("hpea"))
+u = BlzCreateUnitWithSkin(p, FourCC("h000"), 2470.6, 648.1, 305.935, FourCC("h000"))
 end
 
 function CreateBuildingsForPlayer1()
