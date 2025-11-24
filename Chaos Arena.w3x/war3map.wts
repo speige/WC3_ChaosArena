@@ -191,3 +191,423 @@ STRING 38
 Revive Ogre Mauler
 }
 
+STRING 76
+// Units: N009 (Akama), Name (Name)
+{
+Akama
+}
+
+STRING 77
+// Units: N008 (Murloc), Name (Name)
+{
+Murloc
+}
+
+STRING 78
+// Abilities: A00T (Murloc), Name (Name)
+{
+Murloc
+}
+
+STRING 79
+// Units: N008 (Murloc), Tip (Tooltip - Basic)
+{
+Summon Murloc
+}
+
+STRING 80
+// Units: N008 (Murloc), Revivetip (Tooltip - Revive)
+{
+Revive Murloc
+}
+
+STRING 81
+// Units: N009 (Akama), Tip (Tooltip - Basic)
+{
+Summon Akama
+}
+
+STRING 82
+// Abilities: A002 (Priestess of the Moon
+), Name (Name)
+{
+Priestess of the Moon
+
+}
+
+STRING 83
+// Abilities: A003 (Demon Hunter), Name (Name)
+{
+Demon Hunter
+}
+
+STRING 84
+// Abilities: A004 (Ogre Mauler), Name (Name)
+{
+Ogre Mauler
+}
+
+STRING 85
+// Abilities: A005 (Warden), Name (Name)
+{
+Warden
+}
+
+STRING 86
+// Abilities: A006 (Paladin), Name (Name)
+{
+Paladin
+}
+
+STRING 87
+// Abilities: A007 (Archmage), Name (Name)
+{
+Archmage
+}
+
+STRING 88
+// Abilities: A008 (Mountain King), Name (Name)
+{
+Mountain King
+}
+
+STRING 89
+// Abilities: A009 (Blood Mage), Name (Name)
+{
+Blood Mage
+}
+
+STRING 90
+// Abilities: A00A (Blademaster), Name (Name)
+{
+Blademaster
+}
+
+STRING 91
+// Abilities: A00B (Far Seer), Name (Name)
+{
+Far Seer
+}
+
+STRING 92
+// Abilities: A00C (Tauren Chieftain), Name (Name)
+{
+Tauren Chieftain
+}
+
+STRING 93
+// Abilities: A00D (Shadow Hunter), Name (Name)
+{
+Shadow Hunter
+}
+
+STRING 94
+// Abilities: A00E (Death Knight), Name (Name)
+{
+Death Knight
+}
+
+STRING 95
+// Abilities: A00F (Lich), Name (Name)
+{
+Lich
+}
+
+STRING 96
+// Abilities: A00G (Dreadlord
+), Name (Name)
+{
+Dreadlord
+
+}
+
+STRING 97
+// Abilities: A00H (Crypt Lord), Name (Name)
+{
+Crypt Lord
+}
+
+STRING 98
+// Abilities: A00I (Alchemist), Name (Name)
+{
+Alchemist
+}
+
+STRING 99
+// Abilities: A00J (Sea Witch), Name (Name)
+{
+Sea Witch
+}
+
+STRING 100
+// Abilities: A00K (Tinker), Name (Name)
+{
+Tinker
+}
+
+STRING 101
+// Abilities: A00L (Beastmaster), Name (Name)
+{
+Beastmaster
+}
+
+STRING 102
+// Abilities: A00M (Brewmaster), Name (Name)
+{
+Brewmaster
+}
+
+STRING 103
+// Abilities: A00N (Dark Ranger), Name (Name)
+{
+Dark Ranger
+}
+
+STRING 104
+// Abilities: A00O (Firelord), Name (Name)
+{
+Firelord
+}
+
+STRING 105
+// Abilities: A00P (Pit Lord), Name (Name)
+{
+Pit Lord
+}
+
+STRING 106
+// Units: U005 (Archimonde), Name (Name)
+{
+Archimonde
+}
+
+STRING 107
+// Units: O003 (Gul'dan), Name (Name)
+{
+Gul'dan
+}
+
+STRING 108
+// Units: H009 (Jaina), Name (Name)
+{
+Jaina
+}
+
+STRING 109
+// Abilities: A01N (Murloc), Name (Name)
+{
+Murloc
+}
+
+STRING 110
+// Abilities: A00U (Akama), Name (Name)
+{
+Akama
+}
+
+STRING 111
+// Abilities: A01O (Akama), Name (Name)
+{
+Akama
+}
+
+STRING 112
+// Abilities: A00V (Keeper of the Grove
+), Name (Name)
+{
+Keeper of the Grove
+
+}
+
+STRING 113
+// Abilities: A00W (Priestess of the Moon), Name (Name)
+{
+Priestess of the Moon
+}
+
+STRING 114
+// Abilities: A00X (Demon Hunter), Name (Name)
+{
+Demon Hunter
+}
+
+STRING 115
+// Abilities: A00Y (Ogre Mauler), Name (Name)
+{
+Ogre Mauler
+}
+
+STRING 116
+// Abilities: A00Z (Warden), Name (Name)
+{
+Warden
+}
+
+STRING 117
+// Abilities: A010 (Paladin), Name (Name)
+{
+Paladin
+}
+
+STRING 118
+// Abilities: A011 (Archmage), Name (Name)
+{
+Archmage
+}
+
+STRING 119
+// Abilities: A012 (Mountain King), Name (Name)
+{
+Mountain King
+}
+
+STRING 120
+// Abilities: A013 (Blood Mage), Name (Name)
+{
+Blood Mage
+}
+
+STRING 121
+// Abilities: A014 (Blademaster), Name (Name)
+{
+Blademaster
+}
+
+STRING 122
+// Abilities: A015 (Far Seer), Name (Name)
+{
+Far Seer
+}
+
+STRING 123
+// Abilities: A016 (Tauren Chieftain), Name (Name)
+{
+Tauren Chieftain
+}
+
+STRING 124
+// Abilities: A017 (Shadow Hunter), Name (Name)
+{
+Shadow Hunter
+}
+
+STRING 125
+// Abilities: A018 (Death Knight), Name (Name)
+{
+Death Knight
+}
+
+STRING 126
+// Abilities: A019 (Lich), Name (Name)
+{
+Lich
+}
+
+STRING 127
+// Abilities: A01A (Dreadlord), Name (Name)
+{
+Dreadlord
+}
+
+STRING 128
+// Abilities: A01B (Crypt Lord), Name (Name)
+{
+Crypt Lord
+}
+
+STRING 129
+// Abilities: A01C (Alchemist), Name (Name)
+{
+Alchemist
+}
+
+STRING 130
+// Abilities: A01D (Sea Witch), Name (Name)
+{
+Sea Witch
+}
+
+STRING 131
+// Abilities: A01E (Tinker), Name (Name)
+{
+Tinker
+}
+
+STRING 132
+// Abilities: A01F (Beastmaster), Name (Name)
+{
+Beastmaster
+}
+
+STRING 133
+// Abilities: A01G (Brewmaster), Name (Name)
+{
+Brewmaster
+}
+
+STRING 134
+// Abilities: A01H (Dark Ranger), Name (Name)
+{
+Dark Ranger
+}
+
+STRING 135
+// Abilities: A01I (Firelord), Name (Name)
+{
+Firelord
+}
+
+STRING 136
+// Abilities: A01J (Pit Lord), Name (Name)
+{
+Pit Lord
+}
+
+STRING 137
+// Abilities: A00Q (Archimonde), Name (Name)
+{
+Archimonde
+}
+
+STRING 138
+// Abilities: A00R (Gul'dan), Name (Name)
+{
+Gul'dan
+}
+
+STRING 139
+// Abilities: A00S (Jaina), Name (Name)
+{
+Jaina
+}
+
+STRING 141
+// Units: U005 (Archimonde), Awakentip (Tooltip - Awaken)
+{
+Revive Archimonde
+}
+
+STRING 142
+// Units: U005 (Archimonde), Revivetip (Tooltip - Revive)
+{
+Revive Archimonde
+}
+
+STRING 143
+// Abilities: A01K (Archimonde), Name (Name)
+{
+Archimonde
+}
+
+STRING 144
+// Abilities: A01L (Gul'dan), Name (Name)
+{
+Gul'dan
+}
+
+STRING 145
+// Abilities: A01M (Jaina), Name (Name)
+{
+Jaina
+}
+
