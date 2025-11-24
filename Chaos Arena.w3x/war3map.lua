@@ -2,6 +2,385 @@ gg_trg_Melee_Initialization = nil
 function InitGlobals()
 end
 
+local GLOBAL_DECK_UNIT_SET = {}
+GLOBAL_DECK_UNIT_SET[FourCC('E000')] = true
+GLOBAL_DECK_UNIT_SET[FourCC('E001')] = true
+GLOBAL_DECK_UNIT_SET[FourCC('E002')] = true
+GLOBAL_DECK_UNIT_SET[FourCC('E004')] = true
+GLOBAL_DECK_UNIT_SET[FourCC('E003')] = true
+GLOBAL_DECK_UNIT_SET[FourCC('H001')] = true
+GLOBAL_DECK_UNIT_SET[FourCC('H002')] = true
+GLOBAL_DECK_UNIT_SET[FourCC('H003')] = true
+GLOBAL_DECK_UNIT_SET[FourCC('H004')] = true
+GLOBAL_DECK_UNIT_SET[FourCC('O000')] = true
+GLOBAL_DECK_UNIT_SET[FourCC('O001')] = true
+GLOBAL_DECK_UNIT_SET[FourCC('O002')] = true
+GLOBAL_DECK_UNIT_SET[FourCC('O004')] = true
+GLOBAL_DECK_UNIT_SET[FourCC('U000')] = true
+GLOBAL_DECK_UNIT_SET[FourCC('U001')] = true
+GLOBAL_DECK_UNIT_SET[FourCC('U002')] = true
+GLOBAL_DECK_UNIT_SET[FourCC('U004')] = true
+GLOBAL_DECK_UNIT_SET[FourCC('N000')] = true
+GLOBAL_DECK_UNIT_SET[FourCC('N008')] = true
+GLOBAL_DECK_UNIT_SET[FourCC('N002')] = true
+GLOBAL_DECK_UNIT_SET[FourCC('N003')] = true
+GLOBAL_DECK_UNIT_SET[FourCC('N001')] = true
+GLOBAL_DECK_UNIT_SET[FourCC('N005')] = true
+GLOBAL_DECK_UNIT_SET[FourCC('N007')] = true
+GLOBAL_DECK_UNIT_SET[FourCC('N004')] = true
+GLOBAL_DECK_UNIT_SET[FourCC('N006')] = true
+GLOBAL_DECK_UNIT_SET[FourCC('U005')] = true
+GLOBAL_DECK_UNIT_SET[FourCC('N009')] = true
+GLOBAL_DECK_UNIT_SET[FourCC('O003')] = true
+GLOBAL_DECK_UNIT_SET[FourCC('H009')] = true
+
+local GLOBAL_DECK_SPELLBOOK_SET = {}
+GLOBAL_DECK_SPELLBOOK_SET[FourCC('A00U')] = true
+GLOBAL_DECK_SPELLBOOK_SET[FourCC('A00I')] = true
+GLOBAL_DECK_SPELLBOOK_SET[FourCC('A00Q')] = true
+GLOBAL_DECK_SPELLBOOK_SET[FourCC('A007')] = true
+GLOBAL_DECK_SPELLBOOK_SET[FourCC('A00L')] = true
+GLOBAL_DECK_SPELLBOOK_SET[FourCC('A00A')] = true
+GLOBAL_DECK_SPELLBOOK_SET[FourCC('A009')] = true
+GLOBAL_DECK_SPELLBOOK_SET[FourCC('A00M')] = true
+GLOBAL_DECK_SPELLBOOK_SET[FourCC('A00H')] = true
+GLOBAL_DECK_SPELLBOOK_SET[FourCC('A00N')] = true
+GLOBAL_DECK_SPELLBOOK_SET[FourCC('A00E')] = true
+GLOBAL_DECK_SPELLBOOK_SET[FourCC('A003')] = true
+GLOBAL_DECK_SPELLBOOK_SET[FourCC('A00G')] = true
+GLOBAL_DECK_SPELLBOOK_SET[FourCC('A00B')] = true
+GLOBAL_DECK_SPELLBOOK_SET[FourCC('A00O')] = true
+GLOBAL_DECK_SPELLBOOK_SET[FourCC('A00R')] = true
+GLOBAL_DECK_SPELLBOOK_SET[FourCC('A00S')] = true
+GLOBAL_DECK_SPELLBOOK_SET[FourCC('A001')] = true
+GLOBAL_DECK_SPELLBOOK_SET[FourCC('A00F')] = true
+GLOBAL_DECK_SPELLBOOK_SET[FourCC('A008')] = true
+GLOBAL_DECK_SPELLBOOK_SET[FourCC('A00T')] = true
+GLOBAL_DECK_SPELLBOOK_SET[FourCC('A004')] = true
+GLOBAL_DECK_SPELLBOOK_SET[FourCC('A006')] = true
+GLOBAL_DECK_SPELLBOOK_SET[FourCC('A00P')] = true
+GLOBAL_DECK_SPELLBOOK_SET[FourCC('A002')] = true
+GLOBAL_DECK_SPELLBOOK_SET[FourCC('A00J')] = true
+GLOBAL_DECK_SPELLBOOK_SET[FourCC('A00D')] = true
+GLOBAL_DECK_SPELLBOOK_SET[FourCC('A00C')] = true
+GLOBAL_DECK_SPELLBOOK_SET[FourCC('A00K')] = true
+GLOBAL_DECK_SPELLBOOK_SET[FourCC('A005')] = true
+
+function SpawnWaveForPlayer(playerIndex)
+    local p = Player(playerIndex)
+    local proxyPlayer = Player(playerIndex + 12)
+    local playerStart = { x = GetPlayerStartLocationX(p), y = GetPlayerStartLocationY(p) }
+    local proxyStart = { x = GetPlayerStartLocationX(proxyPlayer), y = GetPlayerStartLocationY(proxyPlayer) }
+    local offset = { x = playerStart.x - proxyStart.x, y = playerStart.y - proxyStart.y }
+    
+    local g = CreateGroup()
+    GroupEnumUnitsOfPlayer(g, p, nil)
+    
+    ForGroup(g, function()
+        local u = GetEnumUnit()
+        local unitType = GetUnitTypeId(u)
+        if GLOBAL_DECK_UNIT_SET[unitType] then
+            local ux = GetUnitX(u)
+            local uy = GetUnitY(u)            
+            local clone = CreateUnit(proxyPlayer, unitType, ux + offset.x, uy + offset.y, 0)
+            SetUnitFacingToFaceLocTimed(clone, Location(0, 0), 0 )
+            
+            local heroLevel = GetHeroLevel(u)
+            if heroLevel > 0 then
+                for i = 1, heroLevel - 1 do
+                    SetHeroLevel(clone, heroLevel, false)
+                end
+            end
+            
+            IssuePointOrderLoc(clone, "attack", Location(0, 0))
+        end
+    end)
+    
+    DestroyGroup(g)
+end
+
+function SpawnWaveAllPlayers()
+    for i = 0, 11 do
+        local p = Player(i)
+        if GetPlayerSlotState(p) == PLAYER_SLOT_STATE_PLAYING then
+            SpawnWaveForPlayer(i)
+        end
+    end
+end
+
+local spawnTimer
+local floatingTexts = {}
+local spawnCountdown = 45
+
+function CreateWaveSpawnLabels()
+    for playerIndex = 0, 11 do
+        local proxyPlayer = Player(playerIndex + 12)
+        local txt = CreateTextTag()  
+        SetTextTagText(txt, "", 0.024)
+        SetTextTagPos(txt, GetPlayerStartLocationX(proxyPlayer), GetPlayerStartLocationY(proxyPlayer), 0)
+        SetTextTagPermanent(txt, true)
+        floatingTexts[playerIndex] = txt
+    end
+end
+
+function CreateSpawnTimer()
+    spawnTimer = CreateTimer()
+    TimerStart(spawnTimer, 1.0, true, function()
+        spawnCountdown = spawnCountdown - 1
+        
+        if spawnCountdown <= 0 then
+            spawnCountdown = 30
+        end
+        
+        for i = 0, 11 do
+            local p = Player(i)
+            SetTextTagText(floatingTexts[index], tostring(spawnCountdown), 0.024)
+            SetTextTagVisibility(floatingTexts[index], GetPlayerSlotState(p) == PLAYER_SLOT_STATE_PLAYING)
+        end
+
+    end)
+end
+
+function InitWaveSpawner()
+    local t = CreateTimer()
+    TimerStart(t, 30.0, true, function()
+        SpawnWaveAllPlayers()
+    end)
+end
+
+local proxyToRealPlayerMapping = {}
+for i = 0, 11 do
+    proxyToRealPlayerMapping[i + 12] = i
+end
+
+local BUILDER_ID = FourCC('h000')
+local SPELLBOOK_ID = FourCC('A000')
+
+local playerBuilders = {}
+local playerDecks = {}
+
+function get_table_keys(t)
+    local keys = {}
+    for key, _ in pairs(t) do
+        table.insert(keys, key)
+    end
+    return keys
+end
+
+function CloneAndShuffleArray(arr)
+    local shuffled = {}
+    for i = 1, #arr do
+        shuffled[i] = arr[i]
+    end
+    for i = #shuffled, 2, -1 do
+        local j = math.random(1, i)
+        shuffled[i], shuffled[j] = shuffled[j], shuffled[i]
+    end
+    return shuffled
+end
+
+function InitPlayerDecks()
+    for i = 0, 11 do
+        playerDecks[i] = CloneAndShuffleArray(get_table_keys(GLOBAL_DECK_SPELLBOOK_SET))
+    end
+end
+
+function FindPlayerBuilder(playerIndex)
+    local p = Player(playerIndex)
+    local g = CreateGroup()
+    GroupEnumUnitsOfPlayer(g, p, nil)
+    
+    local builder = nil
+    ForGroup(g, function()
+        local u = GetEnumUnit()
+        if GetUnitTypeId(u) == BUILDER_ID then
+            builder = u
+        end
+    end)
+    
+    DestroyGroup(g)
+    return builder
+end
+
+function InitPlayerBuilders()
+    for i = 0, 11 do
+        local p = Player(i)
+        if GetPlayerSlotState(p) == PLAYER_SLOT_STATE_PLAYING then
+            playerBuilders[i] = FindPlayerBuilder(i)
+        end
+    end
+end
+
+function DrawChoicesFromDeck(playerIndex)
+    local list = playerDecks[playerIndex]
+    local abilities = {}
+    
+    for i = 1, 3 do
+        if #list > 0 then
+            table.insert(abilities, table.remove(list, 1))
+        end
+    end
+    
+    return abilities
+end
+
+function AddDraftAbilitiesToBuilder(playerIndex)
+    if (GetPlayerState(Player(playerIndex), PLAYER_STATE_RESOURCE_FOOD_USED) >= GetPlayerState(Player(playerIndex), PLAYER_STATE_RESOURCE_FOOD_CAP)) then
+        return
+    end
+
+    local builder = playerBuilders[playerIndex]
+    if not builder then return end
+    
+    local abilities = DrawChoicesFromDeck(playerIndex)
+    for i = 1, #abilities do
+        UnitAddAbility(builder, abilities[i])
+    end
+end
+
+function OnSpellEffect()
+    local abilityId = GetSpellAbilityId()
+    
+    if GLOBAL_DECK_SPELLBOOK_SET[abilityId] then
+        OnUnitDrafted()
+    end
+
+    --todo: create abilities in object editor
+    if abilityId == FourCC('A014') then
+        OnSoulSiphonEffect()
+    elseif abilityId == FourCC('A015') then
+        OnHealingWaveEffect()
+    end
+end
+
+function OnUnitDrafted()
+    local builder = GetSpellAbilityUnit()
+
+    for i = 1, #GLOBAL_DECK_SPELLBOOK_SET do
+        UnitRemoveAbility(builder, GLOBAL_DECK_SPELLBOOK_SET[i])                
+    end                
+
+    local circle
+    local g = CreateGroup()
+    GroupEnumUnitsInRange(g, GetSpellTargetX(), GetSpellTargetY(), 25, nil)        
+    ForGroup(g, function()
+        circle = GetEnumUnit()
+        if GetUnitTypeId(circle) == FourCC('ncop') then
+            RemoveUnit(circle)
+            return
+        end
+    end)
+    
+    DestroyGroup(g)
+
+    AddDraftAbilitiesToBuilder(GetPlayerId(GetOwningPlayer(builder)))
+end
+
+function OnSoulSiphonEffect()
+    local caster = GetSpellAbilityUnit()
+    local targetX = GetSpellTargetX()
+    local targetY = GetSpellTargetY()
+	local AOE_RADIUS = 175
+    local casterOwner = GetOwningPlayer(caster)
+    local g = CreateGroup()
+    GroupEnumUnitsInRange(g, x, y, AOE_RADIUS, nil)
+    
+    ForGroup(g, function()
+        local target = GetEnumUnit()
+        if not IsUnitAlly(target, casterOwner) and GetUnitState(target, UNIT_STATE_LIFE) > 0 then
+            local maxHP = GetUnitState(target, UNIT_STATE_MAX_LIFE)
+            local currentHP = GetUnitState(target, UNIT_STATE_LIFE)
+            local percentHP = 100 * currentHP / maxHP
+            
+            local executeChance = 26 - percentHP
+            if executeChance < 0 then
+                return
+            end
+            
+            if math.random(1, 100) <= executeChance then
+                KillUnit(target)
+                AdjustPlayerStateBJ(1, casterOwner, PLAYER_STATE_RESOURCE_LUMBER)
+                --AdjustPlayerStateBJ(5, casterOwner, PLAYER_STATE_RESOURCE_GOLD) -- should already be done by death event
+            end
+        end
+    end)
+    
+    DestroyGroup(g)
+end
+
+function OnHealingWaveEffect()
+    local caster = GetSpellAbilityUnit()
+    local targetX = GetSpellTargetX()
+    local targetY = GetSpellTargetY()
+	local AOE_RADIUS = 350
+    local casterOwner = GetOwningPlayer(caster)
+    local g = CreateGroup()
+    GroupEnumUnitsInRange(g, x, y, AOE_RADIUS, nil)
+    
+    ForGroup(g, function()
+        local target = GetEnumUnit()        
+        if IsUnitOwnedByPlayer(target, casterOwner) and GetUnitState(target, UNIT_STATE_LIFE) > 0 then
+            local maxHP = GetUnitState(target, UNIT_STATE_MAX_LIFE)
+            local currentHP = GetUnitState(target, UNIT_STATE_LIFE)
+            local missingHP = maxHP - currentHP
+            local percentHP = 100 * currentHP / maxHP
+            
+            local healAmount = (100 - percentHP) * maxHP / 4           
+            SetUnitState(target, UNIT_STATE_LIFE, currentHP + healAmount)
+        end
+    end)
+    
+    DestroyGroup(g)
+end
+
+function OnUnitDeath()
+    local dying = GetDyingUnit()
+    local killer = GetKillingUnit()
+    
+    if killer then
+        local killerOwner = GetOwningPlayer(killer)
+        local killerIndex = GetPlayerId(killerOwner)
+        
+        if proxyToRealPlayerMapping[killerIndex] then
+            local actualPlayer = Player(proxyToRealPlayerMapping[killerIndex])
+            AdjustPlayerStateBJ(1, actualPlayer, PLAYER_STATE_RESOURCE_GOLD)
+        else
+            AdjustPlayerStateBJ(1, killerOwner, PLAYER_STATE_RESOURCE_GOLD)
+        end
+    end
+end
+
+function GrantWoodPassive()
+    local t = CreateTimer()
+    TimerStart(t, 5.0, true, function()
+        for i = 0, 11 do
+            local p = Player(i)
+            if GetPlayerSlotState(p) == PLAYER_SLOT_STATE_PLAYING then
+                AdjustPlayerStateBJ(1, p, PLAYER_STATE_RESOURCE_LUMBER)
+            end
+        end
+    end)
+end
+
+function GrantFoodCap()
+    local foodTimes = {
+        0, 0.5, 1, 2, 3.5, 5.5, 9, 15, 24.5
+    }
+    
+    for i = 1, #foodTimes do
+        local t = CreateTimer()
+        TimerStart(t, foodTimes[i] * 60, false, function()
+            for j = 0, 11 do
+                local p = Player(j)
+                if GetPlayerSlotState(p) == PLAYER_SLOT_STATE_PLAYING then
+                    SetPlayerStateBJ(p, PLAYER_STATE_RESOURCE_FOOD_CAP, i)
+                    AddDraftAbilitiesToBuilder(j)
+                end
+            end
+        end)
+    end
+end
+
 function MakeCirclesOfPowerTranslucent()
     ForGroup(GetUnitsOfTypeIdAll(FourCC('ncop')), function()
 		SetUnitVertexColor(GetEnumUnit(), 255, 50, 255, 255)
@@ -21,36 +400,25 @@ function InitPlayers()
 	MakeCirclesOfPowerTranslucent()
 end
 
-function OnBuiltOnCircle()
-    if GetUnitTypeId(GetSpellAbilityUnit()) == FourCC('hpea') and GetSpellAbilityId() == FourCC('AIbt') then
-		local circle
-        local g = CreateGroup()
-        GroupEnumUnitsInRange(g, GetSpellTargetX(), GetSpellTargetY(), 25, nil)        
-        ForGroup(g, function()
-            circle = GetEnumUnit()
-            if GetUnitTypeId(circle) == FourCC('ncop') then
-                RemoveUnit(circle)
-				return
-            end
-        end)
-        
-        DestroyGroup(g)
-    end
-end
-
-function InitBuiltOnCircle()
-    local t = CreateTrigger()
-    TriggerRegisterAnyUnitEventBJ(t, EVENT_PLAYER_UNIT_SPELL_EFFECT)
-    TriggerAddAction(t, OnBuiltOnCircle)
-end
-
 function Init()
 	MeleeStartingVisibility()
 	MeleeClearExcessUnits()
 	FogEnableOff()
 	FogMaskEnableOff()
 	InitPlayers()
-	InitBuiltOnCircle()
+    InitPlayerBuilders()
+    InitPlayerDecks()
+    CreateWaveSpawnLabels()
+    CreateSpawnTimer()
+
+    local deathTrigger = CreateTrigger()
+    TriggerRegisterAnyUnitEventBJ(deathTrigger, EVENT_PLAYER_UNIT_DEATH)
+    TriggerAddAction(deathTrigger, OnUnitDeath)
+    
+    local spellTrigger = CreateTrigger()
+    TriggerRegisterAnyUnitEventBJ(spellTrigger, EVENT_PLAYER_UNIT_SPELL_EFFECT)
+    TriggerAddAction(spellTrigger, OnSpellEffect)
+    InitCustomAbilities()
 end
 
 --[[
