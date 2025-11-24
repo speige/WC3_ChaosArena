@@ -66,13 +66,46 @@ GLOBAL_DECK_SPELLBOOK_SET[FourCC('A00C')] = true
 GLOBAL_DECK_SPELLBOOK_SET[FourCC('A00K')] = true
 GLOBAL_DECK_SPELLBOOK_SET[FourCC('A005')] = true
 
+local GLOBAL_DECK_UNIT_BUILD_ABILITY_SET = {}
+GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A01O')] = true
+GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A01C')] = true
+GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A01K')] = true
+GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A011')] = true
+GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A01F')] = true
+GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A014')] = true
+GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A013')] = true
+GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A01G')] = true
+GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A01B')] = true
+GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A01H')] = true
+GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A018')] = true
+GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A00X')] = true
+GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A01A')] = true
+GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A015')] = true
+GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A01I')] = true
+GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A01L')] = true
+GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A01M')] = true
+GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A00V')] = true
+GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A019')] = true
+GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A012')] = true
+GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A01N')] = true
+GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A00Y')] = true
+GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A010')] = true
+GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A01J')] = true
+GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A00W')] = true
+GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A01D')] = true
+GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A017')] = true
+GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A016')] = true
+GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A01E')] = true
+GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A00Z')] = true
+
+
 function SpawnWaveForPlayer(playerIndex)
     local p = Player(playerIndex)
     local proxyPlayer = Player(playerIndex + 12)
     local playerStart = { x = GetPlayerStartLocationX(p), y = GetPlayerStartLocationY(p) }
     local proxyStart = { x = GetPlayerStartLocationX(proxyPlayer), y = GetPlayerStartLocationY(proxyPlayer) }
-    local offset = { x = playerStart.x - proxyStart.x, y = playerStart.y - proxyStart.y }
-    
+    local offset = { x = proxyStart.x - playerStart.x, y = proxyStart.y - playerStart.y }
+
     local g = CreateGroup()
     GroupEnumUnitsOfPlayer(g, p, nil)
     
@@ -82,17 +115,19 @@ function SpawnWaveForPlayer(playerIndex)
         if GLOBAL_DECK_UNIT_SET[unitType] then
             local ux = GetUnitX(u)
             local uy = GetUnitY(u)            
-            local clone = CreateUnit(proxyPlayer, unitType, ux + offset.x, uy + offset.y, 0)
-            SetUnitFacingToFaceLocTimed(clone, Location(0, 0), 0 )
-            
+            local clone = CreateUnit(proxyPlayer, unitType, ux + offset.x, uy + offset.y, 0)            
+
             local heroLevel = GetHeroLevel(u)
             if heroLevel > 0 then
                 for i = 1, heroLevel - 1 do
                     SetHeroLevel(clone, heroLevel, false)
                 end
             end
-            
-            IssuePointOrderLoc(clone, "attack", Location(0, 0))
+
+            local attackLoc = Location(0, 0)
+            SetUnitFacingToFaceLocTimed(clone, attackLoc, 0 )
+            IssuePointOrderLoc(clone, "attack", attackLoc)
+            RemoveLocation(attackLoc)
         end
     end)
     
@@ -112,6 +147,14 @@ local spawnTimer
 local floatingTexts = {}
 local spawnCountdown = 45
 
+function RunDelayed(func, seconds)
+    local myTimer = CreateTimer()
+    TimerStart(myTimer, seconds, false, function()
+        func()
+        DestroyTimer(myTimer)
+    end)
+end
+
 function CreateWaveSpawnLabels()
     for playerIndex = 0, 11 do
         local proxyPlayer = Player(playerIndex + 12)
@@ -129,22 +172,16 @@ function CreateSpawnTimer()
         spawnCountdown = spawnCountdown - 1
         
         if spawnCountdown <= 0 then
-            spawnCountdown = 30
+            SpawnWaveAllPlayers()            
+            spawnCountdown = 45
         end
         
         for i = 0, 11 do
             local p = Player(i)
-            SetTextTagText(floatingTexts[index], tostring(spawnCountdown), 0.024)
-            SetTextTagVisibility(floatingTexts[index], GetPlayerSlotState(p) == PLAYER_SLOT_STATE_PLAYING)
+            SetTextTagText(floatingTexts[i], tostring(spawnCountdown), 0.024)
+            SetTextTagVisibility(floatingTexts[i], spawnCountdown <= 30 and GetPlayerSlotState(p) == PLAYER_SLOT_STATE_PLAYING)
         end
 
-    end)
-end
-
-function InitWaveSpawner()
-    local t = CreateTimer()
-    TimerStart(t, 30.0, true, function()
-        SpawnWaveAllPlayers()
     end)
 end
 
@@ -210,6 +247,8 @@ function InitPlayerBuilders()
             local builder = FindPlayerBuilder(i)
             playerBuilders[i] = builder
             UnitRemoveAbility(builder, FourCC('Aatk'))
+            SelectUnitForPlayerSingle(builder, p)
+            SetCameraPositionLocForPlayer(p, GetUnitLoc(builder))
         end
     end
 end
@@ -228,7 +267,8 @@ function DrawChoicesFromDeck(playerIndex)
 end
 
 function AddDraftAbilitiesToBuilder(playerIndex)
-    if (GetPlayerState(Player(playerIndex), PLAYER_STATE_RESOURCE_FOOD_USED) >= GetPlayerState(Player(playerIndex), PLAYER_STATE_RESOURCE_FOOD_CAP)) then
+    if (GetPlayerState(Player(playerIndex), PLAYER_STATE_RESOURCE_FOOD_USED) ~= GetPlayerState(Player(playerIndex), PLAYER_STATE_RESOURCE_FOOD_CAP) - 1) then
+        --note: any other food value means they have a pending draft already (or somehow went over cap)
         return
     end
 
@@ -248,7 +288,7 @@ end
 function OnSpellEffect()
     local abilityId = GetSpellAbilityId()
     
-    if GLOBAL_DECK_SPELLBOOK_SET[abilityId] then
+    if GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[abilityId] then
         OnUnitDrafted()
     end
 
@@ -263,13 +303,16 @@ end
 function OnUnitDrafted()
     local builder = GetSpellAbilityUnit()
 
-    for i = 1, #GLOBAL_DECK_SPELLBOOK_SET do
-        UnitRemoveAbility(builder, GLOBAL_DECK_SPELLBOOK_SET[i])                
+    for key, _ in pairs(GLOBAL_DECK_SPELLBOOK_SET) do
+        UnitRemoveAbility(builder, key)
     end                
 
     local circle
     local g = CreateGroup()
-    GroupEnumUnitsInRange(g, GetSpellTargetX(), GetSpellTargetY(), 25, nil)        
+    print('unitdrafted: searching for circle')
+    print(GetSpellTargetX()) -- seems these are 0,0 ? [they weren't before]
+    print(GetSpellTargetY())
+    GroupEnumUnitsInRange(g, GetSpellTargetX(), GetSpellTargetY(), 25, nil)
     ForGroup(g, function()
         circle = GetEnumUnit()
         if GetUnitTypeId(circle) == FourCC('n00A') then
@@ -280,7 +323,10 @@ function OnUnitDrafted()
     
     DestroyGroup(g)
 
-    AddDraftAbilitiesToBuilder(GetPlayerId(GetOwningPlayer(builder)))
+    --note: takes a second to update food cap, which we need to avoid drafting if maxed
+    RunDelayed(function()
+        AddDraftAbilitiesToBuilder(GetPlayerId(GetOwningPlayer(builder)))
+    end, 1)
 end
 
 function OnSoulSiphonEffect()
@@ -369,9 +415,9 @@ function GrantWoodPassive()
     end)
 end
 
-function GrantFoodCap()
+function InitFoodCapTimer()
     local foodTimes = {
-        0, 0.5, 1, 2, 3.5, 5.5, 9, 15, 24.5
+        0, 1, 2, 3, 5, 8, 12, 17, 23
     }
     
     for i = 1, #foodTimes do
@@ -417,6 +463,7 @@ function Init()
     InitPlayerDecks()
     CreateWaveSpawnLabels()
     CreateSpawnTimer()
+    InitFoodCapTimer()
 
     local deathTrigger = CreateTrigger()
     TriggerRegisterAnyUnitEventBJ(deathTrigger, EVENT_PLAYER_UNIT_DEATH)
@@ -447,16 +494,7 @@ u = BlzCreateUnitWithSkin(p, FourCC("n00A"), 128.0, 2176.0, 270.000, FourCC("n00
 u = BlzCreateUnitWithSkin(p, FourCC("n00A"), -128.0, 2048.0, 270.000, FourCC("n00A"))
 u = BlzCreateUnitWithSkin(p, FourCC("n00A"), 0.0, 2048.0, 270.000, FourCC("n00A"))
 u = BlzCreateUnitWithSkin(p, FourCC("n00A"), 128.0, 2048.0, 270.000, FourCC("n00A"))
-end
-
-function CreateUnitsForPlayer0()
-local p = Player(0)
-local u
-local unitID
-local t
-local life
-
-u = BlzCreateUnitWithSkin(p, FourCC("h000"), 2470.6, 648.1, 305.935, FourCC("h000"))
+u = BlzCreateUnitWithSkin(p, FourCC("h000"), -345.4, 2632.1, 305.935, FourCC("h000"))
 end
 
 function CreateBuildingsForPlayer1()
@@ -475,6 +513,7 @@ u = BlzCreateUnitWithSkin(p, FourCC("n00A"), 1344.0, 1856.0, 270.000, FourCC("n0
 u = BlzCreateUnitWithSkin(p, FourCC("n00A"), 1088.0, 1728.0, 270.000, FourCC("n00A"))
 u = BlzCreateUnitWithSkin(p, FourCC("n00A"), 1216.0, 1728.0, 270.000, FourCC("n00A"))
 u = BlzCreateUnitWithSkin(p, FourCC("n00A"), 1344.0, 1728.0, 270.000, FourCC("n00A"))
+u = BlzCreateUnitWithSkin(p, FourCC("h000"), 870.6, 2376.1, 305.935, FourCC("h000"))
 end
 
 function CreateBuildingsForPlayer2()
@@ -673,7 +712,6 @@ CreateBuildingsForPlayer11()
 end
 
 function CreatePlayerUnits()
-CreateUnitsForPlayer0()
 end
 
 function CreateAllUnits()
@@ -700,121 +738,145 @@ end
 
 function InitCustomPlayerSlots()
 SetPlayerStartLocation(Player(0), 0)
+ForcePlayerStartLocation(Player(0), 0)
 SetPlayerColor(Player(0), ConvertPlayerColor(0))
 SetPlayerRacePreference(Player(0), RACE_PREF_HUMAN)
 SetPlayerRaceSelectable(Player(0), true)
 SetPlayerController(Player(0), MAP_CONTROL_USER)
 SetPlayerStartLocation(Player(1), 1)
+ForcePlayerStartLocation(Player(1), 1)
 SetPlayerColor(Player(1), ConvertPlayerColor(1))
 SetPlayerRacePreference(Player(1), RACE_PREF_HUMAN)
 SetPlayerRaceSelectable(Player(1), true)
 SetPlayerController(Player(1), MAP_CONTROL_USER)
 SetPlayerStartLocation(Player(2), 2)
+ForcePlayerStartLocation(Player(2), 2)
 SetPlayerColor(Player(2), ConvertPlayerColor(2))
 SetPlayerRacePreference(Player(2), RACE_PREF_HUMAN)
 SetPlayerRaceSelectable(Player(2), true)
 SetPlayerController(Player(2), MAP_CONTROL_USER)
 SetPlayerStartLocation(Player(3), 3)
+ForcePlayerStartLocation(Player(3), 3)
 SetPlayerColor(Player(3), ConvertPlayerColor(3))
 SetPlayerRacePreference(Player(3), RACE_PREF_HUMAN)
 SetPlayerRaceSelectable(Player(3), true)
 SetPlayerController(Player(3), MAP_CONTROL_USER)
 SetPlayerStartLocation(Player(4), 4)
+ForcePlayerStartLocation(Player(4), 4)
 SetPlayerColor(Player(4), ConvertPlayerColor(4))
 SetPlayerRacePreference(Player(4), RACE_PREF_HUMAN)
 SetPlayerRaceSelectable(Player(4), true)
 SetPlayerController(Player(4), MAP_CONTROL_USER)
 SetPlayerStartLocation(Player(5), 5)
+ForcePlayerStartLocation(Player(5), 5)
 SetPlayerColor(Player(5), ConvertPlayerColor(5))
 SetPlayerRacePreference(Player(5), RACE_PREF_HUMAN)
 SetPlayerRaceSelectable(Player(5), true)
 SetPlayerController(Player(5), MAP_CONTROL_USER)
 SetPlayerStartLocation(Player(6), 6)
+ForcePlayerStartLocation(Player(6), 6)
 SetPlayerColor(Player(6), ConvertPlayerColor(6))
 SetPlayerRacePreference(Player(6), RACE_PREF_HUMAN)
 SetPlayerRaceSelectable(Player(6), true)
 SetPlayerController(Player(6), MAP_CONTROL_USER)
 SetPlayerStartLocation(Player(7), 7)
+ForcePlayerStartLocation(Player(7), 7)
 SetPlayerColor(Player(7), ConvertPlayerColor(7))
 SetPlayerRacePreference(Player(7), RACE_PREF_HUMAN)
 SetPlayerRaceSelectable(Player(7), true)
 SetPlayerController(Player(7), MAP_CONTROL_USER)
 SetPlayerStartLocation(Player(8), 8)
+ForcePlayerStartLocation(Player(8), 8)
 SetPlayerColor(Player(8), ConvertPlayerColor(8))
 SetPlayerRacePreference(Player(8), RACE_PREF_HUMAN)
 SetPlayerRaceSelectable(Player(8), true)
 SetPlayerController(Player(8), MAP_CONTROL_USER)
 SetPlayerStartLocation(Player(9), 9)
+ForcePlayerStartLocation(Player(9), 9)
 SetPlayerColor(Player(9), ConvertPlayerColor(9))
 SetPlayerRacePreference(Player(9), RACE_PREF_HUMAN)
 SetPlayerRaceSelectable(Player(9), true)
 SetPlayerController(Player(9), MAP_CONTROL_USER)
 SetPlayerStartLocation(Player(10), 10)
+ForcePlayerStartLocation(Player(10), 10)
 SetPlayerColor(Player(10), ConvertPlayerColor(10))
 SetPlayerRacePreference(Player(10), RACE_PREF_HUMAN)
 SetPlayerRaceSelectable(Player(10), true)
 SetPlayerController(Player(10), MAP_CONTROL_USER)
 SetPlayerStartLocation(Player(11), 11)
+ForcePlayerStartLocation(Player(11), 11)
 SetPlayerColor(Player(11), ConvertPlayerColor(11))
 SetPlayerRacePreference(Player(11), RACE_PREF_HUMAN)
 SetPlayerRaceSelectable(Player(11), true)
 SetPlayerController(Player(11), MAP_CONTROL_USER)
 SetPlayerStartLocation(Player(12), 12)
+ForcePlayerStartLocation(Player(12), 12)
 SetPlayerColor(Player(12), ConvertPlayerColor(12))
 SetPlayerRacePreference(Player(12), RACE_PREF_HUMAN)
 SetPlayerRaceSelectable(Player(12), true)
 SetPlayerController(Player(12), MAP_CONTROL_COMPUTER)
 SetPlayerStartLocation(Player(13), 13)
+ForcePlayerStartLocation(Player(13), 13)
 SetPlayerColor(Player(13), ConvertPlayerColor(13))
 SetPlayerRacePreference(Player(13), RACE_PREF_HUMAN)
 SetPlayerRaceSelectable(Player(13), true)
 SetPlayerController(Player(13), MAP_CONTROL_COMPUTER)
 SetPlayerStartLocation(Player(14), 14)
+ForcePlayerStartLocation(Player(14), 14)
 SetPlayerColor(Player(14), ConvertPlayerColor(14))
 SetPlayerRacePreference(Player(14), RACE_PREF_HUMAN)
 SetPlayerRaceSelectable(Player(14), true)
 SetPlayerController(Player(14), MAP_CONTROL_COMPUTER)
 SetPlayerStartLocation(Player(15), 15)
+ForcePlayerStartLocation(Player(15), 15)
 SetPlayerColor(Player(15), ConvertPlayerColor(15))
 SetPlayerRacePreference(Player(15), RACE_PREF_HUMAN)
 SetPlayerRaceSelectable(Player(15), true)
 SetPlayerController(Player(15), MAP_CONTROL_COMPUTER)
 SetPlayerStartLocation(Player(16), 16)
+ForcePlayerStartLocation(Player(16), 16)
 SetPlayerColor(Player(16), ConvertPlayerColor(16))
 SetPlayerRacePreference(Player(16), RACE_PREF_HUMAN)
 SetPlayerRaceSelectable(Player(16), true)
 SetPlayerController(Player(16), MAP_CONTROL_COMPUTER)
 SetPlayerStartLocation(Player(17), 17)
+ForcePlayerStartLocation(Player(17), 17)
 SetPlayerColor(Player(17), ConvertPlayerColor(17))
 SetPlayerRacePreference(Player(17), RACE_PREF_HUMAN)
 SetPlayerRaceSelectable(Player(17), true)
 SetPlayerController(Player(17), MAP_CONTROL_COMPUTER)
 SetPlayerStartLocation(Player(18), 18)
+ForcePlayerStartLocation(Player(18), 18)
 SetPlayerColor(Player(18), ConvertPlayerColor(18))
 SetPlayerRacePreference(Player(18), RACE_PREF_HUMAN)
 SetPlayerRaceSelectable(Player(18), true)
 SetPlayerController(Player(18), MAP_CONTROL_COMPUTER)
 SetPlayerStartLocation(Player(19), 19)
+ForcePlayerStartLocation(Player(19), 19)
 SetPlayerColor(Player(19), ConvertPlayerColor(19))
 SetPlayerRacePreference(Player(19), RACE_PREF_HUMAN)
 SetPlayerRaceSelectable(Player(19), true)
 SetPlayerController(Player(19), MAP_CONTROL_COMPUTER)
 SetPlayerStartLocation(Player(20), 20)
+ForcePlayerStartLocation(Player(20), 20)
 SetPlayerColor(Player(20), ConvertPlayerColor(20))
 SetPlayerRacePreference(Player(20), RACE_PREF_HUMAN)
 SetPlayerRaceSelectable(Player(20), true)
 SetPlayerController(Player(20), MAP_CONTROL_COMPUTER)
 SetPlayerStartLocation(Player(21), 21)
+ForcePlayerStartLocation(Player(21), 21)
 SetPlayerColor(Player(21), ConvertPlayerColor(21))
 SetPlayerRacePreference(Player(21), RACE_PREF_HUMAN)
 SetPlayerRaceSelectable(Player(21), true)
 SetPlayerController(Player(21), MAP_CONTROL_COMPUTER)
 SetPlayerStartLocation(Player(22), 22)
+ForcePlayerStartLocation(Player(22), 22)
 SetPlayerColor(Player(22), ConvertPlayerColor(22))
 SetPlayerRacePreference(Player(22), RACE_PREF_HUMAN)
 SetPlayerRaceSelectable(Player(22), true)
 SetPlayerController(Player(22), MAP_CONTROL_COMPUTER)
 SetPlayerStartLocation(Player(23), 23)
+ForcePlayerStartLocation(Player(23), 23)
 SetPlayerColor(Player(23), ConvertPlayerColor(23))
 SetPlayerRacePreference(Player(23), RACE_PREF_HUMAN)
 SetPlayerRaceSelectable(Player(23), true)

@@ -161,12 +161,6 @@ STRING 33
 Ogre Mauler
 }
 
-STRING 34
-// Abilities: A001 (Keeper of the Grove), Name (Name)
-{
-Keeper of the Grove
-}
-
 STRING 35
 // Units: E004 (Ogre Mauler), Hotkey (Hotkey)
 {
@@ -204,7 +198,7 @@ Murloc
 }
 
 STRING 78
-// Abilities: A00T (Murloc), Name (Name)
+// Abilities: A01N (Murloc), Name (Name)
 {
 Murloc
 }
@@ -227,150 +221,134 @@ STRING 81
 Summon Akama
 }
 
-STRING 82
-// Abilities: A002 (Priestess of the Moon
-), Name (Name)
-{
-Priestess of the Moon
-
-}
-
 STRING 83
-// Abilities: A003 (Demon Hunter), Name (Name)
+// Abilities: A00X (Demon Hunter), Name (Name)
 {
 Demon Hunter
 }
 
 STRING 84
-// Abilities: A004 (Ogre Mauler), Name (Name)
+// Abilities: A00Y (Ogre Mauler), Name (Name)
 {
 Ogre Mauler
 }
 
 STRING 85
-// Abilities: A005 (Warden), Name (Name)
+// Abilities: A00Z (Warden), Name (Name)
 {
 Warden
 }
 
 STRING 86
-// Abilities: A006 (Paladin), Name (Name)
+// Abilities: A010 (Paladin), Name (Name)
 {
 Paladin
 }
 
 STRING 87
-// Abilities: A007 (Archmage), Name (Name)
+// Abilities: A011 (Archmage), Name (Name)
 {
 Archmage
 }
 
 STRING 88
-// Abilities: A008 (Mountain King), Name (Name)
+// Abilities: A012 (Mountain King), Name (Name)
 {
 Mountain King
 }
 
 STRING 89
-// Abilities: A009 (Blood Mage), Name (Name)
+// Abilities: A013 (Blood Mage), Name (Name)
 {
 Blood Mage
 }
 
 STRING 90
-// Abilities: A00A (Blademaster), Name (Name)
+// Abilities: A014 (Blademaster), Name (Name)
 {
 Blademaster
 }
 
 STRING 91
-// Abilities: A00B (Far Seer), Name (Name)
+// Abilities: A015 (Far Seer), Name (Name)
 {
 Far Seer
 }
 
 STRING 92
-// Abilities: A00C (Tauren Chieftain), Name (Name)
+// Abilities: A016 (Tauren Chieftain), Name (Name)
 {
 Tauren Chieftain
 }
 
 STRING 93
-// Abilities: A00D (Shadow Hunter), Name (Name)
+// Abilities: A017 (Shadow Hunter), Name (Name)
 {
 Shadow Hunter
 }
 
 STRING 94
-// Abilities: A00E (Death Knight), Name (Name)
+// Abilities: A018 (Death Knight), Name (Name)
 {
 Death Knight
 }
 
 STRING 95
-// Abilities: A00F (Lich), Name (Name)
+// Abilities: A019 (Lich), Name (Name)
 {
 Lich
 }
 
-STRING 96
-// Abilities: A00G (Dreadlord
-), Name (Name)
-{
-Dreadlord
-
-}
-
 STRING 97
-// Abilities: A00H (Crypt Lord), Name (Name)
+// Abilities: A01B (Crypt Lord), Name (Name)
 {
 Crypt Lord
 }
 
 STRING 98
-// Abilities: A00I (Alchemist), Name (Name)
+// Abilities: A00I (Alchemist (dummy spellbook)), Researchtip (Tooltip - Learn)
 {
 Alchemist
 }
 
 STRING 99
-// Abilities: A00J (Sea Witch), Name (Name)
+// Abilities: A01D (Sea Witch), Name (Name)
 {
 Sea Witch
 }
 
 STRING 100
-// Abilities: A00K (Tinker), Name (Name)
+// Abilities: A01E (Tinker), Name (Name)
 {
 Tinker
 }
 
 STRING 101
-// Abilities: A00L (Beastmaster), Name (Name)
+// Abilities: A01F (Beastmaster), Name (Name)
 {
 Beastmaster
 }
 
 STRING 102
-// Abilities: A00M (Brewmaster), Name (Name)
+// Abilities: A01G (Brewmaster), Name (Name)
 {
 Brewmaster
 }
 
 STRING 103
-// Abilities: A00N (Dark Ranger), Name (Name)
+// Abilities: A01H (Dark Ranger), Name (Name)
 {
 Dark Ranger
 }
 
 STRING 104
-// Abilities: A00O (Firelord), Name (Name)
+// Abilities: A01I (Firelord), Name (Name)
 {
 Firelord
 }
 
 STRING 105
-// Abilities: A00P (Pit Lord), Name (Name)
+// Abilities: A01J (Pit Lord), Name (Name)
 {
 Pit Lord
 }
@@ -394,19 +372,19 @@ Jaina
 }
 
 STRING 109
-// Abilities: A01N (Murloc), Name (Name)
+// Abilities: A01N (Murloc), Tip (Tooltip - Normal)
 {
 Murloc
 }
 
 STRING 110
-// Abilities: A00U (Akama), Name (Name)
+// Abilities: A01O (Akama), Name (Name)
 {
 Akama
 }
 
 STRING 111
-// Abilities: A01O (Akama), Name (Name)
+// Abilities: A01O (Akama), Tip (Tooltip - Normal)
 {
 Akama
 }
@@ -426,79 +404,79 @@ Priestess of the Moon
 }
 
 STRING 114
-// Abilities: A00X (Demon Hunter), Name (Name)
+// Abilities: A00X (Demon Hunter), Tip (Tooltip - Normal)
 {
 Demon Hunter
 }
 
 STRING 115
-// Abilities: A00Y (Ogre Mauler), Name (Name)
+// Abilities: A00Y (Ogre Mauler), Tip (Tooltip - Normal)
 {
 Ogre Mauler
 }
 
 STRING 116
-// Abilities: A00Z (Warden), Name (Name)
+// Abilities: A00Z (Warden), Tip (Tooltip - Normal)
 {
 Warden
 }
 
 STRING 117
-// Abilities: A010 (Paladin), Name (Name)
+// Abilities: A010 (Paladin), Tip (Tooltip - Normal)
 {
 Paladin
 }
 
 STRING 118
-// Abilities: A011 (Archmage), Name (Name)
+// Abilities: A011 (Archmage), Tip (Tooltip - Normal)
 {
 Archmage
 }
 
 STRING 119
-// Abilities: A012 (Mountain King), Name (Name)
+// Abilities: A012 (Mountain King), Tip (Tooltip - Normal)
 {
 Mountain King
 }
 
 STRING 120
-// Abilities: A013 (Blood Mage), Name (Name)
+// Abilities: A013 (Blood Mage), Tip (Tooltip - Normal)
 {
 Blood Mage
 }
 
 STRING 121
-// Abilities: A014 (Blademaster), Name (Name)
+// Abilities: A014 (Blademaster), Tip (Tooltip - Normal)
 {
 Blademaster
 }
 
 STRING 122
-// Abilities: A015 (Far Seer), Name (Name)
+// Abilities: A015 (Far Seer), Tip (Tooltip - Normal)
 {
 Far Seer
 }
 
 STRING 123
-// Abilities: A016 (Tauren Chieftain), Name (Name)
+// Abilities: A016 (Tauren Chieftain), Tip (Tooltip - Normal)
 {
 Tauren Chieftain
 }
 
 STRING 124
-// Abilities: A017 (Shadow Hunter), Name (Name)
+// Abilities: A017 (Shadow Hunter), Tip (Tooltip - Normal)
 {
 Shadow Hunter
 }
 
 STRING 125
-// Abilities: A018 (Death Knight), Name (Name)
+// Abilities: A018 (Death Knight), Tip (Tooltip - Normal)
 {
 Death Knight
 }
 
 STRING 126
-// Abilities: A019 (Lich), Name (Name)
+// Abilities: A019 (Lich), Tip (Tooltip - Normal)
 {
 Lich
 }
@@ -510,7 +488,7 @@ Dreadlord
 }
 
 STRING 128
-// Abilities: A01B (Crypt Lord), Name (Name)
+// Abilities: A01B (Crypt Lord), Tip (Tooltip - Normal)
 {
 Crypt Lord
 }
@@ -522,61 +500,61 @@ Alchemist
 }
 
 STRING 130
-// Abilities: A01D (Sea Witch), Name (Name)
+// Abilities: A01D (Sea Witch), Tip (Tooltip - Normal)
 {
 Sea Witch
 }
 
 STRING 131
-// Abilities: A01E (Tinker), Name (Name)
+// Abilities: A01E (Tinker), Tip (Tooltip - Normal)
 {
 Tinker
 }
 
 STRING 132
-// Abilities: A01F (Beastmaster), Name (Name)
+// Abilities: A01F (Beastmaster), Tip (Tooltip - Normal)
 {
 Beastmaster
 }
 
 STRING 133
-// Abilities: A01G (Brewmaster), Name (Name)
+// Abilities: A01G (Brewmaster), Tip (Tooltip - Normal)
 {
 Brewmaster
 }
 
 STRING 134
-// Abilities: A01H (Dark Ranger), Name (Name)
+// Abilities: A01H (Dark Ranger), Tip (Tooltip - Normal)
 {
 Dark Ranger
 }
 
 STRING 135
-// Abilities: A01I (Firelord), Name (Name)
+// Abilities: A01I (Firelord), Tip (Tooltip - Normal)
 {
 Firelord
 }
 
 STRING 136
-// Abilities: A01J (Pit Lord), Name (Name)
+// Abilities: A01J (Pit Lord), Tip (Tooltip - Normal)
 {
 Pit Lord
 }
 
 STRING 137
-// Abilities: A00Q (Archimonde), Name (Name)
+// Abilities: A01K (Archimonde), Name (Name)
 {
 Archimonde
 }
 
 STRING 138
-// Abilities: A00R (Gul'dan), Name (Name)
+// Abilities: A01L (Gul'dan), Name (Name)
 {
 Gul'dan
 }
 
 STRING 139
-// Abilities: A00S (Jaina), Name (Name)
+// Abilities: A01M (Jaina), Name (Name)
 {
 Jaina
 }
@@ -594,19 +572,19 @@ Revive Archimonde
 }
 
 STRING 143
-// Abilities: A01K (Archimonde), Name (Name)
+// Abilities: A01K (Archimonde), Tip (Tooltip - Normal)
 {
 Archimonde
 }
 
 STRING 144
-// Abilities: A01L (Gul'dan), Name (Name)
+// Abilities: A01L (Gul'dan), Tip (Tooltip - Normal)
 {
 Gul'dan
 }
 
 STRING 145
-// Abilities: A01M (Jaina), Name (Name)
+// Abilities: A01M (Jaina), Tip (Tooltip - Normal)
 {
 Jaina
 }
@@ -621,5 +599,221 @@ STRING 147
 // Units: n00A (Unit Drafting Tile), Description (Description)
 {
 Transfers its power to the drafted unit
+}
+
+STRING 166
+// Abilities: A01C (Alchemist), Tip (Tooltip - Normal)
+{
+Alchemist
+}
+
+STRING 179
+// Abilities: A000 (EmptyUnitDraft), Tip (Tooltip - Normal)
+{
+Draft a unit to build on a green circle
+}
+
+STRING 180
+// Abilities: A001 (Keeper of the Grove (dummy spellbook)), Name (Name)
+{
+Keeper of the Grove (dummy spellbook)
+}
+
+STRING 181
+// Abilities: A002 (Priestess of the Moon
+ (dummy spellbook)), Name (Name)
+{
+Priestess of the Moon
+ (dummy spellbook)
+}
+
+STRING 182
+// Abilities: A003 (Demon Hunter (dummy spellbook)), Name (Name)
+{
+Demon Hunter (dummy spellbook)
+}
+
+STRING 183
+// Abilities: A004 (Ogre Mauler (dummy spellbook)), Name (Name)
+{
+Ogre Mauler (dummy spellbook)
+}
+
+STRING 184
+// Abilities: A005 (Warden (dummy spellbook)), Name (Name)
+{
+Warden (dummy spellbook)
+}
+
+STRING 185
+// Abilities: A006 (Paladin (dummy spellbook)), Name (Name)
+{
+Paladin (dummy spellbook)
+}
+
+STRING 186
+// Abilities: A007 (Archmage (dummy spellbook)), Name (Name)
+{
+Archmage (dummy spellbook)
+}
+
+STRING 187
+// Abilities: A008 (Mountain King (dummy spellbook)), Name (Name)
+{
+Mountain King (dummy spellbook)
+}
+
+STRING 188
+// Abilities: A009 (Blood Mage (dummy spellbook)), Name (Name)
+{
+Blood Mage (dummy spellbook)
+}
+
+STRING 189
+// Abilities: A00A (Blademaster (dummy spellbook)), Name (Name)
+{
+Blademaster (dummy spellbook)
+}
+
+STRING 190
+// Abilities: A00B (Far Seer (dummy spellbook)), Name (Name)
+{
+Far Seer (dummy spellbook)
+}
+
+STRING 191
+// Abilities: A00C (Tauren Chieftain (dummy spellbook)), Name (Name)
+{
+Tauren Chieftain (dummy spellbook)
+}
+
+STRING 192
+// Abilities: A00D (Shadow Hunter (dummy spellbook)), Name (Name)
+{
+Shadow Hunter (dummy spellbook)
+}
+
+STRING 193
+// Abilities: A00E (Death Knight (dummy spellbook)), Name (Name)
+{
+Death Knight (dummy spellbook)
+}
+
+STRING 194
+// Abilities: A00F (Lich (dummy spellbook)), Name (Name)
+{
+Lich (dummy spellbook)
+}
+
+STRING 195
+// Abilities: A00G (Dreadlord
+ (dummy spellbook)), Name (Name)
+{
+Dreadlord
+ (dummy spellbook)
+}
+
+STRING 196
+// Abilities: A00H (Crypt Lord (dummy spellbook)), Name (Name)
+{
+Crypt Lord (dummy spellbook)
+}
+
+STRING 197
+// Abilities: A00I (Alchemist (dummy spellbook)), Name (Name)
+{
+Alchemist (dummy spellbook)
+}
+
+STRING 198
+// Abilities: A00J (Sea Witch (dummy spellbook)), Name (Name)
+{
+Sea Witch (dummy spellbook)
+}
+
+STRING 199
+// Abilities: A00K (Tinker (dummy spellbook)), Name (Name)
+{
+Tinker (dummy spellbook)
+}
+
+STRING 200
+// Abilities: A00L (Beastmaster (dummy spellbook)), Name (Name)
+{
+Beastmaster (dummy spellbook)
+}
+
+STRING 201
+// Abilities: A00M (Brewmaster (dummy spellbook)), Name (Name)
+{
+Brewmaster (dummy spellbook)
+}
+
+STRING 202
+// Abilities: A00N (Dark Ranger (dummy spellbook)), Name (Name)
+{
+Dark Ranger (dummy spellbook)
+}
+
+STRING 203
+// Abilities: A00O (Firelord (dummy spellbook)), Name (Name)
+{
+Firelord (dummy spellbook)
+}
+
+STRING 204
+// Abilities: A00P (Pit Lord (dummy spellbook)), Name (Name)
+{
+Pit Lord (dummy spellbook)
+}
+
+STRING 205
+// Abilities: A00Q (Archimonde (dummy spellbook)), Name (Name)
+{
+Archimonde (dummy spellbook)
+}
+
+STRING 206
+// Abilities: A00R (Gul'dan (dummy spellbook)), Name (Name)
+{
+Gul'dan (dummy spellbook)
+}
+
+STRING 207
+// Abilities: A00S (Jaina (dummy spellbook)), Name (Name)
+{
+Jaina (dummy spellbook)
+}
+
+STRING 208
+// Abilities: A00T (Murloc (dummy spellbook)), Name (Name)
+{
+Murloc (dummy spellbook)
+}
+
+STRING 209
+// Abilities: A00U (Akama (dummy spellbook)), Name (Name)
+{
+Akama (dummy spellbook)
+}
+
+STRING 210
+// Abilities: A00V (Keeper of the Grove
+), Tip (Tooltip - Normal)
+{
+Keeper of the Grove
+
+}
+
+STRING 211
+// Abilities: A00W (Priestess of the Moon), Tip (Tooltip - Normal)
+{
+Priestess of the Moon
+}
+
+STRING 212
+// Abilities: A01A (Dreadlord), Tip (Tooltip - Normal)
+{
+Dreadlord
 }
 
