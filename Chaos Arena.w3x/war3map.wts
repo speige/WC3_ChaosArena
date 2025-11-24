@@ -611,3 +611,15 @@ STRING 145
 Jaina
 }
 
+STRING 146
+// Units: n00A (Unit Drafting Tile), Name (Name)
+{
+Unit Drafting Tile
+}
+
+STRING 147
+// Units: n00A (Unit Drafting Tile), Description (Description)
+{
+Transfers its power to the drafted unit
+}
+
