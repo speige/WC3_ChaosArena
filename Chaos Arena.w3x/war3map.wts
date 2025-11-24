@@ -149,3 +149,45 @@ STRING 30
 Avatar
 }
 
+STRING 31
+// Abilities: A000 (EmptyUnitDraft), Name (Name)
+{
+EmptyUnitDraft
+}
+
+STRING 33
+// Units: E004 (Ogre Mauler), Name (Name)
+{
+Ogre Mauler
+}
+
+STRING 34
+// Abilities: A001 (Keeper of the Grove), Name (Name)
+{
+Keeper of the Grove
+}
+
+STRING 35
+// Units: E004 (Ogre Mauler), Hotkey (Hotkey)
+{
+M
+}
+
+STRING 36
+// Units: E004 (Ogre Mauler), Tip (Tooltip - Basic)
+{
+Summon Ogre Mauler
+}
+
+STRING 37
+// Units: E004 (Ogre Mauler), Ubertip (Tooltip - Extended)
+{
+Large brutal warrior of the Ogre Legion. |n|n|cffffcc00Attacks land units.|r
+}
+
+STRING 38
+// Units: E004 (Ogre Mauler), Revivetip (Tooltip - Revive)
+{
+Revive Ogre Mauler
+}
+
