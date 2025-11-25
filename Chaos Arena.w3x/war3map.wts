@@ -1566,3 +1566,15 @@ STRING 430
 Altar
 }
 
+STRING 431
+// Abilities: A001 (Cancel), Name (Name)
+{
+Cancel
+}
+
+STRING 432
+// Abilities: A001 (Cancel), Tip (Tooltip - Normal)
+{
+Pick unit to summon on green circle
+}
+

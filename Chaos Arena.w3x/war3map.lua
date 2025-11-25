@@ -46,28 +46,29 @@ local GLOBAL_DRAFT_SETS = {
     draftAbilityIds = {}
 }
 for _, value in pairs(draftableUnits) do
-    GLOBAL_DRAFT_SETS.unitTypeIds[value.unitTypeId] = true
-    GLOBAL_DRAFT_SETS.dumyBuildingUnitTypeIds[value.unitTypeId] = true
-    GLOBAL_DRAFT_SETS.draftItemTypeIds[value.draftItemTypeId] = true
-    GLOBAL_DRAFT_SETS.draftAbilityIds[value.draftAbilityId] = true
+    GLOBAL_DRAFT_SETS.unitTypeIds[value.unitTypeId] = value
+    GLOBAL_DRAFT_SETS.dumyBuildingUnitTypeIds[value.dummyBuildingUnitTypeId] = value
+    GLOBAL_DRAFT_SETS.draftItemTypeIds[value.draftItemTypeId] = value
+    GLOBAL_DRAFT_SETS.draftAbilityIds[value.draftAbilityId] = value
 end
 
 local BUILDER_UNIT_TYPE_ID = FourCC('h000')
-local BUILDER_DRAFT_UNIT_TYPE_ID = FourCC('h010')
-local DRAFT_UNIT_ABILITY_ID = FourCC('A000')
+local ALTAR_UNIT_TYPE_ID = FourCC('h010')
+local DRAFT_ABILITY_ID = FourCC('A000')
+local CANCEL_ABILITY_ID = FourCC('A001')
 local INVULNERABLE_ABILITY_ID = FourCC('Avul') --note: used to hide health bars (also requires ObjectEditor IsBuilding=true, but can still move)
 
 local ORDER_IDs = {
     stop = 851972
 }
 
-local playerIndexMapping_realToProxy = {}
-for playerIndex = 0, 11 do
-    playerIndexMapping_realToProxy[playerIndex] = playerIndex + 12
+local playerIdMapping_realToProxy = {}
+for playerId = 0, 11 do
+    playerIdMapping_realToProxy[playerId] = playerId + 12
 end
-local playerIndexMapping_proxyToReal = {}
-for playerIndex = 12, 23 do
-    playerIndexMapping_proxyToReal[playerIndex] = playerIndex - 12
+local playerIdMapping_proxyToReal = {}
+for playerId = 12, 23 do
+    playerIdMapping_proxyToReal[playerId] = playerId - 12
 end
 
 function CalcUnitRotationAngle(unitLocationX, unitLocationY, lookAtX, lookAtY)
@@ -79,18 +80,18 @@ function CalcUnitRotationAngle(unitLocationX, unitLocationY, lookAtX, lookAtY)
     return result
 end
 
-function GetSpawnOffset(playerIndex)
-    local player = Player(playerIndex)
-    local proxyPlayer = Player(playerIndexMapping_realToProxy[playerIndex])
+function GetSpawnOffset(playerId)
+    local player = Player(playerId)
+    local proxyPlayer = Player(playerIdMapping_realToProxy[playerId])
     local playerStart = { x = GetPlayerStartLocationX(player), y = GetPlayerStartLocationY(player) }
     local proxyStart = { x = GetPlayerStartLocationX(proxyPlayer), y = GetPlayerStartLocationY(proxyPlayer) }
     return { x = proxyStart.x - playerStart.x, y = proxyStart.y - playerStart.y }
 end
 
-function SpawnWaveForPlayer(playerIndex)
-    local player = Player(playerIndex)
-    local proxyPlayer = Player(playerIndexMapping_realToProxy[playerIndex])
-    local offset = GetSpawnOffset(playerIndex)
+function SpawnWaveForPlayer(playerId)
+    local player = Player(playerId)
+    local proxyPlayer = Player(playerIdMapping_realToProxy[playerId])
+    local offset = GetSpawnOffset(playerId)
 
     local group = CreateGroup()
     GroupEnumUnitsOfPlayer(group, player, nil)
@@ -121,10 +122,10 @@ function SpawnWaveForPlayer(playerIndex)
 end
 
 function SpawnWaveAllPlayers()
-    for playerIndex = 0, 11 do
-        local player = Player(playerIndex)
+    for playerId = 0, 11 do
+        local player = Player(playerId)
         if GetPlayerSlotState(player) == PLAYER_SLOT_STATE_PLAYING then
-            SpawnWaveForPlayer(playerIndex)
+            SpawnWaveForPlayer(playerId)
         end
     end
 end
@@ -142,13 +143,13 @@ function RunDelayed(func, seconds)
 end
 
 function CreateWaveSpawnLabels()
-    for playerIndex = 0, 11 do
-        local proxyPlayer = Player(playerIndexMapping_realToProxy[playerIndex])
+    for playerId = 0, 11 do
+        local proxyPlayer = Player(playerIdMapping_realToProxy[playerId])
         local text = CreateTextTag()  
         SetTextTagText(text, "", 0.024)
         SetTextTagPos(text, GetPlayerStartLocationX(proxyPlayer), GetPlayerStartLocationY(proxyPlayer), 0)
         SetTextTagPermanent(text, true)
-        floatingTexts[playerIndex] = text
+        floatingTexts[playerId] = text
     end
 end
 
@@ -162,18 +163,18 @@ function CreateSpawnTimer()
             spawnCountdown = 45
         end
         
-        for playerIndex = 0, 11 do
-            local player = Player(playerIndex)
-            SetTextTagText(floatingTexts[playerIndex], tostring(spawnCountdown), 0.024)
-            SetTextTagVisibility(floatingTexts[playerIndex], spawnCountdown <= 30 and GetPlayerSlotState(player) == PLAYER_SLOT_STATE_PLAYING)
+        for playerId = 0, 11 do
+            local player = Player(playerId)
+            SetTextTagText(floatingTexts[playerId], tostring(spawnCountdown), 0.024)
+            SetTextTagVisibility(floatingTexts[playerId], spawnCountdown <= 30 and GetPlayerSlotState(player) == PLAYER_SLOT_STATE_PLAYING)
         end
 
     end)
 end
 
 local playerBuilders = {
-    real = {},
-    dummyUnitDraft = {}
+    primary = {},
+    altar = {}
 }
 local playerDecks = {}
 
@@ -198,42 +199,42 @@ function CloneAndShuffleArray(arr)
 end
 
 function InitPlayerDecks()
-    for playerIndex = 0, 11 do
-        playerDecks[playerIndex] = CloneAndShuffleArray(get_table_keys(GLOBAL_DRAFT_SETS.draftItemTypeIds))
+    for playerId = 0, 11 do
+        playerDecks[playerId] = CloneAndShuffleArray(get_table_keys(GLOBAL_DRAFT_SETS.draftItemTypeIds))
     end
 end
 
-function InitPlayerBuilder(playerIndex)
-    local player = Player(playerIndex)
-    local proxyPlayer = Player(playerIndexMapping_realToProxy[playerIndex])
+function InitPlayerBuilder(playerId)
+    local player = Player(playerId)
+    local proxyPlayer = Player(playerIdMapping_realToProxy[playerId])
     local lookAtLocation = CalcUnitRotationAngle(GetPlayerStartLocationX(player), GetPlayerStartLocationY(player), GetPlayerStartLocationX(proxyPlayer), GetPlayerStartLocationY(proxyPlayer))
     local builder = CreateUnit(player, BUILDER_UNIT_TYPE_ID, GetPlayerStartLocationX(player), GetPlayerStartLocationY(player), lookAtLocation)
     UnitRemoveAbility(builder, FourCC('Aatk'))
     UnitAddAbility(builder, INVULNERABLE_ABILITY_ID)
 
-    local offset = GetSpawnOffset(playerIndex)
-    local dummyUnitDraft = CreateUnit(player, BUILDER_DRAFT_UNIT_TYPE_ID, GetPlayerStartLocationX(player) - offset.x / 2, GetPlayerStartLocationY(player) - offset.y / 4, lookAtLocation)
+    local offset = GetSpawnOffset(playerId)
+    local altar = CreateUnit(player, ALTAR_UNIT_TYPE_ID, GetPlayerStartLocationX(player) - offset.x / 4, GetPlayerStartLocationY(player) - offset.y / 4, lookAtLocation)
     UnitRemoveAbility(builder, FourCC('Aatk'))
     UnitAddAbility(builder, INVULNERABLE_ABILITY_ID)
 
-    playerBuilders.real[playerIndex] = builder
-    playerBuilders.dummyUnitDraft[playerIndex] = dummyUnitDraft
+    playerBuilders.primary[playerId] = builder
+    playerBuilders.altar[playerId] = altar
 
     SelectUnitForPlayerSingle(builder, player)
     SetCameraPositionLocForPlayer(player, GetUnitLoc(builder))
 end
 
 function InitPlayerBuilders()
-    for playerIndex = 0, 11 do
-        local player = Player(playerIndex)
+    for playerId = 0, 11 do
+        local player = Player(playerId)
         if GetPlayerSlotState(player) == PLAYER_SLOT_STATE_PLAYING then
-            InitPlayerBuilder(playerIndex)
+            InitPlayerBuilder(playerId)
         end
     end
 end
 
-function DrawChoicesFromDeck(playerIndex)
-    local list = playerDecks[playerIndex]
+function DrawChoicesFromDeck(playerId)
+    local list = playerDecks[playerId]
     local items = {}
     
     for i = 1, 3 do
@@ -245,41 +246,44 @@ function DrawChoicesFromDeck(playerIndex)
     return items
 end
 
-function AddDraftAbilitiesToBuilder(playerIndex)    
-    print('AddDraftAbilitiesToBuilder')
-    if (GetPlayerState(Player(playerIndex), PLAYER_STATE_RESOURCE_FOOD_USED) >= GetPlayerState(Player(playerIndex), PLAYER_STATE_RESOURCE_FOOD_CAP)) then
+function AddDraftItemsToAltar(playerId)    
+    if (GetPlayerState(Player(playerId), PLAYER_STATE_RESOURCE_FOOD_USED) >= GetPlayerState(Player(playerId), PLAYER_STATE_RESOURCE_FOOD_CAP)) then
         return
     end
 
-    local dummyDraftBuilder = playerBuilders.dummyUnitDraft[playerIndex]
-    if not dummyDraftBuilder then
-        print('not dummyDraftBuilder')
+    local altar = playerBuilders.altar[playerId]
+    if not altar then
         return
     end
     
-    local items = DrawChoicesFromDeck(playerIndex)
+    local items = DrawChoicesFromDeck(playerId)
     for i = 1, #items do
-        print('adding item')
-        UnitAddItemById(dummyDraftBuilder, items[i])
+        UnitAddItemById(altar, items[i])
     end
-    print('done AddDraftAbilitiesToBuilder')
+end
+
+function OnConstructFinish()
+    local unit = GetConstructedStructure()
+    local unitType = GetUnitTypeId(unit)
+    if GLOBAL_DRAFT_SETS.dumyBuildingUnitTypeIds[unitType] then
+        OnUnitDrafted(unit)
+    end
 end
 
 function OnSpellEffect()
     local abilityId = GetSpellAbilityId()
-    print('onspelleffect')
-    if GLOBAL_DRAFT_SETS.draftAbilityIds[abilityId] then
-        print('OnUnitDrafted')
-        OnUnitDrafted()
+    local unit = GetSpellAbilityUnit()
+    local player = GetOwningPlayer(unit)
+
+    if abilityId == CANCEL_ABILITY_ID and GetUnitTypeId(unit) == ALTAR_UNIT_TYPE_ID then
+        -- IssueImmediateOrder(unit, ORDER_IDs.stop)
+        SelectUnitForPlayerSingle(playerBuilders.primary[GetPlayerId(player)], player)
         return
     end
 
-    if abilityId == DRAFT_UNIT_ABILITY_ID then
-        print('selecting draft unit')
-        local unit = GetSpellAbilityUnit()
-        IssueImmediateOrder(unit, ORDER_IDs.stop)
-        local player = GetOwningPlayer(unit)
-        SelectUnitForPlayerSingle(playerBuilders.dummyUnitDraft[GetPlayerId(player)], player)
+    if abilityId == DRAFT_ABILITY_ID then
+        -- IssueImmediateOrder(unit, ORDER_IDs.stop)
+        SelectUnitForPlayerSingle(playerBuilders.altar[GetPlayerId(player)], player)
         return
     end
 
@@ -302,13 +306,13 @@ function UnitHasItems(unit)
     return false
 end
 
-function OnUnitDrafted()
-    print('start unit drafted')
-    local dummyDraftBuilder = GetSpellAbilityUnit()
-    local player = GetOwningPlayer(dummyDraftBuilder)
+function OnUnitDrafted(unit)
+    local player = GetOwningPlayer(unit)
+    local playerId = GetPlayerId(player)
+    local altar = playerBuilders.altar[playerId]
 
     for slotIndex = 0, 5 do
-        local item = UnitItemInSlot(dummyDraftBuilder, slotIndex)
+        local item = UnitItemInSlot(altar, slotIndex)
         if (item) then
             RemoveItem(item)
         end
@@ -316,26 +320,42 @@ function OnUnitDrafted()
 
     local circle
     local group = CreateGroup()
-    print('unit drafted')
-    print(GetSpellTargetX())
-    print(GetSpellTargetY())
-    GroupEnumUnitsInRange(group, GetSpellTargetX(), GetSpellTargetY(), 50, nil)
+    local unitLocation = GetUnitLoc(unit)
+    local unitX = GetLocationX(unitLocation)
+    local unitY = GetLocationY(unitLocation)
+    GroupEnumUnitsInRange(group, unitX, unitY, 25, nil)
     ForGroup(group, function()
-        print('unit found')
-        if GetUnitTypeId(circle) == FourCC('n00A') then
-            RemoveUnit(circle)
+        local enumUnit = GetEnumUnit()
+        if GetUnitTypeId(enumUnit) == FourCC('n00A') then
+            circle = enumUnit
             return
         end
     end)
-    
+
+    RemoveLocation(unitLocation)
     DestroyGroup(group)
 
-    SelectUnitForPlayerSingle(playerBuilders.real[GetPlayerId(player)], player)
+    local dummyUnitTypeId = GetUnitTypeId(unit)
+    local realUnitTypeId = GLOBAL_DRAFT_SETS.dumyBuildingUnitTypeIds[dummyUnitTypeId].unitTypeId
+
+    local circleLocation = GetUnitLoc(circle)
+    local circleX = GetLocationX(circleLocation)
+    local circleY = GetLocationY(circleLocation)
+    RemoveLocation(circleLocation)
+
+    RemoveUnit(unit)
+    RemoveUnit(circle)
+    local realUnit = CreateUnit(player, realUnitTypeId, circleX, circleY, CalcUnitRotationAngle(circleX, circleY, 0, 0))
+    UnitAddAbility(realUnit, INVULNERABLE_ABILITY_ID)
+    UnitRemoveAbility(realUnit, FourCC('Aatk'))
+    UnitRemoveAbility(realUnit, FourCC('Amov'))
+    SelectUnitForPlayerSingle(playerBuilders.primary[playerId], player)
     
     --note: takes a second to update food cap, which we need to avoid drafting if maxed
     RunDelayed(function()
-        AddDraftAbilitiesToBuilder(GetPlayerId(GetOwningPlayer(builder)))
+        AddDraftItemsToAltar(GetPlayerId(GetOwningPlayer(builder)))
     end, 1)
+
 end
 
 function OnSoulSiphonEffect()
@@ -403,7 +423,7 @@ function OnUnitDeath()
         local killerOwner = GetOwningPlayer(killer)
         local killerIndex = GetPlayerId(killerOwner)
         
-        local actualPlayer = Player(playerIndexMapping_proxyToReal[killerIndex])
+        local actualPlayer = Player(playerIdMapping_proxyToReal[killerIndex])
         if actualPlayer then
             AdjustPlayerStateBJ(1, actualPlayer, PLAYER_STATE_RESOURCE_GOLD)
         else
@@ -415,8 +435,8 @@ end
 function GrantWoodPassive()
     local timer = CreateTimer()
     TimerStart(timer, 5.0, true, function()
-        for playerIndex = 0, 11 do
-            local player = Player(playerIndex)
+        for playerId = 0, 11 do
+            local player = Player(playerId)
             if GetPlayerSlotState(player) == PLAYER_SLOT_STATE_PLAYING then
                 AdjustPlayerStateBJ(1, player, PLAYER_STATE_RESOURCE_LUMBER)
             end
@@ -432,12 +452,12 @@ function InitFoodCapTimer()
     for foodCap = 1, #foodCapIncreaseMinutes do
         local timer = CreateTimer()
         TimerStart(timer, foodCapIncreaseMinutes[foodCap] * 60, false, function()
-            for playerIndex = 0, 11 do
-                local player = Player(playerIndex)
+            for playerId = 0, 11 do
+                local player = Player(playerId)
                 if GetPlayerSlotState(player) == PLAYER_SLOT_STATE_PLAYING then
                     SetPlayerStateBJ(player, PLAYER_STATE_RESOURCE_FOOD_CAP, foodCap)
-                    if not UnitHasItems(playerBuilders.dummyUnitDraft[playerIndex]) then
-                        AddDraftAbilitiesToBuilder(playerIndex)
+                    if not UnitHasItems(playerBuilders.altar[playerId]) then
+                        AddDraftItemsToAltar(playerId)
                     end
                 end
             end
@@ -484,6 +504,10 @@ function Init()
     local spellTrigger = CreateTrigger()
     TriggerRegisterAnyUnitEventBJ(spellTrigger, EVENT_PLAYER_UNIT_SPELL_EFFECT)
     TriggerAddAction(spellTrigger, OnSpellEffect)
+
+    local buildTrigger = CreateTrigger()
+    TriggerRegisterAnyUnitEventBJ(buildTrigger, EVENT_PLAYER_UNIT_CONSTRUCT_FINISH)
+    TriggerAddAction(buildTrigger, OnConstructFinish)
 end
 
 --[[
@@ -756,7 +780,7 @@ SetPlayerController(Player(0), MAP_CONTROL_USER)
 SetPlayerStartLocation(Player(1), 1)
 ForcePlayerStartLocation(Player(1), 1)
 SetPlayerColor(Player(1), ConvertPlayerColor(1))
-SetPlayerRacePreference(Player(1), RACE_PREF_HUMAN)
+SetPlayerRacePreference(Player(1), RACE_PREF_ORC)
 SetPlayerRaceSelectable(Player(1), true)
 SetPlayerController(Player(1), MAP_CONTROL_USER)
 SetPlayerStartLocation(Player(2), 2)
@@ -949,57 +973,57 @@ SetStartLocPrioCount(10, 1)
 SetStartLocPrio(10, 0, 9, MAP_LOC_PRIO_HIGH)
 SetStartLocPrioCount(11, 1)
 SetStartLocPrio(11, 0, 0, MAP_LOC_PRIO_HIGH)
-SetStartLocPrioCount(12, 8)
-SetStartLocPrio(12, 0, 1, MAP_LOC_PRIO_LOW)
-SetStartLocPrio(12, 1, 2, MAP_LOC_PRIO_LOW)
-SetStartLocPrio(12, 2, 3, MAP_LOC_PRIO_LOW)
-SetStartLocPrio(12, 3, 4, MAP_LOC_PRIO_LOW)
-SetStartLocPrio(12, 4, 11, MAP_LOC_PRIO_LOW)
-SetStartLocPrio(12, 5, 13, MAP_LOC_PRIO_LOW)
-SetStartLocPrio(12, 6, 14, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrioCount(12, 8)
-SetEnemyStartLocPrio(12, 0, 1, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(12, 1, 2, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(12, 2, 3, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(12, 3, 4, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(12, 4, 11, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(12, 5, 13, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(12, 6, 14, MAP_LOC_PRIO_LOW)
-SetStartLocPrioCount(13, 13)
-SetStartLocPrio(13, 0, 1, MAP_LOC_PRIO_HIGH)
-SetStartLocPrio(13, 1, 3, MAP_LOC_PRIO_HIGH)
-SetStartLocPrio(13, 2, 5, MAP_LOC_PRIO_HIGH)
-SetStartLocPrio(13, 3, 7, MAP_LOC_PRIO_HIGH)
-SetStartLocPrio(13, 4, 9, MAP_LOC_PRIO_HIGH)
-SetStartLocPrio(13, 5, 11, MAP_LOC_PRIO_HIGH)
-SetStartLocPrio(13, 6, 12, MAP_LOC_PRIO_LOW)
-SetStartLocPrio(13, 7, 15, MAP_LOC_PRIO_HIGH)
-SetStartLocPrio(13, 8, 17, MAP_LOC_PRIO_HIGH)
-SetStartLocPrio(13, 9, 19, MAP_LOC_PRIO_HIGH)
-SetStartLocPrio(13, 10, 21, MAP_LOC_PRIO_HIGH)
-SetStartLocPrio(13, 11, 23, MAP_LOC_PRIO_HIGH)
-SetEnemyStartLocPrioCount(13, 13)
-SetEnemyStartLocPrio(13, 0, 0, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(13, 1, 1, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(13, 2, 2, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(13, 3, 3, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(13, 4, 4, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(13, 5, 5, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(13, 6, 6, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(13, 7, 7, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(13, 8, 8, MAP_LOC_PRIO_HIGH)
-SetEnemyStartLocPrio(13, 9, 11, MAP_LOC_PRIO_HIGH)
-SetEnemyStartLocPrio(13, 10, 12, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(13, 11, 20, MAP_LOC_PRIO_HIGH)
-SetEnemyStartLocPrio(13, 12, 23, MAP_LOC_PRIO_HIGH)
-SetEnemyStartLocPrioCount(14, 2)
-SetEnemyStartLocPrio(14, 0, 6, MAP_LOC_PRIO_HIGH)
-SetEnemyStartLocPrio(14, 1, 11, MAP_LOC_PRIO_HIGH)
-SetStartLocPrioCount(15, 1)
+SetStartLocPrioCount(12, 7)
+SetStartLocPrio(12, 0, 2, MAP_LOC_PRIO_LOW)
+SetStartLocPrio(12, 1, 3, MAP_LOC_PRIO_LOW)
+SetStartLocPrio(12, 2, 4, MAP_LOC_PRIO_LOW)
+SetStartLocPrio(12, 3, 11, MAP_LOC_PRIO_LOW)
+SetStartLocPrio(12, 4, 13, MAP_LOC_PRIO_LOW)
+SetStartLocPrio(12, 5, 14, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrioCount(12, 7)
+SetEnemyStartLocPrio(12, 0, 2, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(12, 1, 3, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(12, 2, 4, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(12, 3, 11, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(12, 4, 13, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(12, 5, 14, MAP_LOC_PRIO_LOW)
+SetStartLocPrioCount(13, 12)
+SetStartLocPrio(13, 0, 3, MAP_LOC_PRIO_HIGH)
+SetStartLocPrio(13, 1, 5, MAP_LOC_PRIO_HIGH)
+SetStartLocPrio(13, 2, 7, MAP_LOC_PRIO_HIGH)
+SetStartLocPrio(13, 3, 9, MAP_LOC_PRIO_HIGH)
+SetStartLocPrio(13, 4, 11, MAP_LOC_PRIO_HIGH)
+SetStartLocPrio(13, 5, 12, MAP_LOC_PRIO_LOW)
+SetStartLocPrio(13, 6, 15, MAP_LOC_PRIO_HIGH)
+SetStartLocPrio(13, 7, 17, MAP_LOC_PRIO_HIGH)
+SetStartLocPrio(13, 8, 19, MAP_LOC_PRIO_HIGH)
+SetStartLocPrio(13, 9, 21, MAP_LOC_PRIO_HIGH)
+SetStartLocPrio(13, 10, 23, MAP_LOC_PRIO_HIGH)
+SetEnemyStartLocPrioCount(13, 11)
+SetEnemyStartLocPrio(13, 0, 2, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(13, 1, 3, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(13, 2, 4, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(13, 3, 5, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(13, 4, 6, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(13, 5, 7, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(13, 6, 8, MAP_LOC_PRIO_HIGH)
+SetEnemyStartLocPrio(13, 7, 11, MAP_LOC_PRIO_HIGH)
+SetEnemyStartLocPrio(13, 8, 12, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(13, 9, 20, MAP_LOC_PRIO_HIGH)
+SetEnemyStartLocPrio(13, 10, 23, MAP_LOC_PRIO_HIGH)
+SetStartLocPrioCount(14, 1)
+SetStartLocPrio(14, 0, 0, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrioCount(14, 4)
+SetEnemyStartLocPrio(14, 0, 0, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(14, 1, 1, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(14, 2, 6, MAP_LOC_PRIO_HIGH)
+SetEnemyStartLocPrio(14, 3, 11, MAP_LOC_PRIO_HIGH)
+SetStartLocPrioCount(15, 2)
 SetStartLocPrio(15, 0, 0, MAP_LOC_PRIO_LOW)
+SetStartLocPrio(15, 1, 1, MAP_LOC_PRIO_LOW)
 SetEnemyStartLocPrioCount(15, 15)
-SetEnemyStartLocPrio(15, 0, 0, MAP_LOC_PRIO_HIGH)
-SetEnemyStartLocPrio(15, 1, 1, MAP_LOC_PRIO_HIGH)
+SetEnemyStartLocPrio(15, 0, 0, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(15, 1, 1, MAP_LOC_PRIO_LOW)
 SetEnemyStartLocPrio(15, 2, 2, MAP_LOC_PRIO_HIGH)
 SetEnemyStartLocPrio(15, 3, 3, MAP_LOC_PRIO_HIGH)
 SetEnemyStartLocPrio(15, 4, 5, MAP_LOC_PRIO_LOW)
@@ -1016,27 +1040,29 @@ SetEnemyStartLocPrio(15, 14, 23, MAP_LOC_PRIO_LOW)
 SetStartLocPrioCount(16, 1)
 SetStartLocPrio(16, 0, 23, MAP_LOC_PRIO_LOW)
 SetEnemyStartLocPrioCount(16, 2)
-SetEnemyStartLocPrio(16, 0, 0, MAP_LOC_PRIO_HIGH)
+SetEnemyStartLocPrio(16, 0, 0, MAP_LOC_PRIO_LOW)
 SetEnemyStartLocPrio(16, 1, 11, MAP_LOC_PRIO_HIGH)
-SetStartLocPrioCount(17, 7)
+SetStartLocPrioCount(17, 6)
 SetStartLocPrio(17, 0, 0, MAP_LOC_PRIO_LOW)
-SetStartLocPrio(17, 1, 1, MAP_LOC_PRIO_LOW)
-SetStartLocPrio(17, 2, 3, MAP_LOC_PRIO_LOW)
-SetStartLocPrio(17, 3, 4, MAP_LOC_PRIO_LOW)
-SetStartLocPrio(17, 4, 5, MAP_LOC_PRIO_LOW)
-SetStartLocPrio(17, 5, 7, MAP_LOC_PRIO_LOW)
-SetStartLocPrio(17, 6, 8, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrioCount(17, 1)
-SetEnemyStartLocPrio(17, 0, 7, MAP_LOC_PRIO_LOW)
-SetStartLocPrioCount(18, 9)
-SetStartLocPrio(18, 0, 6, MAP_LOC_PRIO_HIGH)
-SetStartLocPrio(18, 1, 9, MAP_LOC_PRIO_HIGH)
-SetStartLocPrio(18, 2, 10, MAP_LOC_PRIO_HIGH)
-SetStartLocPrio(18, 3, 11, MAP_LOC_PRIO_HIGH)
-SetStartLocPrio(18, 4, 14, MAP_LOC_PRIO_HIGH)
-SetStartLocPrio(18, 5, 20, MAP_LOC_PRIO_HIGH)
-SetStartLocPrio(18, 6, 22, MAP_LOC_PRIO_HIGH)
-SetStartLocPrio(18, 7, 23, MAP_LOC_PRIO_HIGH)
+SetStartLocPrio(17, 1, 3, MAP_LOC_PRIO_LOW)
+SetStartLocPrio(17, 2, 4, MAP_LOC_PRIO_LOW)
+SetStartLocPrio(17, 3, 5, MAP_LOC_PRIO_LOW)
+SetStartLocPrio(17, 4, 7, MAP_LOC_PRIO_LOW)
+SetStartLocPrio(17, 5, 8, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrioCount(17, 2)
+SetEnemyStartLocPrio(17, 0, 0, MAP_LOC_PRIO_HIGH)
+SetEnemyStartLocPrio(17, 1, 7, MAP_LOC_PRIO_LOW)
+SetStartLocPrioCount(18, 11)
+SetStartLocPrio(18, 0, 0, MAP_LOC_PRIO_LOW)
+SetStartLocPrio(18, 1, 1, MAP_LOC_PRIO_LOW)
+SetStartLocPrio(18, 2, 6, MAP_LOC_PRIO_HIGH)
+SetStartLocPrio(18, 3, 9, MAP_LOC_PRIO_HIGH)
+SetStartLocPrio(18, 4, 10, MAP_LOC_PRIO_HIGH)
+SetStartLocPrio(18, 5, 11, MAP_LOC_PRIO_HIGH)
+SetStartLocPrio(18, 6, 14, MAP_LOC_PRIO_HIGH)
+SetStartLocPrio(18, 7, 20, MAP_LOC_PRIO_HIGH)
+SetStartLocPrio(18, 8, 22, MAP_LOC_PRIO_HIGH)
+SetStartLocPrio(18, 9, 23, MAP_LOC_PRIO_HIGH)
 SetEnemyStartLocPrioCount(18, 15)
 SetEnemyStartLocPrio(18, 0, 0, MAP_LOC_PRIO_LOW)
 SetEnemyStartLocPrio(18, 1, 1, MAP_LOC_PRIO_LOW)
@@ -1052,6 +1078,8 @@ SetEnemyStartLocPrio(18, 10, 14, MAP_LOC_PRIO_HIGH)
 SetEnemyStartLocPrio(18, 11, 20, MAP_LOC_PRIO_HIGH)
 SetEnemyStartLocPrio(18, 12, 21, MAP_LOC_PRIO_HIGH)
 SetEnemyStartLocPrio(18, 13, 22, MAP_LOC_PRIO_HIGH)
+SetEnemyStartLocPrioCount(19, 1)
+SetEnemyStartLocPrio(19, 0, 0, MAP_LOC_PRIO_LOW)
 SetStartLocPrioCount(20, 10)
 SetStartLocPrio(20, 0, 5, MAP_LOC_PRIO_HIGH)
 SetStartLocPrio(20, 1, 7, MAP_LOC_PRIO_HIGH)
@@ -1063,25 +1091,24 @@ SetStartLocPrio(20, 6, 18, MAP_LOC_PRIO_HIGH)
 SetStartLocPrio(20, 7, 19, MAP_LOC_PRIO_HIGH)
 SetStartLocPrio(20, 8, 21, MAP_LOC_PRIO_HIGH)
 SetStartLocPrio(20, 9, 23, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrioCount(20, 17)
+SetEnemyStartLocPrioCount(20, 16)
 SetEnemyStartLocPrio(20, 0, 0, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(20, 1, 1, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(20, 2, 2, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(20, 3, 3, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(20, 4, 5, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(20, 5, 6, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(20, 6, 7, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(20, 7, 8, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(20, 8, 9, MAP_LOC_PRIO_HIGH)
-SetEnemyStartLocPrio(20, 9, 10, MAP_LOC_PRIO_HIGH)
-SetEnemyStartLocPrio(20, 10, 11, MAP_LOC_PRIO_HIGH)
-SetEnemyStartLocPrio(20, 11, 14, MAP_LOC_PRIO_HIGH)
-SetEnemyStartLocPrio(20, 12, 16, MAP_LOC_PRIO_HIGH)
-SetEnemyStartLocPrio(20, 13, 18, MAP_LOC_PRIO_HIGH)
-SetEnemyStartLocPrio(20, 14, 21, MAP_LOC_PRIO_HIGH)
-SetEnemyStartLocPrio(20, 15, 23, MAP_LOC_PRIO_HIGH)
+SetEnemyStartLocPrio(20, 1, 2, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(20, 2, 3, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(20, 3, 5, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(20, 4, 6, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(20, 5, 7, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(20, 6, 8, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(20, 7, 9, MAP_LOC_PRIO_HIGH)
+SetEnemyStartLocPrio(20, 8, 10, MAP_LOC_PRIO_HIGH)
+SetEnemyStartLocPrio(20, 9, 11, MAP_LOC_PRIO_HIGH)
+SetEnemyStartLocPrio(20, 10, 14, MAP_LOC_PRIO_HIGH)
+SetEnemyStartLocPrio(20, 11, 16, MAP_LOC_PRIO_HIGH)
+SetEnemyStartLocPrio(20, 12, 18, MAP_LOC_PRIO_HIGH)
+SetEnemyStartLocPrio(20, 13, 21, MAP_LOC_PRIO_HIGH)
+SetEnemyStartLocPrio(20, 14, 23, MAP_LOC_PRIO_HIGH)
 SetStartLocPrioCount(21, 17)
-SetStartLocPrio(21, 0, 0, MAP_LOC_PRIO_HIGH)
+SetStartLocPrio(21, 0, 1, MAP_LOC_PRIO_LOW)
 SetStartLocPrio(21, 1, 2, MAP_LOC_PRIO_HIGH)
 SetStartLocPrio(21, 2, 3, MAP_LOC_PRIO_HIGH)
 SetStartLocPrio(21, 3, 4, MAP_LOC_PRIO_HIGH)
@@ -1098,8 +1125,8 @@ SetStartLocPrio(21, 13, 20, MAP_LOC_PRIO_LOW)
 SetStartLocPrio(21, 14, 22, MAP_LOC_PRIO_LOW)
 SetStartLocPrio(21, 15, 23, MAP_LOC_PRIO_LOW)
 SetEnemyStartLocPrioCount(21, 23)
-SetEnemyStartLocPrio(21, 0, 0, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(21, 1, 1, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(21, 0, 0, MAP_LOC_PRIO_HIGH)
+SetEnemyStartLocPrio(21, 1, 1, MAP_LOC_PRIO_HIGH)
 SetEnemyStartLocPrio(21, 2, 2, MAP_LOC_PRIO_LOW)
 SetEnemyStartLocPrio(21, 3, 3, MAP_LOC_PRIO_LOW)
 SetEnemyStartLocPrio(21, 4, 4, MAP_LOC_PRIO_LOW)
@@ -1120,62 +1147,62 @@ SetEnemyStartLocPrio(21, 18, 19, MAP_LOC_PRIO_LOW)
 SetEnemyStartLocPrio(21, 19, 20, MAP_LOC_PRIO_LOW)
 SetEnemyStartLocPrio(21, 20, 22, MAP_LOC_PRIO_LOW)
 SetEnemyStartLocPrio(21, 21, 23, MAP_LOC_PRIO_HIGH)
-SetStartLocPrioCount(22, 11)
-SetStartLocPrio(22, 0, 6, MAP_LOC_PRIO_LOW)
-SetStartLocPrio(22, 1, 8, MAP_LOC_PRIO_HIGH)
-SetStartLocPrio(22, 2, 9, MAP_LOC_PRIO_HIGH)
-SetStartLocPrio(22, 3, 11, MAP_LOC_PRIO_HIGH)
-SetStartLocPrio(22, 4, 12, MAP_LOC_PRIO_HIGH)
-SetStartLocPrio(22, 5, 14, MAP_LOC_PRIO_HIGH)
-SetStartLocPrio(22, 6, 15, MAP_LOC_PRIO_HIGH)
-SetStartLocPrio(22, 7, 16, MAP_LOC_PRIO_HIGH)
-SetStartLocPrio(22, 8, 18, MAP_LOC_PRIO_HIGH)
-SetStartLocPrio(22, 9, 20, MAP_LOC_PRIO_HIGH)
-SetEnemyStartLocPrioCount(22, 13)
-SetEnemyStartLocPrio(22, 0, 1, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(22, 1, 2, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(22, 2, 4, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(22, 3, 5, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(22, 4, 6, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(22, 5, 7, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(22, 6, 8, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(22, 7, 9, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(22, 8, 10, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(22, 9, 11, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(22, 10, 12, MAP_LOC_PRIO_HIGH)
-SetEnemyStartLocPrio(22, 11, 13, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(22, 12, 14, MAP_LOC_PRIO_LOW)
-SetStartLocPrioCount(23, 17)
+SetStartLocPrioCount(22, 12)
+SetStartLocPrio(22, 0, 0, MAP_LOC_PRIO_LOW)
+SetStartLocPrio(22, 1, 6, MAP_LOC_PRIO_LOW)
+SetStartLocPrio(22, 2, 8, MAP_LOC_PRIO_HIGH)
+SetStartLocPrio(22, 3, 9, MAP_LOC_PRIO_HIGH)
+SetStartLocPrio(22, 4, 11, MAP_LOC_PRIO_HIGH)
+SetStartLocPrio(22, 5, 12, MAP_LOC_PRIO_HIGH)
+SetStartLocPrio(22, 6, 14, MAP_LOC_PRIO_HIGH)
+SetStartLocPrio(22, 7, 15, MAP_LOC_PRIO_HIGH)
+SetStartLocPrio(22, 8, 16, MAP_LOC_PRIO_HIGH)
+SetStartLocPrio(22, 9, 18, MAP_LOC_PRIO_HIGH)
+SetStartLocPrio(22, 10, 20, MAP_LOC_PRIO_HIGH)
+SetEnemyStartLocPrioCount(22, 14)
+SetEnemyStartLocPrio(22, 0, 0, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(22, 1, 1, MAP_LOC_PRIO_HIGH)
+SetEnemyStartLocPrio(22, 2, 2, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(22, 3, 4, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(22, 4, 5, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(22, 5, 6, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(22, 6, 7, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(22, 7, 8, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(22, 8, 9, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(22, 9, 10, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(22, 10, 11, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(22, 11, 12, MAP_LOC_PRIO_HIGH)
+SetEnemyStartLocPrio(22, 12, 13, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(22, 13, 14, MAP_LOC_PRIO_LOW)
+SetStartLocPrioCount(23, 16)
 SetStartLocPrio(23, 0, 0, MAP_LOC_PRIO_HIGH)
-SetStartLocPrio(23, 1, 1, MAP_LOC_PRIO_HIGH)
-SetStartLocPrio(23, 2, 2, MAP_LOC_PRIO_HIGH)
-SetStartLocPrio(23, 3, 3, MAP_LOC_PRIO_LOW)
-SetStartLocPrio(23, 4, 4, MAP_LOC_PRIO_LOW)
-SetStartLocPrio(23, 5, 5, MAP_LOC_PRIO_LOW)
-SetStartLocPrio(23, 6, 6, MAP_LOC_PRIO_HIGH)
-SetStartLocPrio(23, 7, 7, MAP_LOC_PRIO_LOW)
-SetStartLocPrio(23, 8, 8, MAP_LOC_PRIO_LOW)
-SetStartLocPrio(23, 9, 10, MAP_LOC_PRIO_LOW)
-SetStartLocPrio(23, 10, 11, MAP_LOC_PRIO_LOW)
-SetStartLocPrio(23, 11, 12, MAP_LOC_PRIO_LOW)
-SetStartLocPrio(23, 12, 13, MAP_LOC_PRIO_LOW)
-SetStartLocPrio(23, 13, 16, MAP_LOC_PRIO_LOW)
-SetStartLocPrio(23, 14, 18, MAP_LOC_PRIO_LOW)
-SetStartLocPrio(23, 15, 22, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrioCount(23, 14)
-SetEnemyStartLocPrio(23, 0, 0, MAP_LOC_PRIO_HIGH)
-SetEnemyStartLocPrio(23, 1, 1, MAP_LOC_PRIO_HIGH)
-SetEnemyStartLocPrio(23, 2, 2, MAP_LOC_PRIO_HIGH)
-SetEnemyStartLocPrio(23, 3, 3, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(23, 4, 4, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(23, 5, 5, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(23, 6, 6, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(23, 7, 7, MAP_LOC_PRIO_HIGH)
-SetEnemyStartLocPrio(23, 8, 8, MAP_LOC_PRIO_HIGH)
-SetEnemyStartLocPrio(23, 9, 14, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(23, 10, 16, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(23, 11, 18, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(23, 12, 22, MAP_LOC_PRIO_LOW)
+SetStartLocPrio(23, 1, 2, MAP_LOC_PRIO_HIGH)
+SetStartLocPrio(23, 2, 3, MAP_LOC_PRIO_LOW)
+SetStartLocPrio(23, 3, 4, MAP_LOC_PRIO_LOW)
+SetStartLocPrio(23, 4, 5, MAP_LOC_PRIO_LOW)
+SetStartLocPrio(23, 5, 6, MAP_LOC_PRIO_HIGH)
+SetStartLocPrio(23, 6, 7, MAP_LOC_PRIO_LOW)
+SetStartLocPrio(23, 7, 8, MAP_LOC_PRIO_LOW)
+SetStartLocPrio(23, 8, 10, MAP_LOC_PRIO_LOW)
+SetStartLocPrio(23, 9, 11, MAP_LOC_PRIO_LOW)
+SetStartLocPrio(23, 10, 12, MAP_LOC_PRIO_LOW)
+SetStartLocPrio(23, 11, 13, MAP_LOC_PRIO_LOW)
+SetStartLocPrio(23, 12, 16, MAP_LOC_PRIO_LOW)
+SetStartLocPrio(23, 13, 18, MAP_LOC_PRIO_LOW)
+SetStartLocPrio(23, 14, 22, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrioCount(23, 13)
+SetEnemyStartLocPrio(23, 0, 0, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(23, 1, 2, MAP_LOC_PRIO_HIGH)
+SetEnemyStartLocPrio(23, 2, 3, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(23, 3, 4, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(23, 4, 5, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(23, 5, 6, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(23, 6, 7, MAP_LOC_PRIO_HIGH)
+SetEnemyStartLocPrio(23, 7, 8, MAP_LOC_PRIO_HIGH)
+SetEnemyStartLocPrio(23, 8, 14, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(23, 9, 16, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(23, 10, 18, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(23, 11, 22, MAP_LOC_PRIO_LOW)
 end
 
 function main()
