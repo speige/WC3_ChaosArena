@@ -57,13 +57,17 @@ local BUILDER_DRAFT_UNIT_TYPE_ID = FourCC('h010')
 local DRAFT_UNIT_ABILITY_ID = FourCC('A000')
 local INVULNERABLE_ABILITY_ID = FourCC('Avul') --note: used to hide health bars (also requires ObjectEditor IsBuilding=true, but can still move)
 
+local ORDER_IDs = {
+    stop = 851972
+}
+
 local playerIndexMapping_realToProxy = {}
-for i = 0, 11 do
-    playerIndexMapping_realToProxy[i + 12] = i
+for playerIndex = 0, 11 do
+    playerIndexMapping_realToProxy[playerIndex] = playerIndex + 12
 end
 local playerIndexMapping_proxyToReal = {}
-for i = 12, 23 do
-    playerIndexMapping_proxyToReal[i - 12] = i
+for playerIndex = 12, 23 do
+    playerIndexMapping_proxyToReal[playerIndex] = playerIndex - 12
 end
 
 function CalcUnitRotationAngle(unitLocationX, unitLocationY, lookAtX, lookAtY)
@@ -75,26 +79,32 @@ function CalcUnitRotationAngle(unitLocationX, unitLocationY, lookAtX, lookAtY)
     return result
 end
 
-function SpawnWaveForPlayer(playerIndex)
-    local p = Player(playerIndex)
+function GetSpawnOffset(playerIndex)
+    local player = Player(playerIndex)
     local proxyPlayer = Player(playerIndexMapping_realToProxy[playerIndex])
-    local playerStart = { x = GetPlayerStartLocationX(p), y = GetPlayerStartLocationY(p) }
+    local playerStart = { x = GetPlayerStartLocationX(player), y = GetPlayerStartLocationY(player) }
     local proxyStart = { x = GetPlayerStartLocationX(proxyPlayer), y = GetPlayerStartLocationY(proxyPlayer) }
-    local offset = { x = proxyStart.x - playerStart.x, y = proxyStart.y - playerStart.y }
+    return { x = proxyStart.x - playerStart.x, y = proxyStart.y - playerStart.y }
+end
 
-    local g = CreateGroup()
-    GroupEnumUnitsOfPlayer(g, p, nil)
+function SpawnWaveForPlayer(playerIndex)
+    local player = Player(playerIndex)
+    local proxyPlayer = Player(playerIndexMapping_realToProxy[playerIndex])
+    local offset = GetSpawnOffset(playerIndex)
+
+    local group = CreateGroup()
+    GroupEnumUnitsOfPlayer(group, player, nil)
     
-    ForGroup(g, function()
-        local u = GetEnumUnit()
-        local unitType = GetUnitTypeId(u)
+    ForGroup(group, function()
+        local unit = GetEnumUnit()
+        local unitType = GetUnitTypeId(unit)
         if GLOBAL_DRAFT_SETS.unitTypeIds[unitType] then
-            local ux = GetUnitX(u)
-            local uy = GetUnitY(u)            
-            local clone = CreateUnit(proxyPlayer, unitType, ux + offset.x, uy + offset.y, CalcUnitRotationAngle(ux, uy, 0, 0))
+            local x = GetUnitX(unit)
+            local y = GetUnitY(unit)            
+            local clone = CreateUnit(proxyPlayer, unitType, x + offset.x, y + offset.y, CalcUnitRotationAngle(x, y, 0, 0))
             UnitRemoveAbility(clone, INVULNERABLE_ABILITY_ID)
 
-            local heroLevel = GetHeroLevel(u)
+            local heroLevel = GetHeroLevel(unit)
             if heroLevel > 0 then
                 for i = 1, heroLevel - 1 do
                     SetHeroLevel(clone, heroLevel, false)
@@ -107,14 +117,14 @@ function SpawnWaveForPlayer(playerIndex)
         end
     end)
     
-    DestroyGroup(g)
+    DestroyGroup(group)
 end
 
 function SpawnWaveAllPlayers()
-    for i = 0, 11 do
-        local p = Player(i)
-        if GetPlayerSlotState(p) == PLAYER_SLOT_STATE_PLAYING then
-            SpawnWaveForPlayer(i)
+    for playerIndex = 0, 11 do
+        local player = Player(playerIndex)
+        if GetPlayerSlotState(player) == PLAYER_SLOT_STATE_PLAYING then
+            SpawnWaveForPlayer(playerIndex)
         end
     end
 end
@@ -134,11 +144,11 @@ end
 function CreateWaveSpawnLabels()
     for playerIndex = 0, 11 do
         local proxyPlayer = Player(playerIndexMapping_realToProxy[playerIndex])
-        local txt = CreateTextTag()  
-        SetTextTagText(txt, "", 0.024)
-        SetTextTagPos(txt, GetPlayerStartLocationX(proxyPlayer), GetPlayerStartLocationY(proxyPlayer), 0)
-        SetTextTagPermanent(txt, true)
-        floatingTexts[playerIndex] = txt
+        local text = CreateTextTag()  
+        SetTextTagText(text, "", 0.024)
+        SetTextTagPos(text, GetPlayerStartLocationX(proxyPlayer), GetPlayerStartLocationY(proxyPlayer), 0)
+        SetTextTagPermanent(text, true)
+        floatingTexts[playerIndex] = text
     end
 end
 
@@ -152,10 +162,10 @@ function CreateSpawnTimer()
             spawnCountdown = 45
         end
         
-        for i = 0, 11 do
-            local p = Player(i)
-            SetTextTagText(floatingTexts[i], tostring(spawnCountdown), 0.024)
-            SetTextTagVisibility(floatingTexts[i], spawnCountdown <= 30 and GetPlayerSlotState(p) == PLAYER_SLOT_STATE_PLAYING)
+        for playerIndex = 0, 11 do
+            local player = Player(playerIndex)
+            SetTextTagText(floatingTexts[playerIndex], tostring(spawnCountdown), 0.024)
+            SetTextTagVisibility(floatingTexts[playerIndex], spawnCountdown <= 30 and GetPlayerSlotState(player) == PLAYER_SLOT_STATE_PLAYING)
         end
 
     end)
@@ -188,80 +198,88 @@ function CloneAndShuffleArray(arr)
 end
 
 function InitPlayerDecks()
-    for i = 0, 11 do
-        playerDecks[i] = CloneAndShuffleArray(get_table_keys(GLOBAL_DRAFT_SETS.draftItemTypeIds))
+    for playerIndex = 0, 11 do
+        playerDecks[playerIndex] = CloneAndShuffleArray(get_table_keys(GLOBAL_DRAFT_SETS.draftItemTypeIds))
     end
 end
 
 function InitPlayerBuilder(playerIndex)
-    local p = Player(playerIndex)
+    local player = Player(playerIndex)
     local proxyPlayer = Player(playerIndexMapping_realToProxy[playerIndex])
-    local lookAtLocation = CalcUnitRotationAngle(GetPlayerStartLocationX(p), GetPlayerStartLocationY(p), GetPlayerStartLocationX(proxyPlayer), GetPlayerStartLocationY(proxyPlayer))
-    local builder = CreateUnit(p, BUILDER_UNIT_TYPE_ID, GetPlayerStartLocationX(p), GetPlayerStartLocationY(p), lookAtLocation)
+    local lookAtLocation = CalcUnitRotationAngle(GetPlayerStartLocationX(player), GetPlayerStartLocationY(player), GetPlayerStartLocationX(proxyPlayer), GetPlayerStartLocationY(proxyPlayer))
+    local builder = CreateUnit(player, BUILDER_UNIT_TYPE_ID, GetPlayerStartLocationX(player), GetPlayerStartLocationY(player), lookAtLocation)
     UnitRemoveAbility(builder, FourCC('Aatk'))
     UnitAddAbility(builder, INVULNERABLE_ABILITY_ID)
 
-    local dummyUnitDraft = CreateUnit(p, BUILDER_DRAFT_UNIT_TYPE_ID, GetPlayerStartLocationX(p), GetPlayerStartLocationY(p), lookAtLocation)
+    local offset = GetSpawnOffset(playerIndex)
+    local dummyUnitDraft = CreateUnit(player, BUILDER_DRAFT_UNIT_TYPE_ID, GetPlayerStartLocationX(player) - offset.x / 2, GetPlayerStartLocationY(player) - offset.y / 4, lookAtLocation)
     UnitRemoveAbility(builder, FourCC('Aatk'))
     UnitAddAbility(builder, INVULNERABLE_ABILITY_ID)
 
     playerBuilders.real[playerIndex] = builder
     playerBuilders.dummyUnitDraft[playerIndex] = dummyUnitDraft
 
-    SelectUnitForPlayerSingle(builder, p)
-    SetCameraPositionLocForPlayer(p, GetUnitLoc(builder))
+    SelectUnitForPlayerSingle(builder, player)
+    SetCameraPositionLocForPlayer(player, GetUnitLoc(builder))
 end
 
 function InitPlayerBuilders()
-    for i = 0, 11 do
-        local p = Player(i)
-        if GetPlayerSlotState(p) == PLAYER_SLOT_STATE_PLAYING then
-            InitPlayerBuilder(i)
+    for playerIndex = 0, 11 do
+        local player = Player(playerIndex)
+        if GetPlayerSlotState(player) == PLAYER_SLOT_STATE_PLAYING then
+            InitPlayerBuilder(playerIndex)
         end
     end
 end
 
 function DrawChoicesFromDeck(playerIndex)
     local list = playerDecks[playerIndex]
-    local abilities = {}
+    local items = {}
     
     for i = 1, 3 do
         if #list > 0 then
-            table.insert(abilities, table.remove(list, 1))
+            table.insert(items, table.remove(list, 1))
         end
     end
     
-    return abilities
+    return items
 end
 
 function AddDraftAbilitiesToBuilder(playerIndex)    
-    if (GetPlayerState(Player(playerIndex), PLAYER_STATE_RESOURCE_FOOD_USED) ~= GetPlayerState(Player(playerIndex), PLAYER_STATE_RESOURCE_FOOD_CAP) - 1) then
-        --note: any other food value means they have a pending draft already (or somehow went over cap)
+    print('AddDraftAbilitiesToBuilder')
+    if (GetPlayerState(Player(playerIndex), PLAYER_STATE_RESOURCE_FOOD_USED) >= GetPlayerState(Player(playerIndex), PLAYER_STATE_RESOURCE_FOOD_CAP)) then
         return
     end
 
     local dummyDraftBuilder = playerBuilders.dummyUnitDraft[playerIndex]
     if not dummyDraftBuilder then
+        print('not dummyDraftBuilder')
         return
     end
     
     local items = DrawChoicesFromDeck(playerIndex)
     for i = 1, #items do
-        UnitAddItem(dummyDraftBuilder, items[i])
+        print('adding item')
+        UnitAddItemById(dummyDraftBuilder, items[i])
     end
+    print('done AddDraftAbilitiesToBuilder')
 end
 
 function OnSpellEffect()
     local abilityId = GetSpellAbilityId()
-    
+    print('onspelleffect')
     if GLOBAL_DRAFT_SETS.draftAbilityIds[abilityId] then
+        print('OnUnitDrafted')
         OnUnitDrafted()
         return
     end
 
     if abilityId == DRAFT_UNIT_ABILITY_ID then
-        local player = GetOwningPlayer(GetSpellAbilityUnit())
-        SelectUnitForPlayerSingle(playerBuilders.dummyUnitDraft[GetPlayerId(player)])
+        print('selecting draft unit')
+        local unit = GetSpellAbilityUnit()
+        IssueImmediateOrder(unit, ORDER_IDs.stop)
+        local player = GetOwningPlayer(unit)
+        SelectUnitForPlayerSingle(playerBuilders.dummyUnitDraft[GetPlayerId(player)], player)
         return
     end
 
@@ -273,21 +291,36 @@ function OnSpellEffect()
     end
 end
 
-function OnUnitDrafted()
-    print('unit drafted')
-    local dummyDraftBuilder = GetSpellAbilityUnit()
+function UnitHasItems(unit)
+    for slotIndex = 0, 5 do
+        local item = UnitItemInSlot(unit, slotIndex)
+        if (item) then
+            return true
+        end
+    end
 
-    for key, _ in pairs(GLOBAL_DRAFT_SETS.draftItemTypeIds) do
-        UnitRemoveItem(dummyDraftBuilder, key)
-    end                
+    return false
+end
+
+function OnUnitDrafted()
+    print('start unit drafted')
+    local dummyDraftBuilder = GetSpellAbilityUnit()
+    local player = GetOwningPlayer(dummyDraftBuilder)
+
+    for slotIndex = 0, 5 do
+        local item = UnitItemInSlot(dummyDraftBuilder, slotIndex)
+        if (item) then
+            RemoveItem(item)
+        end
+    end
 
     local circle
-    local g = CreateGroup()
+    local group = CreateGroup()
     print('unit drafted')
     print(GetSpellTargetX())
     print(GetSpellTargetY())
-    GroupEnumUnitsInRange(g, GetSpellTargetX(), GetSpellTargetY(), 50, nil)
-    ForGroup(g, function()
+    GroupEnumUnitsInRange(group, GetSpellTargetX(), GetSpellTargetY(), 50, nil)
+    ForGroup(group, function()
         print('unit found')
         if GetUnitTypeId(circle) == FourCC('n00A') then
             RemoveUnit(circle)
@@ -295,9 +328,9 @@ function OnUnitDrafted()
         end
     end)
     
-    DestroyGroup(g)
+    DestroyGroup(group)
 
-    SelectUnitForPlayerSingle(playerBuilders.real[playerIndex], GetOwningPlayer(playerBuilders.real[playerIndex]))
+    SelectUnitForPlayerSingle(playerBuilders.real[GetPlayerId(player)], player)
     
     --note: takes a second to update food cap, which we need to avoid drafting if maxed
     RunDelayed(function()
@@ -311,8 +344,8 @@ function OnSoulSiphonEffect()
     local targetY = GetSpellTargetY()
 	local AOE_RADIUS = 175
     local casterOwner = GetOwningPlayer(caster)
-    local g = CreateGroup()
-    GroupEnumUnitsInRange(g, x, y, AOE_RADIUS, nil)
+    local group = CreateGroup()
+    GroupEnumUnitsInRange(group, x, y, AOE_RADIUS, nil)
     
     ForGroup(g, function()
         local target = GetEnumUnit()
@@ -334,7 +367,7 @@ function OnSoulSiphonEffect()
         end
     end)
     
-    DestroyGroup(g)
+    DestroyGroup(group)
 end
 
 function OnHealingWaveEffect()
@@ -343,8 +376,8 @@ function OnHealingWaveEffect()
     local targetY = GetSpellTargetY()
 	local AOE_RADIUS = 350
     local casterOwner = GetOwningPlayer(caster)
-    local g = CreateGroup()
-    GroupEnumUnitsInRange(g, x, y, AOE_RADIUS, nil)
+    local group = CreateGroup()
+    GroupEnumUnitsInRange(group, x, y, AOE_RADIUS, nil)
     
     ForGroup(g, function()
         local target = GetEnumUnit()        
@@ -359,7 +392,7 @@ function OnHealingWaveEffect()
         end
     end)
     
-    DestroyGroup(g)
+    DestroyGroup(group)
 end
 
 function OnUnitDeath()
@@ -380,30 +413,32 @@ function OnUnitDeath()
 end
 
 function GrantWoodPassive()
-    local t = CreateTimer()
-    TimerStart(t, 5.0, true, function()
-        for i = 0, 11 do
-            local p = Player(i)
-            if GetPlayerSlotState(p) == PLAYER_SLOT_STATE_PLAYING then
-                AdjustPlayerStateBJ(1, p, PLAYER_STATE_RESOURCE_LUMBER)
+    local timer = CreateTimer()
+    TimerStart(timer, 5.0, true, function()
+        for playerIndex = 0, 11 do
+            local player = Player(playerIndex)
+            if GetPlayerSlotState(player) == PLAYER_SLOT_STATE_PLAYING then
+                AdjustPlayerStateBJ(1, player, PLAYER_STATE_RESOURCE_LUMBER)
             end
         end
     end)
 end
 
 function InitFoodCapTimer()
-    local foodTimes = {
+    local foodCapIncreaseMinutes = {
         0, 1, 2, 3, 5, 8, 12, 17, 23
     }
     
-    for i = 1, #foodTimes do
-        local t = CreateTimer()
-        TimerStart(t, foodTimes[i] * 60, false, function()
-            for j = 0, 11 do
-                local p = Player(j)
-                if GetPlayerSlotState(p) == PLAYER_SLOT_STATE_PLAYING then
-                    SetPlayerStateBJ(p, PLAYER_STATE_RESOURCE_FOOD_CAP, i)
-                    AddDraftAbilitiesToBuilder(j)
+    for foodCap = 1, #foodCapIncreaseMinutes do
+        local timer = CreateTimer()
+        TimerStart(timer, foodCapIncreaseMinutes[foodCap] * 60, false, function()
+            for playerIndex = 0, 11 do
+                local player = Player(playerIndex)
+                if GetPlayerSlotState(player) == PLAYER_SLOT_STATE_PLAYING then
+                    SetPlayerStateBJ(player, PLAYER_STATE_RESOURCE_FOOD_CAP, foodCap)
+                    if not UnitHasItems(playerBuilders.dummyUnitDraft[playerIndex]) then
+                        AddDraftAbilitiesToBuilder(playerIndex)
+                    end
                 end
             end
         end)
@@ -440,6 +475,7 @@ function Init()
     CreateWaveSpawnLabels()
     CreateSpawnTimer()
     InitFoodCapTimer()
+    GrantWoodPassive()
 
     local deathTrigger = CreateTrigger()
     TriggerRegisterAnyUnitEventBJ(deathTrigger, EVENT_PLAYER_UNIT_DEATH)

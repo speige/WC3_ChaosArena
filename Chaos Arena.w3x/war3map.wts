@@ -1531,12 +1531,6 @@ STRING 422
 Murloc
 }
 
-STRING 423
-// Units: h010 (Unit Draft), Name (Name)
-{
-Unit Draft
-}
-
 STRING 424
 // Abilities: A000 (Draft Unit), Name (Name)
 {
@@ -1564,5 +1558,11 @@ Select |cff00ff00circle|r first to see powers
 May provide: Items and Elemental abilities (|cffff0000Fire|r |cff00ff00Earth|r |cff0000ffWater|r)
 
 Other heroes will be discarded permanently. Choose wisely.
+}
+
+STRING 430
+// Units: h010 (Altar), Name (Name)
+{
+Altar
 }
 
