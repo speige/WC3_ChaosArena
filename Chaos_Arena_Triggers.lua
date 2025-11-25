@@ -375,6 +375,13 @@ function OnConstructFinish()
     end
 end
 
+function SetAbilityUIState(whichUnit, abilityId, disabled, hidden)
+    --NOTE: abilities have internal counter for disable & hidden counts in case they're called simultaneously from multiple timed sources, but remove/add resets counter
+    UnitRemoveAbility(whichUnit, abilityId)
+    UnitAddAbility(whichUnit, abilityId)
+    BlzUnitDisableAbility(whichUnit, abilityId, disabled, hidden)
+end
+
 function OnSpellEffect()
     local abilityId = GetSpellAbilityId()
     local unit = GetSpellAbilityUnit()
