@@ -500,6 +500,20 @@ function InitPlayers()
         	SetCameraField(CAMERA_FIELD_TARGET_DISTANCE, 3000, 0)
         end
     end
+
+    InitPlayerBases()
+    InitPlayerDecks()
+
+    --[[
+    for playerIndex=0,11 do
+        local player = Player(playerIndex)
+        local proxyPlayer = Player(playerIdMapping_realToProxy[playerIndex])
+        SetPlayerAlliance(player, proxyPlayer, ALLIANCE_SHARED_XP, true)
+        --SetPlayerAlliance(player, proxyPlayer, ALLIANCE_HELP_REQUEST, true)
+        local team = GetPlayerTeam(player)
+        SetPlayerTeam(proxyPlayer, team)
+    end
+    --]]
 end
 
 function Init()
@@ -508,8 +522,6 @@ function Init()
 	FogEnableOff()
 	FogMaskEnableOff()
 	InitPlayers()
-    InitPlayerBases()
-    InitPlayerDecks()
     CreateWaveSpawnLabels()
     CreateSpawnTimer()
     InitFoodCapTimer()
