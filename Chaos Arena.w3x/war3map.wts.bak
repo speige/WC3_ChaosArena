@@ -1555,14 +1555,12 @@ STRING 427
 Draft Unit Tooltip
 }
 
-STRING 429
+STRING 428
 // Abilities: A002 (Draft Unit Tooltip), Tip (Tooltip - Normal)
 {
 Pick hero from inventory
-Place on |cff00ff00green circle|r to summon
-Select |cff00ff00circle|r first to see powers
-May provide: Items and Elemental abilities (|cffff0000Fire|r |cff00ff00Earth|r |cff0000ffWater|r)
-
-Other heroes will be discarded permanently. Choose wisely.
+Place on green circle to summon
+Will gain attributes from circle (both items and elements)
+Elements unlock abilities (|cccFF0000Fire |ccc00FF00Earth |ccc0000FFWater)
 }
 

@@ -2,106 +2,82 @@ gg_trg_Melee_Initialization = nil
 function InitGlobals()
 end
 
-local GLOBAL_DECK_UNIT_SET = {}
-GLOBAL_DECK_UNIT_SET[FourCC('E000')] = true
-GLOBAL_DECK_UNIT_SET[FourCC('E001')] = true
-GLOBAL_DECK_UNIT_SET[FourCC('E002')] = true
-GLOBAL_DECK_UNIT_SET[FourCC('E004')] = true
-GLOBAL_DECK_UNIT_SET[FourCC('E003')] = true
-GLOBAL_DECK_UNIT_SET[FourCC('H001')] = true
-GLOBAL_DECK_UNIT_SET[FourCC('H002')] = true
-GLOBAL_DECK_UNIT_SET[FourCC('H003')] = true
-GLOBAL_DECK_UNIT_SET[FourCC('H004')] = true
-GLOBAL_DECK_UNIT_SET[FourCC('O000')] = true
-GLOBAL_DECK_UNIT_SET[FourCC('O001')] = true
-GLOBAL_DECK_UNIT_SET[FourCC('O002')] = true
-GLOBAL_DECK_UNIT_SET[FourCC('O004')] = true
-GLOBAL_DECK_UNIT_SET[FourCC('U000')] = true
-GLOBAL_DECK_UNIT_SET[FourCC('U001')] = true
-GLOBAL_DECK_UNIT_SET[FourCC('U002')] = true
-GLOBAL_DECK_UNIT_SET[FourCC('U004')] = true
-GLOBAL_DECK_UNIT_SET[FourCC('N000')] = true
-GLOBAL_DECK_UNIT_SET[FourCC('N008')] = true
-GLOBAL_DECK_UNIT_SET[FourCC('N002')] = true
-GLOBAL_DECK_UNIT_SET[FourCC('N003')] = true
-GLOBAL_DECK_UNIT_SET[FourCC('N001')] = true
-GLOBAL_DECK_UNIT_SET[FourCC('N005')] = true
-GLOBAL_DECK_UNIT_SET[FourCC('N007')] = true
-GLOBAL_DECK_UNIT_SET[FourCC('N004')] = true
-GLOBAL_DECK_UNIT_SET[FourCC('N006')] = true
-GLOBAL_DECK_UNIT_SET[FourCC('U005')] = true
-GLOBAL_DECK_UNIT_SET[FourCC('N009')] = true
-GLOBAL_DECK_UNIT_SET[FourCC('O003')] = true
-GLOBAL_DECK_UNIT_SET[FourCC('H009')] = true
+function UnitMetaData(name, unitTypeId, dummyBuildingUnitTypeId, draftItemTypeId, draftAbilityId)
+    return { name = name, unitTypeId = unitTypeId, dummyBuildingUnitTypeId = dummyBuildingUnitTypeId, draftItemTypeId = draftItemTypeId, draftAbilityId = draftAbilityId }
+end
 
-local GLOBAL_DECK_SPELLBOOK_SET = {}
-GLOBAL_DECK_SPELLBOOK_SET[FourCC('A00U')] = true
-GLOBAL_DECK_SPELLBOOK_SET[FourCC('A00I')] = true
-GLOBAL_DECK_SPELLBOOK_SET[FourCC('A00Q')] = true
-GLOBAL_DECK_SPELLBOOK_SET[FourCC('A007')] = true
-GLOBAL_DECK_SPELLBOOK_SET[FourCC('A00L')] = true
-GLOBAL_DECK_SPELLBOOK_SET[FourCC('A00A')] = true
-GLOBAL_DECK_SPELLBOOK_SET[FourCC('A009')] = true
-GLOBAL_DECK_SPELLBOOK_SET[FourCC('A00M')] = true
-GLOBAL_DECK_SPELLBOOK_SET[FourCC('A00H')] = true
-GLOBAL_DECK_SPELLBOOK_SET[FourCC('A00N')] = true
-GLOBAL_DECK_SPELLBOOK_SET[FourCC('A00E')] = true
-GLOBAL_DECK_SPELLBOOK_SET[FourCC('A003')] = true
-GLOBAL_DECK_SPELLBOOK_SET[FourCC('A00G')] = true
-GLOBAL_DECK_SPELLBOOK_SET[FourCC('A00B')] = true
-GLOBAL_DECK_SPELLBOOK_SET[FourCC('A00O')] = true
-GLOBAL_DECK_SPELLBOOK_SET[FourCC('A00R')] = true
-GLOBAL_DECK_SPELLBOOK_SET[FourCC('A00S')] = true
-GLOBAL_DECK_SPELLBOOK_SET[FourCC('A001')] = true
-GLOBAL_DECK_SPELLBOOK_SET[FourCC('A00F')] = true
-GLOBAL_DECK_SPELLBOOK_SET[FourCC('A008')] = true
-GLOBAL_DECK_SPELLBOOK_SET[FourCC('A00T')] = true
-GLOBAL_DECK_SPELLBOOK_SET[FourCC('A004')] = true
-GLOBAL_DECK_SPELLBOOK_SET[FourCC('A006')] = true
-GLOBAL_DECK_SPELLBOOK_SET[FourCC('A00P')] = true
-GLOBAL_DECK_SPELLBOOK_SET[FourCC('A002')] = true
-GLOBAL_DECK_SPELLBOOK_SET[FourCC('A00J')] = true
-GLOBAL_DECK_SPELLBOOK_SET[FourCC('A00D')] = true
-GLOBAL_DECK_SPELLBOOK_SET[FourCC('A00C')] = true
-GLOBAL_DECK_SPELLBOOK_SET[FourCC('A00K')] = true
-GLOBAL_DECK_SPELLBOOK_SET[FourCC('A005')] = true
+local draftableUnits = {
+    akama = UnitMetaData('akama', FourCC('N009'), FourCC('h00S'), FourCC('I001'), FourCC('A01O')),
+    alchemist = UnitMetaData('alchemist', FourCC('N000'), FourCC('h00O'), FourCC('I000'), FourCC('A01C')),
+    archimonde = UnitMetaData('archimonde', FourCC('U005'), FourCC('h00N'), FourCC('I002'), FourCC('A01K')),
+    archmange = UnitMetaData('archmange', FourCC('H002'), FourCC('h00C'), FourCC('I003'), FourCC('A011')),
+    beastmaster = UnitMetaData('beastmaster', FourCC('N001'), FourCC('h00T'), FourCC('I004'), FourCC('A01F')),
+    blademaster = UnitMetaData('blademaster', FourCC('O000'), FourCC('h00F'), FourCC('I005'), FourCC('A014')),
+    bloodMage = UnitMetaData('bloodMage', FourCC('H004'), FourCC('h00E'), FourCC('I006'), FourCC('A013')),
+    brewmaster = UnitMetaData('brewmaster', FourCC('N005'), FourCC('h00U'), FourCC('I007'), FourCC('A01G')),
+    cryptLord = UnitMetaData('cryptLord', FourCC('U003'), FourCC('h00M'), FourCC('I008'), FourCC('A01B')),
+    darkRanger = UnitMetaData('darkRanger', FourCC('N007'), FourCC('h00V'), FourCC('I009'), FourCC('A01H')),
+    deathKnight = UnitMetaData('deathKnight', FourCC('U000'), FourCC('h00J'), FourCC('I00A'), FourCC('A018')),
+    demonHunter = UnitMetaData('demonHunter', FourCC('E002'), FourCC('h007'), FourCC('I00B'), FourCC('A00X')),
+    dreadlord = UnitMetaData('dreadlord', FourCC('U002'), FourCC('h00L'), FourCC('I00C'), FourCC('A01A')),
+    farSeer = UnitMetaData('farSeer', FourCC('O001'), FourCC('h00G'), FourCC('I00D'), FourCC('A015')),
+    firelord = UnitMetaData('firelord', FourCC('N004'), FourCC('h00W'), FourCC('I00E'), FourCC('A01I')),
+    guldan = UnitMetaData('guldan', FourCC('O003'), FourCC('h00X'), FourCC('I00F'), FourCC('A01L')),
+    jaina = UnitMetaData('jaina', FourCC('H009'), FourCC('h00Y'), FourCC('I00G'), FourCC('A01M')),
+    keeperOfTheGrove = UnitMetaData('keeperOfTheGrove', FourCC('E000'), FourCC('h005'), FourCC('I00H'), FourCC('A00V')),
+    lich = UnitMetaData('lich', FourCC('U001'), FourCC('h00K'), FourCC('I00I'), FourCC('A019')),
+    mountainKing = UnitMetaData('mountainKing', FourCC('H003'), FourCC('h00D'), FourCC('I00J'), FourCC('A012')),
+    murloc = UnitMetaData('murloc', FourCC('N008'), FourCC('h00P'), FourCC('I00K'), FourCC('A01N')),
+    ogreMauler = UnitMetaData('ogreMauler', FourCC('E004'), FourCC('h008'), FourCC('I00L'), FourCC('A00Y')),
+    paladin = UnitMetaData('paladin', FourCC('H001'), FourCC('h00B'), FourCC('I00M'), FourCC('A010')),
+    pitLord = UnitMetaData('pitLord', FourCC('N006'), FourCC('h00Z'), FourCC('I00N'), FourCC('A01J')),
+    priestessOfTheMoon = UnitMetaData('priestessOfTheMoon', FourCC('E001'), FourCC('h006'), FourCC('I00O'), FourCC('A00W')),
+    seaWitch = UnitMetaData('seaWitch', FourCC('N002'), FourCC('h00Q'), FourCC('I00P'), FourCC('A01D')),
+    shadowHunter = UnitMetaData('shadowHunter', FourCC('O004'), FourCC('h00I'), FourCC('I00Q'), FourCC('A017')),
+    taurenChieftain = UnitMetaData('taurenChieftain', FourCC('O002'), FourCC('h00H'), FourCC('I00R'), FourCC('A016')),
+    tinker = UnitMetaData('tinker', FourCC('N003'), FourCC('h00R'), FourCC('I00S'), FourCC('A01E')),
+    warden = UnitMetaData('warden', FourCC('E003'), FourCC('h00A'), FourCC('I00T'), FourCC('A00Z'))
+}
 
-local GLOBAL_DECK_UNIT_BUILD_ABILITY_SET = {}
-GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A01O')] = true
-GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A01C')] = true
-GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A01K')] = true
-GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A011')] = true
-GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A01F')] = true
-GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A014')] = true
-GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A013')] = true
-GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A01G')] = true
-GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A01B')] = true
-GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A01H')] = true
-GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A018')] = true
-GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A00X')] = true
-GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A01A')] = true
-GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A015')] = true
-GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A01I')] = true
-GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A01L')] = true
-GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A01M')] = true
-GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A00V')] = true
-GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A019')] = true
-GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A012')] = true
-GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A01N')] = true
-GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A00Y')] = true
-GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A010')] = true
-GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A01J')] = true
-GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A00W')] = true
-GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A01D')] = true
-GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A017')] = true
-GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A016')] = true
-GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A01E')] = true
-GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[FourCC('A00Z')] = true
+local GLOBAL_DRAFT_SETS = {
+    unitTypeIds = {},
+    dumyBuildingUnitTypeIds = {},
+    draftItemTypeIds = {},
+    draftAbilityIds = {}
+}
+for _, value in pairs(draftableUnits) do
+    GLOBAL_DRAFT_SETS.unitTypeIds[value.unitTypeId] = true
+    GLOBAL_DRAFT_SETS.dumyBuildingUnitTypeIds[value.unitTypeId] = true
+    GLOBAL_DRAFT_SETS.draftItemTypeIds[value.draftItemTypeId] = true
+    GLOBAL_DRAFT_SETS.draftAbilityIds[value.draftAbilityId] = true
+end
 
+local BUILDER_UNIT_TYPE_ID = FourCC('h000')
+local BUILDER_DRAFT_UNIT_TYPE_ID = FourCC('h010')
+local DRAFT_UNIT_ABILITY_ID = FourCC('A000')
+local INVULNERABLE_ABILITY_ID = FourCC('Avul') --note: used to hide health bars (also requires ObjectEditor IsBuilding=true, but can still move)
+
+local playerIndexMapping_realToProxy = {}
+for i = 0, 11 do
+    playerIndexMapping_realToProxy[i + 12] = i
+end
+local playerIndexMapping_proxyToReal = {}
+for i = 12, 23 do
+    playerIndexMapping_proxyToReal[i - 12] = i
+end
+
+function CalcUnitRotationAngle(unitLocationX, unitLocationY, lookAtX, lookAtY)
+    local unitLocation = Location(unitLocationX, unitLocationY)
+    local lookAtLocation = Location(lookAtX, lookAtY)
+    local result = AngleBetweenPoints(unitLocation, lookAtLocation)
+    RemoveLocation(unitLocation)
+    RemoveLocation(lookAtLocation)
+    return result
+end
 
 function SpawnWaveForPlayer(playerIndex)
     local p = Player(playerIndex)
-    local proxyPlayer = Player(playerIndex + 12)
+    local proxyPlayer = Player(playerIndexMapping_realToProxy[playerIndex])
     local playerStart = { x = GetPlayerStartLocationX(p), y = GetPlayerStartLocationY(p) }
     local proxyStart = { x = GetPlayerStartLocationX(proxyPlayer), y = GetPlayerStartLocationY(proxyPlayer) }
     local offset = { x = proxyStart.x - playerStart.x, y = proxyStart.y - playerStart.y }
@@ -112,10 +88,11 @@ function SpawnWaveForPlayer(playerIndex)
     ForGroup(g, function()
         local u = GetEnumUnit()
         local unitType = GetUnitTypeId(u)
-        if GLOBAL_DECK_UNIT_SET[unitType] then
+        if GLOBAL_DRAFT_SETS.unitTypeIds[unitType] then
             local ux = GetUnitX(u)
             local uy = GetUnitY(u)            
-            local clone = CreateUnit(proxyPlayer, unitType, ux + offset.x, uy + offset.y, 0)            
+            local clone = CreateUnit(proxyPlayer, unitType, ux + offset.x, uy + offset.y, CalcUnitRotationAngle(ux, uy, 0, 0))
+            UnitRemoveAbility(clone, INVULNERABLE_ABILITY_ID)
 
             local heroLevel = GetHeroLevel(u)
             if heroLevel > 0 then
@@ -125,7 +102,6 @@ function SpawnWaveForPlayer(playerIndex)
             end
 
             local attackLoc = Location(0, 0)
-            SetUnitFacingToFaceLocTimed(clone, attackLoc, 0 )
             IssuePointOrderLoc(clone, "attack", attackLoc)
             RemoveLocation(attackLoc)
         end
@@ -157,7 +133,7 @@ end
 
 function CreateWaveSpawnLabels()
     for playerIndex = 0, 11 do
-        local proxyPlayer = Player(playerIndex + 12)
+        local proxyPlayer = Player(playerIndexMapping_realToProxy[playerIndex])
         local txt = CreateTextTag()  
         SetTextTagText(txt, "", 0.024)
         SetTextTagPos(txt, GetPlayerStartLocationX(proxyPlayer), GetPlayerStartLocationY(proxyPlayer), 0)
@@ -185,15 +161,10 @@ function CreateSpawnTimer()
     end)
 end
 
-local proxyToRealPlayerMapping = {}
-for i = 0, 11 do
-    proxyToRealPlayerMapping[i + 12] = i
-end
-
-local BUILDER_ID = FourCC('h000')
-local SPELLBOOK_ID = FourCC('A000')
-
-local playerBuilders = {}
+local playerBuilders = {
+    real = {},
+    dummyUnitDraft = {}
+}
 local playerDecks = {}
 
 function get_table_keys(t)
@@ -218,37 +189,34 @@ end
 
 function InitPlayerDecks()
     for i = 0, 11 do
-        playerDecks[i] = CloneAndShuffleArray(get_table_keys(GLOBAL_DECK_SPELLBOOK_SET))
+        playerDecks[i] = CloneAndShuffleArray(get_table_keys(GLOBAL_DRAFT_SETS.draftItemTypeIds))
     end
 end
 
-function FindPlayerBuilder(playerIndex)
+function InitPlayerBuilder(playerIndex)
     local p = Player(playerIndex)
-    local g = CreateGroup()
-    GroupEnumUnitsOfPlayer(g, p, nil)
-    
-    local builder = nil
-    ForGroup(g, function()
-        local u = GetEnumUnit()
-        if GetUnitTypeId(u) == BUILDER_ID then
-            builder = u
-            return
-        end
-    end)
-    
-    DestroyGroup(g)
-    return builder
+    local proxyPlayer = Player(playerIndexMapping_realToProxy[playerIndex])
+    local lookAtLocation = CalcUnitRotationAngle(GetPlayerStartLocationX(p), GetPlayerStartLocationY(p), GetPlayerStartLocationX(proxyPlayer), GetPlayerStartLocationY(proxyPlayer))
+    local builder = CreateUnit(p, BUILDER_UNIT_TYPE_ID, GetPlayerStartLocationX(p), GetPlayerStartLocationY(p), lookAtLocation)
+    UnitRemoveAbility(builder, FourCC('Aatk'))
+    UnitAddAbility(builder, INVULNERABLE_ABILITY_ID)
+
+    local dummyUnitDraft = CreateUnit(p, BUILDER_DRAFT_UNIT_TYPE_ID, GetPlayerStartLocationX(p), GetPlayerStartLocationY(p), lookAtLocation)
+    UnitRemoveAbility(builder, FourCC('Aatk'))
+    UnitAddAbility(builder, INVULNERABLE_ABILITY_ID)
+
+    playerBuilders.real[playerIndex] = builder
+    playerBuilders.dummyUnitDraft[playerIndex] = dummyUnitDraft
+
+    SelectUnitForPlayerSingle(builder, p)
+    SetCameraPositionLocForPlayer(p, GetUnitLoc(builder))
 end
 
 function InitPlayerBuilders()
     for i = 0, 11 do
         local p = Player(i)
         if GetPlayerSlotState(p) == PLAYER_SLOT_STATE_PLAYING then
-            local builder = FindPlayerBuilder(i)
-            playerBuilders[i] = builder
-            UnitRemoveAbility(builder, FourCC('Aatk'))
-            SelectUnitForPlayerSingle(builder, p)
-            SetCameraPositionLocForPlayer(p, GetUnitLoc(builder))
+            InitPlayerBuilder(i)
         end
     end
 end
@@ -266,30 +234,35 @@ function DrawChoicesFromDeck(playerIndex)
     return abilities
 end
 
-function AddDraftAbilitiesToBuilder(playerIndex)
+function AddDraftAbilitiesToBuilder(playerIndex)    
     if (GetPlayerState(Player(playerIndex), PLAYER_STATE_RESOURCE_FOOD_USED) ~= GetPlayerState(Player(playerIndex), PLAYER_STATE_RESOURCE_FOOD_CAP) - 1) then
         --note: any other food value means they have a pending draft already (or somehow went over cap)
         return
     end
 
-    local builder = playerBuilders[playerIndex]
-    if not builder then
+    local dummyDraftBuilder = playerBuilders.dummyUnitDraft[playerIndex]
+    if not dummyDraftBuilder then
         return
     end
     
-    local abilities = DrawChoicesFromDeck(playerIndex)
-    for i = 1, #abilities do
-        --note: hack to add abilities to existing spellbook. adding 2nd spellbooks with identical "Data Base Order ID" merges them but also show 2 icons. Disable 2nd to hide its icon
-        UnitAddAbility(builder, abilities[i])
-        BlzUnitDisableAbility(builder, abilities[i], false, true)
+    local items = DrawChoicesFromDeck(playerIndex)
+    for i = 1, #items do
+        UnitAddItem(dummyDraftBuilder, items[i])
     end
 end
 
 function OnSpellEffect()
     local abilityId = GetSpellAbilityId()
     
-    if GLOBAL_DECK_UNIT_BUILD_ABILITY_SET[abilityId] then
+    if GLOBAL_DRAFT_SETS.draftAbilityIds[abilityId] then
         OnUnitDrafted()
+        return
+    end
+
+    if abilityId == DRAFT_UNIT_ABILITY_ID then
+        local player = GetOwningPlayer(GetSpellAbilityUnit())
+        SelectUnitForPlayerSingle(playerBuilders.dummyUnitDraft[GetPlayerId(player)])
+        return
     end
 
     --todo: create abilities in object editor
@@ -301,20 +274,21 @@ function OnSpellEffect()
 end
 
 function OnUnitDrafted()
-    local builder = GetSpellAbilityUnit()
+    print('unit drafted')
+    local dummyDraftBuilder = GetSpellAbilityUnit()
 
-    for key, _ in pairs(GLOBAL_DECK_SPELLBOOK_SET) do
-        UnitRemoveAbility(builder, key)
+    for key, _ in pairs(GLOBAL_DRAFT_SETS.draftItemTypeIds) do
+        UnitRemoveItem(dummyDraftBuilder, key)
     end                
 
     local circle
     local g = CreateGroup()
-    print('unitdrafted: searching for circle')
-    print(GetSpellTargetX()) -- seems these are 0,0 ? [they weren't before]
+    print('unit drafted')
+    print(GetSpellTargetX())
     print(GetSpellTargetY())
-    GroupEnumUnitsInRange(g, GetSpellTargetX(), GetSpellTargetY(), 25, nil)
+    GroupEnumUnitsInRange(g, GetSpellTargetX(), GetSpellTargetY(), 50, nil)
     ForGroup(g, function()
-        circle = GetEnumUnit()
+        print('unit found')
         if GetUnitTypeId(circle) == FourCC('n00A') then
             RemoveUnit(circle)
             return
@@ -323,6 +297,8 @@ function OnUnitDrafted()
     
     DestroyGroup(g)
 
+    SelectUnitForPlayerSingle(playerBuilders.real[playerIndex], GetOwningPlayer(playerBuilders.real[playerIndex]))
+    
     --note: takes a second to update food cap, which we need to avoid drafting if maxed
     RunDelayed(function()
         AddDraftAbilitiesToBuilder(GetPlayerId(GetOwningPlayer(builder)))
@@ -394,8 +370,8 @@ function OnUnitDeath()
         local killerOwner = GetOwningPlayer(killer)
         local killerIndex = GetPlayerId(killerOwner)
         
-        if proxyToRealPlayerMapping[killerIndex] then
-            local actualPlayer = Player(proxyToRealPlayerMapping[killerIndex])
+        local actualPlayer = Player(playerIndexMapping_proxyToReal[killerIndex])
+        if actualPlayer then
             AdjustPlayerStateBJ(1, actualPlayer, PLAYER_STATE_RESOURCE_GOLD)
         else
             AdjustPlayerStateBJ(1, killerOwner, PLAYER_STATE_RESOURCE_GOLD)
@@ -494,7 +470,6 @@ u = BlzCreateUnitWithSkin(p, FourCC("n00A"), 128.0, 2176.0, 270.000, FourCC("n00
 u = BlzCreateUnitWithSkin(p, FourCC("n00A"), -128.0, 2048.0, 270.000, FourCC("n00A"))
 u = BlzCreateUnitWithSkin(p, FourCC("n00A"), 0.0, 2048.0, 270.000, FourCC("n00A"))
 u = BlzCreateUnitWithSkin(p, FourCC("n00A"), 128.0, 2048.0, 270.000, FourCC("n00A"))
-u = BlzCreateUnitWithSkin(p, FourCC("h000"), -345.4, 2632.1, 305.935, FourCC("h000"))
 end
 
 function CreateBuildingsForPlayer1()
@@ -513,7 +488,6 @@ u = BlzCreateUnitWithSkin(p, FourCC("n00A"), 1344.0, 1856.0, 270.000, FourCC("n0
 u = BlzCreateUnitWithSkin(p, FourCC("n00A"), 1088.0, 1728.0, 270.000, FourCC("n00A"))
 u = BlzCreateUnitWithSkin(p, FourCC("n00A"), 1216.0, 1728.0, 270.000, FourCC("n00A"))
 u = BlzCreateUnitWithSkin(p, FourCC("n00A"), 1344.0, 1728.0, 270.000, FourCC("n00A"))
-u = BlzCreateUnitWithSkin(p, FourCC("h000"), 870.6, 2376.1, 305.935, FourCC("h000"))
 end
 
 function CreateBuildingsForPlayer2()
@@ -939,19 +913,36 @@ SetStartLocPrioCount(10, 1)
 SetStartLocPrio(10, 0, 9, MAP_LOC_PRIO_HIGH)
 SetStartLocPrioCount(11, 1)
 SetStartLocPrio(11, 0, 0, MAP_LOC_PRIO_HIGH)
-SetStartLocPrioCount(13, 12)
+SetStartLocPrioCount(12, 8)
+SetStartLocPrio(12, 0, 1, MAP_LOC_PRIO_LOW)
+SetStartLocPrio(12, 1, 2, MAP_LOC_PRIO_LOW)
+SetStartLocPrio(12, 2, 3, MAP_LOC_PRIO_LOW)
+SetStartLocPrio(12, 3, 4, MAP_LOC_PRIO_LOW)
+SetStartLocPrio(12, 4, 11, MAP_LOC_PRIO_LOW)
+SetStartLocPrio(12, 5, 13, MAP_LOC_PRIO_LOW)
+SetStartLocPrio(12, 6, 14, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrioCount(12, 8)
+SetEnemyStartLocPrio(12, 0, 1, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(12, 1, 2, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(12, 2, 3, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(12, 3, 4, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(12, 4, 11, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(12, 5, 13, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(12, 6, 14, MAP_LOC_PRIO_LOW)
+SetStartLocPrioCount(13, 13)
 SetStartLocPrio(13, 0, 1, MAP_LOC_PRIO_HIGH)
 SetStartLocPrio(13, 1, 3, MAP_LOC_PRIO_HIGH)
 SetStartLocPrio(13, 2, 5, MAP_LOC_PRIO_HIGH)
 SetStartLocPrio(13, 3, 7, MAP_LOC_PRIO_HIGH)
 SetStartLocPrio(13, 4, 9, MAP_LOC_PRIO_HIGH)
 SetStartLocPrio(13, 5, 11, MAP_LOC_PRIO_HIGH)
-SetStartLocPrio(13, 6, 15, MAP_LOC_PRIO_HIGH)
-SetStartLocPrio(13, 7, 17, MAP_LOC_PRIO_HIGH)
-SetStartLocPrio(13, 8, 19, MAP_LOC_PRIO_HIGH)
-SetStartLocPrio(13, 9, 21, MAP_LOC_PRIO_HIGH)
-SetStartLocPrio(13, 10, 23, MAP_LOC_PRIO_HIGH)
-SetEnemyStartLocPrioCount(13, 12)
+SetStartLocPrio(13, 6, 12, MAP_LOC_PRIO_LOW)
+SetStartLocPrio(13, 7, 15, MAP_LOC_PRIO_HIGH)
+SetStartLocPrio(13, 8, 17, MAP_LOC_PRIO_HIGH)
+SetStartLocPrio(13, 9, 19, MAP_LOC_PRIO_HIGH)
+SetStartLocPrio(13, 10, 21, MAP_LOC_PRIO_HIGH)
+SetStartLocPrio(13, 11, 23, MAP_LOC_PRIO_HIGH)
+SetEnemyStartLocPrioCount(13, 13)
 SetEnemyStartLocPrio(13, 0, 0, MAP_LOC_PRIO_LOW)
 SetEnemyStartLocPrio(13, 1, 1, MAP_LOC_PRIO_LOW)
 SetEnemyStartLocPrio(13, 2, 2, MAP_LOC_PRIO_LOW)
@@ -962,14 +953,15 @@ SetEnemyStartLocPrio(13, 6, 6, MAP_LOC_PRIO_LOW)
 SetEnemyStartLocPrio(13, 7, 7, MAP_LOC_PRIO_LOW)
 SetEnemyStartLocPrio(13, 8, 8, MAP_LOC_PRIO_HIGH)
 SetEnemyStartLocPrio(13, 9, 11, MAP_LOC_PRIO_HIGH)
-SetEnemyStartLocPrio(13, 10, 20, MAP_LOC_PRIO_HIGH)
-SetEnemyStartLocPrio(13, 11, 23, MAP_LOC_PRIO_HIGH)
+SetEnemyStartLocPrio(13, 10, 12, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(13, 11, 20, MAP_LOC_PRIO_HIGH)
+SetEnemyStartLocPrio(13, 12, 23, MAP_LOC_PRIO_HIGH)
 SetEnemyStartLocPrioCount(14, 2)
 SetEnemyStartLocPrio(14, 0, 6, MAP_LOC_PRIO_HIGH)
 SetEnemyStartLocPrio(14, 1, 11, MAP_LOC_PRIO_HIGH)
 SetStartLocPrioCount(15, 1)
 SetStartLocPrio(15, 0, 0, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrioCount(15, 16)
+SetEnemyStartLocPrioCount(15, 15)
 SetEnemyStartLocPrio(15, 0, 0, MAP_LOC_PRIO_HIGH)
 SetEnemyStartLocPrio(15, 1, 1, MAP_LOC_PRIO_HIGH)
 SetEnemyStartLocPrio(15, 2, 2, MAP_LOC_PRIO_HIGH)
@@ -980,12 +972,11 @@ SetEnemyStartLocPrio(15, 6, 7, MAP_LOC_PRIO_HIGH)
 SetEnemyStartLocPrio(15, 7, 8, MAP_LOC_PRIO_HIGH)
 SetEnemyStartLocPrio(15, 8, 10, MAP_LOC_PRIO_LOW)
 SetEnemyStartLocPrio(15, 9, 11, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(15, 10, 12, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(15, 11, 14, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(15, 12, 18, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(15, 13, 20, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(15, 14, 22, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(15, 15, 23, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(15, 10, 14, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(15, 11, 18, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(15, 12, 20, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(15, 13, 22, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(15, 14, 23, MAP_LOC_PRIO_LOW)
 SetStartLocPrioCount(16, 1)
 SetStartLocPrio(16, 0, 23, MAP_LOC_PRIO_LOW)
 SetEnemyStartLocPrioCount(16, 2)
@@ -1001,17 +992,16 @@ SetStartLocPrio(17, 5, 7, MAP_LOC_PRIO_LOW)
 SetStartLocPrio(17, 6, 8, MAP_LOC_PRIO_LOW)
 SetEnemyStartLocPrioCount(17, 1)
 SetEnemyStartLocPrio(17, 0, 7, MAP_LOC_PRIO_LOW)
-SetStartLocPrioCount(18, 10)
+SetStartLocPrioCount(18, 9)
 SetStartLocPrio(18, 0, 6, MAP_LOC_PRIO_HIGH)
 SetStartLocPrio(18, 1, 9, MAP_LOC_PRIO_HIGH)
 SetStartLocPrio(18, 2, 10, MAP_LOC_PRIO_HIGH)
 SetStartLocPrio(18, 3, 11, MAP_LOC_PRIO_HIGH)
-SetStartLocPrio(18, 4, 12, MAP_LOC_PRIO_HIGH)
-SetStartLocPrio(18, 5, 14, MAP_LOC_PRIO_HIGH)
-SetStartLocPrio(18, 6, 20, MAP_LOC_PRIO_HIGH)
-SetStartLocPrio(18, 7, 22, MAP_LOC_PRIO_HIGH)
-SetStartLocPrio(18, 8, 23, MAP_LOC_PRIO_HIGH)
-SetEnemyStartLocPrioCount(18, 16)
+SetStartLocPrio(18, 4, 14, MAP_LOC_PRIO_HIGH)
+SetStartLocPrio(18, 5, 20, MAP_LOC_PRIO_HIGH)
+SetStartLocPrio(18, 6, 22, MAP_LOC_PRIO_HIGH)
+SetStartLocPrio(18, 7, 23, MAP_LOC_PRIO_HIGH)
+SetEnemyStartLocPrioCount(18, 15)
 SetEnemyStartLocPrio(18, 0, 0, MAP_LOC_PRIO_LOW)
 SetEnemyStartLocPrio(18, 1, 1, MAP_LOC_PRIO_LOW)
 SetEnemyStartLocPrio(18, 2, 2, MAP_LOC_PRIO_LOW)
@@ -1021,12 +1011,11 @@ SetEnemyStartLocPrio(18, 5, 6, MAP_LOC_PRIO_LOW)
 SetEnemyStartLocPrio(18, 6, 7, MAP_LOC_PRIO_LOW)
 SetEnemyStartLocPrio(18, 7, 8, MAP_LOC_PRIO_LOW)
 SetEnemyStartLocPrio(18, 8, 10, MAP_LOC_PRIO_HIGH)
-SetEnemyStartLocPrio(18, 9, 12, MAP_LOC_PRIO_HIGH)
-SetEnemyStartLocPrio(18, 10, 13, MAP_LOC_PRIO_HIGH)
-SetEnemyStartLocPrio(18, 11, 14, MAP_LOC_PRIO_HIGH)
-SetEnemyStartLocPrio(18, 12, 20, MAP_LOC_PRIO_HIGH)
-SetEnemyStartLocPrio(18, 13, 21, MAP_LOC_PRIO_HIGH)
-SetEnemyStartLocPrio(18, 14, 22, MAP_LOC_PRIO_HIGH)
+SetEnemyStartLocPrio(18, 9, 13, MAP_LOC_PRIO_HIGH)
+SetEnemyStartLocPrio(18, 10, 14, MAP_LOC_PRIO_HIGH)
+SetEnemyStartLocPrio(18, 11, 20, MAP_LOC_PRIO_HIGH)
+SetEnemyStartLocPrio(18, 12, 21, MAP_LOC_PRIO_HIGH)
+SetEnemyStartLocPrio(18, 13, 22, MAP_LOC_PRIO_HIGH)
 SetStartLocPrioCount(20, 10)
 SetStartLocPrio(20, 0, 5, MAP_LOC_PRIO_HIGH)
 SetStartLocPrio(20, 1, 7, MAP_LOC_PRIO_HIGH)
@@ -1038,7 +1027,7 @@ SetStartLocPrio(20, 6, 18, MAP_LOC_PRIO_HIGH)
 SetStartLocPrio(20, 7, 19, MAP_LOC_PRIO_HIGH)
 SetStartLocPrio(20, 8, 21, MAP_LOC_PRIO_HIGH)
 SetStartLocPrio(20, 9, 23, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrioCount(20, 18)
+SetEnemyStartLocPrioCount(20, 17)
 SetEnemyStartLocPrio(20, 0, 0, MAP_LOC_PRIO_LOW)
 SetEnemyStartLocPrio(20, 1, 1, MAP_LOC_PRIO_LOW)
 SetEnemyStartLocPrio(20, 2, 2, MAP_LOC_PRIO_LOW)
@@ -1050,13 +1039,12 @@ SetEnemyStartLocPrio(20, 7, 8, MAP_LOC_PRIO_LOW)
 SetEnemyStartLocPrio(20, 8, 9, MAP_LOC_PRIO_HIGH)
 SetEnemyStartLocPrio(20, 9, 10, MAP_LOC_PRIO_HIGH)
 SetEnemyStartLocPrio(20, 10, 11, MAP_LOC_PRIO_HIGH)
-SetEnemyStartLocPrio(20, 11, 12, MAP_LOC_PRIO_HIGH)
-SetEnemyStartLocPrio(20, 12, 14, MAP_LOC_PRIO_HIGH)
-SetEnemyStartLocPrio(20, 13, 16, MAP_LOC_PRIO_HIGH)
-SetEnemyStartLocPrio(20, 14, 18, MAP_LOC_PRIO_HIGH)
-SetEnemyStartLocPrio(20, 15, 21, MAP_LOC_PRIO_HIGH)
-SetEnemyStartLocPrio(20, 16, 23, MAP_LOC_PRIO_HIGH)
-SetStartLocPrioCount(21, 18)
+SetEnemyStartLocPrio(20, 11, 14, MAP_LOC_PRIO_HIGH)
+SetEnemyStartLocPrio(20, 12, 16, MAP_LOC_PRIO_HIGH)
+SetEnemyStartLocPrio(20, 13, 18, MAP_LOC_PRIO_HIGH)
+SetEnemyStartLocPrio(20, 14, 21, MAP_LOC_PRIO_HIGH)
+SetEnemyStartLocPrio(20, 15, 23, MAP_LOC_PRIO_HIGH)
+SetStartLocPrioCount(21, 17)
 SetStartLocPrio(21, 0, 0, MAP_LOC_PRIO_HIGH)
 SetStartLocPrio(21, 1, 2, MAP_LOC_PRIO_HIGH)
 SetStartLocPrio(21, 2, 3, MAP_LOC_PRIO_HIGH)
@@ -1064,17 +1052,16 @@ SetStartLocPrio(21, 3, 4, MAP_LOC_PRIO_HIGH)
 SetStartLocPrio(21, 4, 5, MAP_LOC_PRIO_HIGH)
 SetStartLocPrio(21, 5, 6, MAP_LOC_PRIO_HIGH)
 SetStartLocPrio(21, 6, 9, MAP_LOC_PRIO_HIGH)
-SetStartLocPrio(21, 7, 12, MAP_LOC_PRIO_LOW)
-SetStartLocPrio(21, 8, 13, MAP_LOC_PRIO_HIGH)
-SetStartLocPrio(21, 9, 14, MAP_LOC_PRIO_HIGH)
-SetStartLocPrio(21, 10, 16, MAP_LOC_PRIO_HIGH)
-SetStartLocPrio(21, 11, 17, MAP_LOC_PRIO_HIGH)
-SetStartLocPrio(21, 12, 18, MAP_LOC_PRIO_LOW)
-SetStartLocPrio(21, 13, 19, MAP_LOC_PRIO_HIGH)
-SetStartLocPrio(21, 14, 20, MAP_LOC_PRIO_LOW)
-SetStartLocPrio(21, 15, 22, MAP_LOC_PRIO_LOW)
-SetStartLocPrio(21, 16, 23, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrioCount(21, 24)
+SetStartLocPrio(21, 7, 13, MAP_LOC_PRIO_HIGH)
+SetStartLocPrio(21, 8, 14, MAP_LOC_PRIO_HIGH)
+SetStartLocPrio(21, 9, 16, MAP_LOC_PRIO_HIGH)
+SetStartLocPrio(21, 10, 17, MAP_LOC_PRIO_HIGH)
+SetStartLocPrio(21, 11, 18, MAP_LOC_PRIO_LOW)
+SetStartLocPrio(21, 12, 19, MAP_LOC_PRIO_HIGH)
+SetStartLocPrio(21, 13, 20, MAP_LOC_PRIO_LOW)
+SetStartLocPrio(21, 14, 22, MAP_LOC_PRIO_LOW)
+SetStartLocPrio(21, 15, 23, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrioCount(21, 23)
 SetEnemyStartLocPrio(21, 0, 0, MAP_LOC_PRIO_LOW)
 SetEnemyStartLocPrio(21, 1, 1, MAP_LOC_PRIO_LOW)
 SetEnemyStartLocPrio(21, 2, 2, MAP_LOC_PRIO_LOW)
@@ -1087,17 +1074,16 @@ SetEnemyStartLocPrio(21, 8, 8, MAP_LOC_PRIO_LOW)
 SetEnemyStartLocPrio(21, 9, 9, MAP_LOC_PRIO_LOW)
 SetEnemyStartLocPrio(21, 10, 10, MAP_LOC_PRIO_LOW)
 SetEnemyStartLocPrio(21, 11, 11, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(21, 12, 12, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(21, 13, 13, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(21, 14, 14, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(21, 15, 15, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(21, 16, 16, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(21, 17, 17, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(21, 18, 18, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(21, 19, 19, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(21, 20, 20, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(21, 21, 22, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(21, 22, 23, MAP_LOC_PRIO_HIGH)
+SetEnemyStartLocPrio(21, 12, 13, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(21, 13, 14, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(21, 14, 15, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(21, 15, 16, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(21, 16, 17, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(21, 17, 18, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(21, 18, 19, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(21, 19, 20, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(21, 20, 22, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(21, 21, 23, MAP_LOC_PRIO_HIGH)
 SetStartLocPrioCount(22, 11)
 SetStartLocPrio(22, 0, 6, MAP_LOC_PRIO_LOW)
 SetStartLocPrio(22, 1, 8, MAP_LOC_PRIO_HIGH)
@@ -1120,7 +1106,7 @@ SetEnemyStartLocPrio(22, 6, 8, MAP_LOC_PRIO_LOW)
 SetEnemyStartLocPrio(22, 7, 9, MAP_LOC_PRIO_LOW)
 SetEnemyStartLocPrio(22, 8, 10, MAP_LOC_PRIO_LOW)
 SetEnemyStartLocPrio(22, 9, 11, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrio(22, 10, 12, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrio(22, 10, 12, MAP_LOC_PRIO_HIGH)
 SetEnemyStartLocPrio(22, 11, 13, MAP_LOC_PRIO_LOW)
 SetEnemyStartLocPrio(22, 12, 14, MAP_LOC_PRIO_LOW)
 SetStartLocPrioCount(23, 17)
