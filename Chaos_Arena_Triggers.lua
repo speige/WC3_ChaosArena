@@ -60,6 +60,30 @@ local ORDER_IDs = {
     stop = 851972
 }
 
+local GLOBAL_ITEM_SET = {}
+table.insert(GLOBAL_ITEM_SET, FourCC('bgst'))
+table.insert(GLOBAL_ITEM_SET, FourCC('belv'))
+table.insert(GLOBAL_ITEM_SET, FourCC('cnob'))
+table.insert(GLOBAL_ITEM_SET, FourCC('rat6'))
+table.insert(GLOBAL_ITEM_SET, FourCC('gcel'))
+table.insert(GLOBAL_ITEM_SET, FourCC('rhth'))
+table.insert(GLOBAL_ITEM_SET, FourCC('pmna'))
+table.insert(GLOBAL_ITEM_SET, FourCC('prvt'))
+table.insert(GLOBAL_ITEM_SET, FourCC('rde4'))
+table.insert(GLOBAL_ITEM_SET, FourCC('ciri'))
+--table.insert(GLOBAL_ITEM_SET, FourCC('texp')) -- need to create custom item that's not consumeable but passively adds XP [also, circle needs to be converted to hero or game crashes]
+
+local GLOBAL_ELEMENT_NAMES = {
+    fire = '|cffff0000Fire|cffffffff',
+    earth = '|cff00ff00Earth|cffffffff',
+    water = '|cff0000ffWater|cffffffff'
+}
+
+local GLOBAL_TILE_SETUP = {
+    itemCounts = {},
+    elementCounts = {}
+}
+
 local playerIdMapping_realToProxy = {}
 for playerId = 0, 11 do
     playerIdMapping_realToProxy[playerId] = playerId + 12
@@ -67,6 +91,25 @@ end
 local playerIdMapping_proxyToReal = {}
 for playerId = 12, 23 do
     playerIdMapping_proxyToReal[playerId] = playerId - 12
+end
+
+function WeightedRandom(weights)
+    local total = 0
+    for _, weight in ipairs(weights) do
+        total = total + weight
+    end
+    
+    local rand = math.random() * total
+    local cumulative = 0
+    
+    for i, weight in ipairs(weights) do
+        cumulative = cumulative + weight
+        if rand <= cumulative then
+            return i
+        end
+    end
+    
+    return #weights
 end
 
 function CalcUnitRotationAngle(unitLocationX, unitLocationY, lookAtX, lookAtY)
@@ -115,18 +158,26 @@ function SpawnWaveForPlayer(playerId)
         if GLOBAL_DRAFT_SETS.unitTypeIds[unitType] then
             local x = GetUnitX(unit)
             local y = GetUnitY(unit)            
-            local clone = CreateUnit(proxyPlayer, unitType, x + offset.x, y + offset.y, CalcUnitRotationAngle(x, y, 0, 0))
-            UnitRemoveAbility(clone, INVULNERABLE_ABILITY_ID)
+            local clonedUnit = CreateUnit(proxyPlayer, unitType, x + offset.x, y + offset.y, CalcUnitRotationAngle(x, y, 0, 0))
+            UnitRemoveAbility(clonedUnit, INVULNERABLE_ABILITY_ID)
 
             local heroLevel = GetHeroLevel(unit)
             if heroLevel > 0 then
                 for i = 1, heroLevel - 1 do
-                    SetHeroLevel(clone, heroLevel, false)
+                    SetHeroLevel(clonedUnit, heroLevel, false)
+                end
+            end
+
+            for itemSlot = 1, 6 do
+                local item = UnitItemInSlot(unit, itemSlot)
+                if (item) then
+                    local clonedItem = UnitAddItemById(clonedUnit, itemType)
+                    SetItemDroppable(clonedItem, false)
                 end
             end
 
             local attackLoc = Location(0, 0)
-            IssuePointOrderLoc(clone, "attack", attackLoc)
+            IssuePointOrderLoc(clonedUnit, 'attack', attackLoc)
             RemoveLocation(attackLoc)
         end
     end)
@@ -160,7 +211,7 @@ function CreateWaveSpawnLabels()
         local offset = GetSpawnOffset(playerId)
         local player = Player(playerId)
         local text = CreateTextTag()  
-        SetTextTagText(text, "", 0.024)
+        SetTextTagText(text, '', 0.024)
         SetTextTagPos(text, GetPlayerStartLocationX(player) + offset.x * 2, GetPlayerStartLocationY(player) + offset.y * 2, 0)
         SetTextTagPermanent(text, true)
         floatingTexts[playerId] = text
@@ -212,6 +263,39 @@ function CloneAndShuffleArray(arr)
     return shuffled
 end
 
+local playerTileCoords = {}
+
+function UnlockPlayerTiles(playerId, count)
+    local player = Player(playerId)
+    local offset = GetSpawnOffset(playerId)
+    local startLocation = { x = GetPlayerStartLocationX(player), y = GetPlayerStartLocationY(player) }
+    local lookAtAngle = CalcUnitRotationAngle(startLocation.x, startLocation.y, startLocation.x + offset.x, startLocation.y + offset.y)
+
+    for tile = 1, count do
+        local tileIndex = 9 - #playerTileCoords[playerId] + 1
+        local pos = table.remove(playerTileCoords[playerId], 1)
+        local circle = CreateUnit(player, CIRCLE_OF_POWER_UNIT_TYPE_ID, pos.x, pos.y, lookAtAngle)
+        SetUnitVertexColor(circle, 255, 50, 255, 255)
+
+        local itemCount = GLOBAL_TILE_SETUP.itemCounts[tileIndex]
+        local elementCount = GLOBAL_TILE_SETUP.elementCounts[tileIndex]
+        for itemIndex = 1, itemCount do
+            local itemType = GLOBAL_ITEM_SET[math.random(1, #GLOBAL_ITEM_SET)]
+            local item = UnitAddItemById(circle, itemType)
+            SetItemDroppable(item, false)
+        end
+
+        local elements = get_table_keys(GLOBAL_ELEMENT_NAMES)
+        local shuffledElements = CloneAndShuffleArray(elements)
+        local elemNames = {}
+        for element = 1, elementCount do
+            table.insert(elemNames, GLOBAL_ELEMENT_NAMES[table.remove(shuffledElements, 1)])
+        end
+        local name = table.concat(elemNames, ' ')
+        BlzSetUnitName(circle, name)
+    end
+end
+
 function InitPlayerDecks()
     for playerId = 0, 11 do
         playerDecks[playerId] = CloneAndShuffleArray(get_table_keys(GLOBAL_DRAFT_SETS.draftItemTypeIds))
@@ -223,25 +307,20 @@ function InitPlayerBase(playerId)
     local offset = GetSpawnOffset(playerId)
     local startLocation = { x = GetPlayerStartLocationX(player), y = GetPlayerStartLocationY(player) }
 
-    local lookAtLocation = CalcUnitRotationAngle(startLocation.x, startLocation.y, startLocation.x + offset.x, startLocation.y + offset.y)
-    local builder = CreateUnit(player, BUILDER_UNIT_TYPE_ID, startLocation.x, startLocation.y, lookAtLocation)
+    local lookAtAngle = CalcUnitRotationAngle(startLocation.x, startLocation.y, startLocation.x + offset.x, startLocation.y + offset.y)
+    local builder = CreateUnit(player, BUILDER_UNIT_TYPE_ID, startLocation.x, startLocation.y, lookAtAngle)
     UnitRemoveAbility(builder, FourCC('Aatk'))
     UnitAddAbility(builder, INVULNERABLE_ABILITY_ID)
 
     local offset = GetSpawnOffset(playerId)
-    local altar = CreateUnit(player, ALTAR_UNIT_TYPE_ID, startLocation.x - offset.x / 2, startLocation.y - offset.y / 2, lookAtLocation)
-    UnitRemoveAbility(builder, FourCC('Aatk'))
-    UnitAddAbility(builder, INVULNERABLE_ABILITY_ID)
+    local altar = CreateUnit(player, ALTAR_UNIT_TYPE_ID, startLocation.x - offset.x / 2, startLocation.y - offset.y / 2, lookAtAngle)
+    UnitRemoveAbility(altar, FourCC('Aatk'))
+    UnitAddAbility(altar, INVULNERABLE_ABILITY_ID)
 
     playerBuilders.primary[playerId] = builder
     playerBuilders.altar[playerId] = altar
 
-    for x = -1,1 do
-        for y = -1,1 do
-            local circle = CreateUnit(player, CIRCLE_OF_POWER_UNIT_TYPE_ID, startLocation.x + offset.x + (x * 125), startLocation.y + offset.y + (y * 125), lookAtLocation)
-    		SetUnitVertexColor(circle, 255, 50, 255, 255)
-        end    
-    end
+    UnlockPlayerTiles(playerId, 3)
 
     SelectUnitForPlayerSingle(builder, player)
     SetCameraPositionLocForPlayer(player, GetUnitLoc(builder))
@@ -283,7 +362,7 @@ function AddDraftItemsToAltar(playerId)
     for i = 1, #items do
         UnitAddItemById(altar, items[i])
     end
-    --SetUnitAnimation(altar, "levelup")
+    --SetUnitAnimation(altar, 'levelup')
     --PlaySound('Sounds/Internal/Abilities/Spells/Other/Levelup')
     --SelectUnitForPlayerSingle(altar, Player(playerId))
 end
@@ -393,7 +472,7 @@ function OnSoulSiphonEffect()
     local group = CreateGroup()
     GroupEnumUnitsInRange(group, x, y, AOE_RADIUS, nil)
     
-    ForGroup(g, function()
+    ForGroup(group, function()
         local target = GetEnumUnit()
         if not IsUnitAlly(target, casterOwner) and GetUnitState(target, UNIT_STATE_LIFE) > 0 then
             local maxHP = GetUnitState(target, UNIT_STATE_MAX_LIFE)
@@ -425,7 +504,7 @@ function OnHealingWaveEffect()
     local group = CreateGroup()
     GroupEnumUnitsInRange(group, x, y, AOE_RADIUS, nil)
     
-    ForGroup(g, function()
+    ForGroup(group, function()
         local target = GetEnumUnit()        
         if IsUnitOwnedByPlayer(target, casterOwner) and GetUnitState(target, UNIT_STATE_LIFE) > 0 then
             local maxHP = GetUnitState(target, UNIT_STATE_MAX_LIFE)
@@ -482,12 +561,57 @@ function InitFoodCapTimer()
                 local player = Player(playerId)
                 if GetPlayerSlotState(player) == PLAYER_SLOT_STATE_PLAYING then
                     SetPlayerStateBJ(player, PLAYER_STATE_RESOURCE_FOOD_CAP, foodCap)
+                    if foodCap % 3 == 0 and foodCap < 9 then
+                        UnlockPlayerTiles(playerId, 3)
+                    end
                     if not UnitHasItems(playerBuilders.altar[playerId]) then
                         AddDraftItemsToAltar(playerId)
                     end
                 end
             end
         end)
+    end
+end
+
+function InitPlayerAlliances()
+    for playerIndex=0,11 do
+        local player = Player(playerIndex)
+        local proxyPlayer = Player(playerIdMapping_realToProxy[playerIndex])
+        SetPlayerAlliance(player, proxyPlayer, ALLIANCE_PASSIVE, true)
+        SetPlayerAlliance(proxyPlayer, player, ALLIANCE_PASSIVE, true)
+        local team = GetPlayerTeam(player)
+        SetPlayerTeam(proxyPlayer, team)
+
+        for otherPlayerIndex=0,11 do
+            if (playerIndex ~= otherPlayerIndex) then
+                local otherProxyPlayer = Player(playerIdMapping_realToProxy[otherPlayerIndex])
+                SetPlayerAlliance(otherProxyPlayer, proxyPlayer, ALLIANCE_PASSIVE, true)
+                SetPlayerAlliance(proxyPlayer, otherProxyPlayer, ALLIANCE_PASSIVE, true)
+            end
+        end
+    end
+end
+
+function InitPlayerTiles()
+    for i = 1, 9 do
+        table.insert(GLOBAL_TILE_SETUP.itemCounts, WeightedRandom({25, 25, 20, 15, 10, 5}))
+        table.insert(GLOBAL_TILE_SETUP.elementCounts, WeightedRandom({50, 40, 10}))
+    end
+
+    for playerId = 0, 11 do
+        local player = Player(playerId)
+        if GetPlayerSlotState(player) == PLAYER_SLOT_STATE_PLAYING then
+            local tileCoords = {}
+            local offset = GetSpawnOffset(playerId)
+            local baseX = GetPlayerStartLocationX(player) + offset.x
+            local baseY = GetPlayerStartLocationY(player) + offset.y
+            for x = -1, 1 do
+                for y = -1, 1 do
+                    table.insert(tileCoords, {x = baseX + (x * 125), y = baseY + (y * 125)})
+                end
+            end
+            playerTileCoords[playerId] = CloneAndShuffleArray(tileCoords)
+        end
     end
 end
 
@@ -501,19 +625,10 @@ function InitPlayers()
         end
     end
 
+    InitPlayerTiles()
     InitPlayerBases()
     InitPlayerDecks()
-
-    --[[
-    for playerIndex=0,11 do
-        local player = Player(playerIndex)
-        local proxyPlayer = Player(playerIdMapping_realToProxy[playerIndex])
-        SetPlayerAlliance(player, proxyPlayer, ALLIANCE_SHARED_XP, true)
-        --SetPlayerAlliance(player, proxyPlayer, ALLIANCE_HELP_REQUEST, true)
-        local team = GetPlayerTeam(player)
-        SetPlayerTeam(proxyPlayer, team)
-    end
-    --]]
+    InitPlayerAlliances()
 end
 
 function Init()
@@ -541,6 +656,6 @@ function Init()
 end
 
 --[[
-
-
+    xpcall(function()
+    end, function(error) print(error) end)
 --]]
