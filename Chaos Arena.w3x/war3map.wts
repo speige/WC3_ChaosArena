@@ -343,12 +343,6 @@ STRING 142
 Revive Archimonde
 }
 
-STRING 147
-// Units: n00A (Circle of Power), Description (Description)
-{
-Transfers its power to the drafted unit
-}
-
 STRING 251
 // Items: I001 (Akama), Name (Name)
 {
@@ -1298,7 +1292,7 @@ Draft Unit
 }
 
 STRING 425
-// Abilities: A000 (Draft Unit), Tip (Tooltip - Normal)
+// Abilities: A001 (Cancel), Tip (Tooltip - Normal)
 {
 Pick unit to summon on green circle
 }
@@ -1307,17 +1301,6 @@ STRING 427
 // Abilities: A002 (Draft Unit Tooltip), Name (Name)
 {
 Draft Unit Tooltip
-}
-
-STRING 429
-// Abilities: A002 (Draft Unit Tooltip), Tip (Tooltip - Normal)
-{
-Pick hero from inventory
-Place on |cff00ff00green circle|r to summon
-Select |cff00ff00circle|r first to see powers
-May provide: Items and Elemental abilities (|cffff0000Fire|r |cff00ff00Earth|r |cff0000ffWater|r)
-
-Other heroes will be discarded permanently. Choose wisely.
 }
 
 STRING 430
@@ -1330,12 +1313,6 @@ STRING 431
 // Abilities: A001 (Cancel), Name (Name)
 {
 Cancel
-}
-
-STRING 432
-// Abilities: A001 (Cancel), Tip (Tooltip - Normal)
-{
-Pick unit to summon on green circle
 }
 
 STRING 433
@@ -1642,5 +1619,98 @@ STRING 483
 // Abilities: A03W (Max Mana Aura), Tip (Tooltip - Normal)
 {
 Max Mana Aura
+}
+
+STRING 484
+// Abilities: A03Z (Swap), Name (Name)
+{
+Swap
+}
+
+STRING 485
+// Abilities: A03Z (Swap), Tip (Tooltip - Normal)
+{
+Swap location with another unit
+- also swaps items & unlocked elements
+- 1x use per unit
+}
+
+STRING 486
+// Units: n00A (Circle of Power), Description (Description)
+{
+Transfers its power to the drafted unit
+May provide: Items and Elemental abilities (|cffff0000Fire|r |cff00ff00Earth|r |cff0000ffWater|r)
+}
+
+STRING 487
+// Abilities: A000 (Draft Unit), Tip (Tooltip - Normal)
+{
+Pick unit to summon onto circle placeholders
+}
+
+STRING 488
+// Abilities: A002 (Draft Unit Tooltip), Tip (Tooltip - Normal)
+{
+Pick hero from inventory
+Place on a |cff00ff00green circle|r to summon
+Will gain items & abilities from |cff00ff00circle|r
+Select |cff00ff00circle|r first to see powers
+
+Other heroes will be discarded permanently. Choose wisely.
+}
+
+STRING 489
+// Abilities: A041 (Fire Element), Name (Name)
+{
+Fire Element
+}
+
+STRING 490
+// Abilities: A041 (Fire Element), Tip (Tooltip - Normal)
+{
+|cffff0000Fire Element|r
+}
+
+STRING 491
+// Abilities: A041 (Fire Element), Ubertip (Tooltip - Normal - Extended)
+{
+Unlocks the summoned unit's |cffff0000Fire|r ability
+}
+
+STRING 492
+// Abilities: A040 (Earth Element), Name (Name)
+{
+Earth Element
+}
+
+STRING 493
+// Abilities: A040 (Earth Element), Tip (Tooltip - Normal)
+{
+|cff00ff00Earth Element|r
+
+}
+
+STRING 494
+// Abilities: A040 (Earth Element), Ubertip (Tooltip - Normal - Extended)
+{
+Unlocks the summoned unit's |cff00ff00Earth|r ability
+}
+
+STRING 495
+// Abilities: A042 (Water Element), Name (Name)
+{
+Water Element
+}
+
+STRING 496
+// Abilities: A042 (Water Element), Tip (Tooltip - Normal)
+{
+|cff0000ffWater Element|r
+}
+
+STRING 497
+// Abilities: A042 (Water Element), Ubertip (Tooltip - Normal - Extended)
+{
+Unlocks the summoned unit's |cff0000ffWater|r ability
 }
 

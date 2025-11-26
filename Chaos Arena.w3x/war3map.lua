@@ -159,25 +159,33 @@ local draftableUnits = {
     warden = UnitMetaData('warden', FourCC('E003'), FourCC('h00A'), FourCC('I00T'), FourCC('A00Z'), UnitAbilityMetaData(abilityIds.FanOfKnives, abilityIds.ShadowStrike, abilityIds.Vengeance, abilityIds.Aura_Strength))
 }
 
+local unitTypeIdToName = {}
+for key, meta in pairs(draftableUnits) do
+    unitTypeIdToName[meta.unitTypeId] = key
+end
+
+function GetUnitMetaData(unitTypeId)
+    local name = unitTypeIdToName[unitTypeId]
+    if name then
+        return draftableUnits[name]
+    end
+
+    return nil
+end
+
 function GetUnusedAbilityIds()
     local used = {}
     local result = {}
 
     for _, unit in pairs(draftableUnits) do
-        local meta = unit.abilityMetaData
-        if meta.fire    then used[meta.fire]    = true end
-        if meta.earth   then used[meta.earth]   = true end
-        if meta.water   then used[meta.water]   = true end
-        if meta.passive then used[meta.passive] = true end
+        local metaData = unit.abilityMetaData
+        if metaData.fire    then used[metaData.fire]    = true end
+        if metaData.earth   then used[metaData.earth]   = true end
+        if metaData.water   then used[metaData.water]   = true end
+        if metaData.passive then used[metaData.passive] = true end
     end
 
-    for name, id in pairs(abilityIds) do
-        if not used[id] then
-            result[name] = id
-        end
-    end
-
-    return result
+    return get_table_keys(used)
 end
 
 local GLOBAL_DRAFT_SETS = {
@@ -193,11 +201,20 @@ for _, value in pairs(draftableUnits) do
     GLOBAL_DRAFT_SETS.draftAbilityIds[value.draftAbilityId] = value
 end
 
-local CIRCLE_OF_POWER_UNIT_TYPE_ID = FourCC('n00A')
+local CIRCLE_OF_POWER_METADATA = {
+    unitTypeId = FourCC('n00A'),
+    fireAbilityId = FourCC('A041'),
+    earthAbilityId = FourCC('A040'),
+    waterAbilityId = FourCC('A042')
+}
+
 local BUILDER_UNIT_TYPE_ID = FourCC('h000')
 local ALTAR_UNIT_TYPE_ID = FourCC('h010')
 local DRAFT_ABILITY_ID = FourCC('A000')
 local CANCEL_ABILITY_ID = FourCC('A001')
+local SWAP_UNITS_ABILITY_ID = FourCC('A03Z')
+local ATTACK_ABILITY_ID = FourCC('Aatk')
+local MOVE_ABILITY_ID = FourCC('Amov')
 local INVULNERABLE_ABILITY_ID = FourCC('Avul') --note: used to hide health bars (also requires ObjectEditor IsBuilding=true, but can still move)
 
 local ORDER_IDs = {
@@ -217,7 +234,7 @@ table.insert(GLOBAL_ITEM_SET, FourCC('rde4'))
 table.insert(GLOBAL_ITEM_SET, FourCC('ciri'))
 --table.insert(GLOBAL_ITEM_SET, FourCC('texp')) -- need to create custom item that's not consumeable but passively adds XP [also, circle needs to be converted to hero or game crashes]
 
-local GLOBAL_ELEMENT_NAMES = {
+local GLOBAL_ELEMENT_NAME_TO_STRING = {
     fire = '|cffff0000Fire|cffffffff',
     earth = '|cff00ff00Earth|cffffffff',
     water = '|cff0000ffWater|cffffffff'
@@ -263,6 +280,103 @@ function CalcUnitRotationAngle(unitLocationX, unitLocationY, lookAtX, lookAtY)
     RemoveLocation(unitLocation)
     RemoveLocation(lookAtLocation)
     return result
+end
+
+function GetUnitActivatedElements(unit)
+    local unitType = GetUnitTypeId(unit)
+    local name
+    if unitType ~= CIRCLE_OF_POWER_METADATA.unitTypeId then
+        name = GetHeroProperName(unit)
+    else
+        name = GetUnitName(unit)
+    end
+
+    return {
+        fire = string.find(name, GLOBAL_ELEMENT_NAME_TO_STRING.fire) ~= nil,
+        earth = string.find(name, GLOBAL_ELEMENT_NAME_TO_STRING.earth) ~= nil,
+        water = string.find(name, GLOBAL_ELEMENT_NAME_TO_STRING.water) ~= nil
+    }
+end
+
+function ActivateElementalAbilities(unit)
+    local unitType = GetUnitTypeId(unit)
+    local elements = GetUnitActivatedElements(unit)
+
+    local fireAbililtyId, earthAbililtyId, waterAbililtyId
+    
+    if unitType == CIRCLE_OF_POWER_METADATA.unitTypeId then
+        fireAbililtyId = CIRCLE_OF_POWER_METADATA.fireAbilityId
+        earthAbililtyId = CIRCLE_OF_POWER_METADATA.earthAbilityId
+        waterAbililtyId = CIRCLE_OF_POWER_METADATA.waterAbilityId
+    else
+        local metaData = GetUnitMetaData(unit)
+        if metaData then
+            local abilityMetaData = metaData.abilityMetaData
+            fireAbililtyId = abilityMetaData.fire
+            earthAbililtyId = abilityMetaData.earth
+            waterAbililtyId = abilityMetaData.water
+        else
+            return
+        end
+    end
+    
+    if fireAbililtyId then
+        SetAbilityUIState(unit, fireAbililtyId, not elements.fire, false)
+    end
+    if earthAbililtyId then
+        SetAbilityUIState(unit, earthAbililtyId, not elements.earth, false)
+    end
+    if waterAbililtyId then
+        SetAbilityUIState(unit, waterAbililtyId, not elements.water, false)
+    end
+end
+
+function CopyUnitGear(sourceUnit, targetUnit)
+    for slotIndex = 0, 5 do
+        local item = UnitItemInSlot(targetUnit, slotIndex)
+        if (item) then
+            RemoveItem(item)
+        end
+    end
+
+    for slot = 0, 5 do
+        local item = UnitItemInSlot(sourceUnit, slot)
+        if item then
+            local clonedItem = UnitAddItemById(targetUnit, GetItemTypeId(item))
+            SetItemDroppable(clonedItem, false)
+        end
+    end
+    
+    local name
+    local sourceType = GetUnitTypeId(sourceUnit)
+    if sourceType == CIRCLE_OF_POWER_METADATA.unitTypeId then
+        name = GetUnitName(sourceUnit)
+    else
+        name = GetHeroProperName(sourceUnit)
+    end
+
+    local targetType = GetUnitTypeId(targetUnit)
+    if targetType == CIRCLE_OF_POWER_METADATA.unitTypeId then
+        BlzSetUnitName(targetUnit, name)
+    else
+        BlzSetHeroProperName(targetUnit, name)
+    end
+    
+    ActivateElementalAbilities(targetUnit)
+end
+
+function SwapUnitPositions(sourceUnit, targetUnit)
+    local sourceX = GetUnitX(sourceUnit)
+    local sourceY = GetUnitY(sourceUnit)
+    local sourceFacing = GetUnitFacing(sourceUnit)
+    local targetX = GetUnitX(targetUnit)
+    local targetY = GetUnitY(targetUnit)
+    local targetFacing = GetUnitFacing(targetUnit)
+    
+    SetUnitPosition(sourceUnit, targetX, targetY)
+    SetUnitFacing(sourceUnit, targetFacing)
+    SetUnitPosition(targetUnit, sourceX, sourceY)
+    SetUnitFacing(targetUnit, sourceFacing)
 end
 
 function GetSpawnOffset(playerId)
@@ -418,7 +532,7 @@ function UnlockPlayerTiles(playerId, count)
     for tile = 1, count do
         local tileIndex = 9 - #playerTileCoords[playerId] + 1
         local pos = table.remove(playerTileCoords[playerId], 1)
-        local circle = CreateUnit(player, CIRCLE_OF_POWER_UNIT_TYPE_ID, pos.x, pos.y, lookAtAngle)
+        local circle = CreateUnit(player, CIRCLE_OF_POWER_METADATA.unitTypeId, pos.x, pos.y, lookAtAngle)
         SetUnitVertexColor(circle, 255, 50, 255, 255)
 
         local itemCount = GLOBAL_TILE_SETUP.itemCounts[tileIndex]
@@ -429,11 +543,13 @@ function UnlockPlayerTiles(playerId, count)
             SetItemDroppable(item, false)
         end
 
-        local elements = get_table_keys(GLOBAL_ELEMENT_NAMES)
+        local elements = get_table_keys(GLOBAL_ELEMENT_NAME_TO_STRING)
         local shuffledElements = CloneAndShuffleArray(elements)
         local elemNames = {}
         for element = 1, elementCount do
-            table.insert(elemNames, GLOBAL_ELEMENT_NAMES[table.remove(shuffledElements, 1)])
+            local elementName = table.remove(shuffledElements, 1)
+            UnitAddAbility(circle, CIRCLE_OF_POWER_METADATA[elementName .. 'AbilityId'])
+            table.insert(elemNames, GLOBAL_ELEMENT_NAME_TO_STRING[elementName])
         end
         local name = table.concat(elemNames, ' ')
         BlzSetUnitName(circle, name)
@@ -453,12 +569,12 @@ function InitPlayerBase(playerId)
 
     local lookAtAngle = CalcUnitRotationAngle(startLocation.x, startLocation.y, startLocation.x + offset.x, startLocation.y + offset.y)
     local builder = CreateUnit(player, BUILDER_UNIT_TYPE_ID, startLocation.x, startLocation.y, lookAtAngle)
-    UnitRemoveAbility(builder, FourCC('Aatk'))
+    UnitRemoveAbility(builder, ATTACK_ABILITY_ID)
     UnitAddAbility(builder, INVULNERABLE_ABILITY_ID)
 
     local offset = GetSpawnOffset(playerId)
     local altar = CreateUnit(player, ALTAR_UNIT_TYPE_ID, startLocation.x - offset.x / 2, startLocation.y - offset.y / 2, lookAtAngle)
-    UnitRemoveAbility(altar, FourCC('Aatk'))
+    UnitRemoveAbility(altar, ATTACK_ABILITY_ID)
     UnitAddAbility(altar, INVULNERABLE_ABILITY_ID)
 
     playerBuilders.primary[playerId] = builder
@@ -526,6 +642,53 @@ function SetAbilityUIState(whichUnit, abilityId, disabled, hidden)
     BlzUnitDisableAbility(whichUnit, abilityId, disabled, hidden)
 end
 
+local MIN_X, MIN_Y
+function SwapTileUnits(caster, target)
+    local player = GetOwningPlayer(caster)
+    
+    local casterX = GetUnitX(caster)
+    local casterY = GetUnitY(caster)
+    local targetX = GetUnitX(target)
+    local targetY = GetUnitY(target)
+    
+    --todo: check if this is necessary (assuming it'll have collision issues otherwise & bump position slightly)
+    SetUnitX(caster, MIN_X)
+    SetUnitY(caster, MIN_Y)
+    SetUnitX(target, MIN_X)
+    SetUnitY(target, MIN_Y)
+
+    local casterType = GetUnitTypeId(caster)
+    local targetType = GetUnitTypeId(target)
+    local casterFacing = GetUnitFacing(caster)
+    local targetFacing = GetUnitFacing(target)
+    
+    local newCaster = CreateUnit(player, casterType, targetX, targetY, targetFacing)
+    local newTarget = CreateUnit(player, targetType, casterX, casterY, casterFacing)
+    
+    UnitRemoveAbility(newCaster, ATTACK_ABILITY_ID)
+    UnitRemoveAbility(newCaster, MOVE_ABILITY_ID)
+    UnitAddAbility(newCaster, INVULNERABLE_ABILITY_ID)
+    
+    UnitRemoveAbility(newTarget, ATTACK_ABILITY_ID)
+    UnitRemoveAbility(newTarget, MOVE_ABILITY_ID)
+    UnitAddAbility(newTarget, INVULNERABLE_ABILITY_ID)
+    
+    CopyUnitGear(target, newCaster)
+    CopyUnitGear(caster, newTarget)
+
+    if GetUnitAbilityLevel(target, SWAP_UNITS_ABILITY_ID) > 0 then
+        UnitAddAbility(newTarget, SWAP_UNITS_ABILITY_ID)
+    end
+
+    RemoveUnit(caster)
+    RemoveUnit(target)
+
+    ActivateElementalAbilities(newCaster)
+    ActivateElementalAbilities(newTarget)
+
+    UnitRemoveAbility(newCaster, SWAP_UNITS_ABILITY_ID)
+end
+
 function OnSpellEffect()
     local abilityId = GetSpellAbilityId()
     local unit = GetSpellAbilityUnit()
@@ -543,11 +706,20 @@ function OnSpellEffect()
         return
     end
 
+    if abilityId == SWAP_UNITS_ABILITY_ID then
+        local caster = GetSpellAbilityUnit()
+        local target = GetSpellTargetUnit()
+        SwapTileUnits(caster, target)
+        return
+    end
+
     --todo: create abilities in object editor
     if abilityId == FourCC('A014') then
         OnSoulSiphonEffect()
+        return
     elseif abilityId == FourCC('A015') then
         OnHealingWaveEffect()
+        return
     end
 end
 
@@ -582,7 +754,7 @@ function OnUnitDrafted(unit)
     GroupEnumUnitsInRange(group, unitX, unitY, 100, nil)
     ForGroup(group, function()
         local enumUnit = GetEnumUnit()
-        if GetUnitTypeId(enumUnit) == FourCC('n00A') then
+        if GetUnitTypeId(enumUnit) == CIRCLE_OF_POWER_METADATA.unitTypeId then
             circle = enumUnit
             return
         end
@@ -600,18 +772,28 @@ function OnUnitDrafted(unit)
     RemoveLocation(circleLocation)
 
     RemoveUnit(unit)
-    RemoveUnit(circle)
+
+    --todo: check if this is necessary (assuming it'll have collision issues otherwise & bump position slightly)
+    SetUnitX(circle, MIN_X)
+    SetUnitY(circle, MIN_Y)
+
     local realUnit = CreateUnit(player, realUnitTypeId, circleX, circleY, CalcUnitRotationAngle(circleX, circleY, 0, 0))
+    CopyUnitGear(circle, realUnit)
+
+    RemoveUnit(circle)
+
     UnitAddAbility(realUnit, INVULNERABLE_ABILITY_ID)
-    UnitRemoveAbility(realUnit, FourCC('Aatk'))
-    UnitRemoveAbility(realUnit, FourCC('Amov'))
+    UnitAddAbility(realUnit, SWAP_UNITS_ABILITY_ID)
+    UnitRemoveAbility(realUnit, ATTACK_ABILITY_ID)
+    UnitRemoveAbility(realUnit, MOVE_ABILITY_ID)
+    ActivateElementalAbilities(realUnit)
+
     SelectUnitForPlayerSingle(playerBuilders.primary[playerId], player)
     
     --note: takes a second to update food cap, which we need to avoid drafting if maxed
     RunDelayed(function()
         AddDraftItemsToAltar(GetPlayerId(GetOwningPlayer(builder)))
     end, 1)
-
 end
 
 function OnSoulSiphonEffect()
@@ -792,6 +974,11 @@ function Init()
     CreateSpawnTimer()
     InitFoodCapTimer()
     GrantWoodPassive()
+
+    local worldBounds = GetWorldBounds()
+    MIN_X = GetRectMinX(worldBounds)
+    MIN_Y = GetRectMinY(worldBounds)
+    RemoveRect(worldBounds)
 
     local deathTrigger = CreateTrigger()
     TriggerRegisterAnyUnitEventBJ(deathTrigger, EVENT_PLAYER_UNIT_DEATH)
