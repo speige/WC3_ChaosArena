@@ -1507,12 +1507,6 @@ STRING 464
 Damage Aura
 }
 
-STRING 465
-// Abilities: A00G (Damage Aura), Tip (Tooltip - Normal)
-{
-Damage Aura
-}
-
 STRING 466
 // Abilities: A006 (Agility Aura), Ubertip (Tooltip - Normal - Extended)
 {
@@ -1521,12 +1515,6 @@ STRING 466
 
 STRING 467
 // Abilities: A006 (Agility Aura), Name (Name)
-{
-Agility Aura
-}
-
-STRING 468
-// Abilities: A006 (Agility Aura), Tip (Tooltip - Normal)
 {
 Agility Aura
 }
@@ -1543,12 +1531,6 @@ STRING 470
 Armor Aura
 }
 
-STRING 471
-// Abilities: A00N (Armor Aura), Tip (Tooltip - Normal)
-{
-Armor Aura
-}
-
 STRING 472
 // Abilities: A00R (Max HP Aura), Ubertip (Tooltip - Normal - Extended)
 {
@@ -1557,12 +1539,6 @@ STRING 472
 
 STRING 473
 // Abilities: A00R (Max HP Aura), Name (Name)
-{
-Max HP Aura
-}
-
-STRING 474
-// Abilities: A00R (Max HP Aura), Tip (Tooltip - Normal)
 {
 Max HP Aura
 }
@@ -1579,12 +1555,6 @@ STRING 476
 Intelligence Aura
 }
 
-STRING 477
-// Abilities: A02X (Intelligence Aura), Tip (Tooltip - Normal)
-{
-Intelligence Aura
-}
-
 STRING 478
 // Abilities: A03V (Strength Aura), Ubertip (Tooltip - Normal - Extended)
 {
@@ -1597,12 +1567,6 @@ STRING 479
 Strength Aura
 }
 
-STRING 480
-// Abilities: A03V (Strength Aura), Tip (Tooltip - Normal)
-{
-Strength Aura
-}
-
 STRING 481
 // Abilities: A03W (Max Mana Aura), Ubertip (Tooltip - Normal - Extended)
 {
@@ -1611,12 +1575,6 @@ STRING 481
 
 STRING 482
 // Abilities: A03W (Max Mana Aura), Name (Name)
-{
-Max Mana Aura
-}
-
-STRING 483
-// Abilities: A03W (Max Mana Aura), Tip (Tooltip - Normal)
 {
 Max Mana Aura
 }
@@ -1659,58 +1617,220 @@ Select |cff00ff00circle|r first to see powers
 Other heroes will be discarded permanently. Choose wisely.
 }
 
-STRING 489
-// Abilities: A041 (Fire Element), Name (Name)
-{
-Fire Element
-}
-
-STRING 490
-// Abilities: A041 (Fire Element), Tip (Tooltip - Normal)
-{
-|cffff0000Fire Element|r
-}
-
 STRING 491
-// Abilities: A041 (Fire Element), Ubertip (Tooltip - Normal - Extended)
+// Abilities: A041 (Fire), Ubertip (Tooltip - Normal - Extended)
 {
 Unlocks the summoned unit's |cffff0000Fire|r ability
 }
 
-STRING 492
-// Abilities: A040 (Earth Element), Name (Name)
-{
-Earth Element
-}
-
-STRING 493
-// Abilities: A040 (Earth Element), Tip (Tooltip - Normal)
-{
-|cff00ff00Earth Element|r
-
-}
-
 STRING 494
-// Abilities: A040 (Earth Element), Ubertip (Tooltip - Normal - Extended)
+// Abilities: A040 (Earth), Ubertip (Tooltip - Normal - Extended)
 {
 Unlocks the summoned unit's |cff00ff00Earth|r ability
 }
 
-STRING 495
-// Abilities: A042 (Water Element), Name (Name)
-{
-Water Element
-}
-
-STRING 496
-// Abilities: A042 (Water Element), Tip (Tooltip - Normal)
-{
-|cff0000ffWater Element|r
-}
-
 STRING 497
-// Abilities: A042 (Water Element), Ubertip (Tooltip - Normal - Extended)
+// Abilities: A042 (Water), Ubertip (Tooltip - Normal - Extended)
 {
 Unlocks the summoned unit's |cff0000ffWater|r ability
+}
+
+STRING 498
+// Abilities: A041 (Fire), Hotkey (Hotkey - Normal)
+{
+R
+}
+
+STRING 499
+// Abilities: A041 (Fire), Unhotkey (Hotkey - Turn Off)
+{
+R
+}
+
+STRING 500
+// Abilities: A040 (Earth), Hotkey (Hotkey - Normal)
+{
+E
+}
+
+STRING 501
+// Abilities: A040 (Earth), Unhotkey (Hotkey - Turn Off)
+{
+E
+}
+
+STRING 502
+// Abilities: A042 (Water), Hotkey (Hotkey - Normal)
+{
+W
+}
+
+STRING 503
+// Abilities: A042 (Water), Unhotkey (Hotkey - Turn Off)
+{
+W
+}
+
+STRING 511
+// Abilities: A03V (Strength Aura), Tip (Tooltip - Normal)
+{
+Strength Aura
+}
+
+STRING 512
+// Buffs/Effects: B000 (), Buffubertip (Tooltip - Extended)
+{
++ 10% strength
+}
+
+STRING 513
+// Abilities: A006 (Agility Aura), Tip (Tooltip - Normal)
+{
+Agility Aura
+}
+
+STRING 514
+// Buffs/Effects: B001 (), Buffubertip (Tooltip - Extended)
+{
++ 10% agility
+}
+
+STRING 515
+// Abilities: A00N (Armor Aura), Tip (Tooltip - Normal)
+{
+Armor Aura
+}
+
+STRING 516
+// Buffs/Effects: B002 (), Buffubertip (Tooltip - Extended)
+{
++ 10% armor
+}
+
+STRING 517
+// Abilities: A00G (Damage Aura), Tip (Tooltip - Normal)
+{
+Damage Aura
+}
+
+STRING 518
+// Buffs/Effects: B003 (), Buffubertip (Tooltip - Extended)
+{
++ 10% damage
+}
+
+STRING 519
+// Abilities: A02X (Intelligence Aura), Tip (Tooltip - Normal)
+{
+Intelligence Aura
+}
+
+STRING 520
+// Buffs/Effects: B004 (), Buffubertip (Tooltip - Extended)
+{
++ 10% intelligence
+}
+
+STRING 521
+// Abilities: A00R (Max HP Aura), Tip (Tooltip - Normal)
+{
+Max HP Aura
+}
+
+STRING 522
+// Buffs/Effects: B005 (), Buffubertip (Tooltip - Extended)
+{
++ 10% max HP
+}
+
+STRING 523
+// Abilities: A03W (Max Mana Aura), Tip (Tooltip - Normal)
+{
+Max Mana Aura
+}
+
+STRING 524
+// Buffs/Effects: B006 (), Buffubertip (Tooltip - Extended)
+{
++ 10% max mana
+}
+
+STRING 525
+// Buffs/Effects: B000 (), Bufftip (Tooltip)
+{
+Strength Aura
+}
+
+STRING 526
+// Buffs/Effects: B001 (), Bufftip (Tooltip)
+{
+Agility Aura
+}
+
+STRING 527
+// Buffs/Effects: B002 (), Bufftip (Tooltip)
+{
+Armor Aura
+}
+
+STRING 528
+// Buffs/Effects: B003 (), Bufftip (Tooltip)
+{
+Damage Aura
+}
+
+STRING 529
+// Buffs/Effects: B004 (), Bufftip (Tooltip)
+{
+Intelligence Aura
+}
+
+STRING 530
+// Buffs/Effects: B005 (), Bufftip (Tooltip)
+{
+Max HP Aura
+}
+
+STRING 531
+// Buffs/Effects: B006 (), Bufftip (Tooltip)
+{
+Max Mana Aura
+}
+
+STRING 532
+// Abilities: A041 (Fire), Name (Name)
+{
+Fire
+}
+
+STRING 533
+// Abilities: A041 (Fire), Tip (Tooltip - Normal)
+{
+|cffff0000Fire|r
+}
+
+STRING 534
+// Abilities: A040 (Earth), Name (Name)
+{
+Earth
+}
+
+STRING 535
+// Abilities: A040 (Earth), Tip (Tooltip - Normal)
+{
+|cff00ff00Earth|r
+
+}
+
+STRING 536
+// Abilities: A042 (Water), Name (Name)
+{
+Water
+}
+
+STRING 537
+// Abilities: A042 (Water), Tip (Tooltip - Normal)
+{
+|cff0000ffWater|r
 }
 

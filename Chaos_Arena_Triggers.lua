@@ -3,8 +3,8 @@ function UnitMetaData(name, unitTypeId, dummyBuildingUnitTypeId, draftItemTypeId
     return { name = name, unitTypeId = unitTypeId, dummyBuildingUnitTypeId = dummyBuildingUnitTypeId, draftItemTypeId = draftItemTypeId, draftAbilityId = draftAbilityId, abilityMetaData = abilityMetaData }
 end
 
-function UnitAbilityMetaData(fire, earth, wind, passive)
-    return { fire = fire, earth = earth, water = water, passive = passive }
+function UnitAbilityMetaData(water, earth, fire, passive)
+    return { water = water, earth = earth, fire = fire, passive = passive }
 end
 
 local abilityIds = {
@@ -125,7 +125,7 @@ local abilityIds = {
 local draftableUnits = {
     akama = UnitMetaData('akama', FourCC('N009'), FourCC('h00S'), FourCC('I001'), FourCC('A01O'), UnitAbilityMetaData(abilityIds.Immolation, abilityIds.HardenedSkin, abilityIds.Taunt, abilityIds.Aura_Armor)),
     alchemist = UnitMetaData('alchemist', FourCC('N000'), FourCC('h00O'), FourCC('I000'), FourCC('A01C'), UnitAbilityMetaData(abilityIds.HealingSpray, abilityIds.AcidBomb, abilityIds.Transmute, abilityIds.Aura_Strength)),
-    archimonde = UnitMetaData('archimonde', FourCC('U005'), FourCC('h00N'), FourCC('I002'), FourCC('A01K'), UnitAbilityMetaData(abilityIds.RainOfChaos, abilityIds.DarkPortal, abilityIds.Bash, abilityIds.Aura_MaxMana)),
+    archimonde = UnitMetaData('archimonde', FourCC('U005'), FourCC('h00N'), FourCC('I002'), FourCC('A01K'), UnitAbilityMetaData(abilityIds.RainOfChaos, abilityIds.DarkPortal, abilityIds.Curse, abilityIds.Aura_MaxMana)),
     archmange = UnitMetaData('archmange', FourCC('H002'), FourCC('h00C'), FourCC('I003'), FourCC('A011'), UnitAbilityMetaData(abilityIds.LifeDrain, abilityIds.Blizzard, abilityIds.SummonWaterElemental, abilityIds.Aura_MaxHP)),
     beastmaster = UnitMetaData('beastmaster', FourCC('N001'), FourCC('h00T'), FourCC('I004'), FourCC('A01F'), UnitAbilityMetaData(abilityIds.SummonBear, abilityIds.SummonQuilbeast, abilityIds.Stampede, abilityIds.Aura_Agility)),
     blademaster = UnitMetaData('blademaster', FourCC('O000'), FourCC('h00F'), FourCC('I005'), FourCC('A014'), UnitAbilityMetaData(abilityIds.CriticalStrike, abilityIds.MirrorImage, abilityIds.Bladestorm, abilityIds.Aura_Damage)),
@@ -146,7 +146,7 @@ local draftableUnits = {
     murloc = UnitMetaData('murloc', FourCC('N008'), FourCC('h00P'), FourCC('I00K'), FourCC('A01N'), UnitAbilityMetaData(abilityIds.RaiseDead, abilityIds.LightningShield, abilityIds.AerialShackles, abilityIds.Aura_Agility)),
     ogreMauler = UnitMetaData('ogreMauler', FourCC('E004'), FourCC('h008'), FourCC('I00L'), FourCC('A00Y'), UnitAbilityMetaData(abilityIds.Inferno, abilityIds.CarrionBeetles, abilityIds.Volcano, abilityIds.Aura_MaxMana)),
     paladin = UnitMetaData('paladin', FourCC('H001'), FourCC('h00B'), FourCC('I00M'), FourCC('A010'), UnitAbilityMetaData(abilityIds.HolyLight, abilityIds.DivineShield, abilityIds.Resurrection, abilityIds.Aura_Intelligence)),
-    pitLord = UnitMetaData('pitLord', FourCC('N006'), FourCC('h00Z'), FourCC('I00N'), FourCC('A01J'), UnitAbilityMetaData(abilityIds.HowlOfTerror, abilityIds.CleavingAttack, abilityIds.Immolation, abilityIds.Aura_MaxHP)),
+    pitLord = UnitMetaData('pitLord', FourCC('N006'), FourCC('h00Z'), FourCC('I00N'), FourCC('A01J'), UnitAbilityMetaData(abilityIds.HowlOfTerror, abilityIds.CleavingAttack, abilityIds.SpellImmunity, abilityIds.Aura_MaxHP)),
     priestessOfTheMoon = UnitMetaData('priestessOfTheMoon', FourCC('E001'), FourCC('h006'), FourCC('I00O'), FourCC('A00W'), UnitAbilityMetaData(abilityIds.ThunderClap, abilityIds.SearingArrows, abilityIds.Starfall, abilityIds.Aura_Damage)),
     seaWitch = UnitMetaData('seaWitch', FourCC('N002'), FourCC('h00Q'), FourCC('I00P'), FourCC('A01D'), UnitAbilityMetaData(abilityIds.ForkedLightning, abilityIds.FrostArrows, abilityIds.ManaShield, abilityIds.Aura_MaxMana)),
     shadowHunter = UnitMetaData('shadowHunter', FourCC('O004'), FourCC('h00I'), FourCC('I00Q'), FourCC('A017'), UnitAbilityMetaData(abilityIds.Hex, abilityIds.SerpentWard, abilityIds.BigBadVoodoo, abilityIds.Aura_MaxHP)),
@@ -156,11 +156,22 @@ local draftableUnits = {
 }
 
 local unitTypeIdToName = {}
-for key, meta in pairs(draftableUnits) do
-    unitTypeIdToName[meta.unitTypeId] = key
+for key, metaData in pairs(draftableUnits) do
+    unitTypeIdToName[metaData.unitTypeId] = key
 end
 
-function GetUnitMetaData(unitTypeId)
+local CIRCLE_OF_POWER_METADATA = UnitMetaData('circle_of_power', FourCC('n00A'), nil, nil, nil, UnitAbilityMetaData(FourCC('A042'), FourCC('A040'), FourCC('A041'), nil))
+
+function GetUnitMetaData(unit)
+    local unitTypeId = GetUnitTypeId(unit)
+    if unitTypeId == CIRCLE_OF_POWER_METADATA.unitTypeId then
+        return CIRCLE_OF_POWER_METADATA
+    end
+
+    return GetUnitTypeIdMetaData(unitTypeId)
+end
+
+function GetUnitTypeIdMetaData(unitTypeId)
     local name = unitTypeIdToName[unitTypeId]
     if name then
         return draftableUnits[name]
@@ -169,19 +180,65 @@ function GetUnitMetaData(unitTypeId)
     return nil
 end
 
-function GetUnusedAbilityIds()
+function DEBUG_GetDuplicateAbilityIds()
+    local duplicated = {}
     local used = {}
     local result = {}
 
     for _, unit in pairs(draftableUnits) do
         local metaData = unit.abilityMetaData
-        if metaData.fire    then used[metaData.fire]    = true end
-        if metaData.earth   then used[metaData.earth]   = true end
+        if metaData.water and used[metaData.water] then duplicated[metaData.water]   = true end
+        if metaData.earth and used[metaData.earth] then duplicated[metaData.earth]   = true end
+        if metaData.fire and used[metaData.fire] then duplicated[metaData.fire]    = true end
+
         if metaData.water   then used[metaData.water]   = true end
+        if metaData.earth   then used[metaData.earth]   = true end
+        if metaData.fire    then used[metaData.fire]    = true end
         if metaData.passive then used[metaData.passive] = true end
     end
 
-    return get_table_keys(used)
+    return MapListValues(get_table_keys(duplicated),
+        function (abilityId)
+            for key, value in pairs(abilityIds) do
+                if value == abilityId then
+                    return key
+                end
+            end
+
+            return abilityId
+        end
+    )
+end
+
+function DEBUG_GetUnusedAbilityIds()
+    local used = {}
+    local result = {}
+
+    for _, unit in pairs(draftableUnits) do
+        local metaData = unit.abilityMetaData
+        if metaData.water   then used[metaData.water]   = true end
+        if metaData.earth   then used[metaData.earth]   = true end
+        if metaData.fire    then used[metaData.fire]    = true end
+        if metaData.passive then used[metaData.passive] = true end
+    end
+
+    for _, abilityId in pairs(abilityIds) do
+        if not used[abilityId] then
+            result[abilityId] = true
+        end
+    end
+
+    return MapListValues(get_table_keys(result),
+        function (abilityId)
+            for key, value in pairs(abilityIds) do
+                if value == abilityId then
+                    return key
+                end
+            end
+
+            return abilityId
+        end
+    )
 end
 
 local GLOBAL_DRAFT_SETS = {
@@ -196,13 +253,6 @@ for _, value in pairs(draftableUnits) do
     GLOBAL_DRAFT_SETS.draftItemTypeIds[value.draftItemTypeId] = value
     GLOBAL_DRAFT_SETS.draftAbilityIds[value.draftAbilityId] = value
 end
-
-local CIRCLE_OF_POWER_METADATA = {
-    unitTypeId = FourCC('n00A'),
-    fireAbilityId = FourCC('A041'),
-    earthAbilityId = FourCC('A040'),
-    waterAbilityId = FourCC('A042')
-}
 
 local BUILDER_UNIT_TYPE_ID = FourCC('h000')
 local ALTAR_UNIT_TYPE_ID = FourCC('h010')
@@ -230,10 +280,18 @@ table.insert(GLOBAL_ITEM_SET, FourCC('rde4'))
 table.insert(GLOBAL_ITEM_SET, FourCC('ciri'))
 --table.insert(GLOBAL_ITEM_SET, FourCC('texp')) -- need to create custom item that's not consumeable but passively adds XP [also, circle needs to be converted to hero or game crashes]
 
-local GLOBAL_ELEMENT_NAME_TO_STRING = {
-    fire = '|cffff0000Fire|cffffffff',
-    earth = '|cff00ff00Earth|cffffffff',
-    water = '|cff0000ffWater|cffffffff'
+local GLOBAL_ELEMENT_NAME_TO_COLOR = {
+    water = '|cff0000ff',
+    earth = '|cff00ff00',
+    fire = '|cffff0000'
+}
+
+local COLOR_WHITE = '|cffffffff'
+
+local GLOBAL_ELEMENT_NAME_TO_COLORED_STRING = {
+    water = GLOBAL_ELEMENT_NAME_TO_COLOR.water .. 'Water' .. COLOR_WHITE,
+    earth = GLOBAL_ELEMENT_NAME_TO_COLOR.earth .. 'Earth' .. COLOR_WHITE,
+    fire = GLOBAL_ELEMENT_NAME_TO_COLOR.fire .. 'Fire' .. COLOR_WHITE,
 }
 
 local GLOBAL_TILE_SETUP = {
@@ -248,6 +306,18 @@ end
 local playerIdMapping_proxyToReal = {}
 for playerId = 12, 23 do
     playerIdMapping_proxyToReal[playerId] = playerId - 12
+end
+
+function IntegerToFourCC(i)
+    local a = string.char(math.fmod(i, 256))
+    i = math.floor(i / 256)
+    local b = string.char(math.fmod(i, 256))
+    i = math.floor(i / 256)
+    local c = string.char(math.fmod(i, 256))
+    i = math.floor(i / 256)
+    local d = string.char(math.fmod(i, 256))
+    
+    return d .. c .. b .. a
 end
 
 function WeightedRandom(weights)
@@ -278,6 +348,61 @@ function CalcUnitRotationAngle(unitLocationX, unitLocationY, lookAtX, lookAtY)
     return result
 end
 
+function SetAbilityHotkey(unit, abilityId, key)
+    local ability = BlzGetUnitAbility(unit, abilityId)
+    BlzSetAbilityStringField(ability, ConvertAbilityStringField(FourCC('ahky')), key)
+    BlzSetAbilityStringField(ability, ConvertAbilityStringField(FourCC('auhk')), key)
+end
+
+function GetUnitAbilityTooltip(unit, abilityId, tooltip)
+    local ability = BlzGetUnitAbility(unit, abilityId)
+    return BlzGetAbilityStringLevelField(ability, ABILITY_SLF_TOOLTIP_NORMAL, 0)
+end
+
+function SetUnitAbilityTooltip(unit, abilityId, tooltip)
+    local ability = BlzGetUnitAbility(unit, abilityId)
+    BlzSetAbilityStringLevelField(ability, ABILITY_SLF_TOOLTIP_NORMAL, 0, tooltip)
+end
+
+function InitAbilityGridPositions()
+    local tooltipsAlreadySet = {}
+
+    for _, metaData in pairs(draftableUnits) do
+        if metaData.abilityMetaData.passive then
+            BlzSetAbilityPosX(metaData.abilityMetaData.passive, 0)
+            BlzSetAbilityPosY(metaData.abilityMetaData.passive, 0)
+            if not tooltipsAlreadySet[metaData.abilityMetaData.passive] then
+                BlzSetAbilityTooltip(metaData.abilityMetaData.passive, BlzGetAbilityTooltip(metaData.abilityMetaData.passive, 0) .. ' (passive)', 0)
+                tooltipsAlreadySet[metaData.abilityMetaData.passive] = true
+            end
+        end
+        if metaData.abilityMetaData.water then
+            BlzSetAbilityPosX(metaData.abilityMetaData.water, 1)
+            BlzSetAbilityPosY(metaData.abilityMetaData.water, 0)
+            if not tooltipsAlreadySet[metaData.abilityMetaData.water] then
+                BlzSetAbilityTooltip(metaData.abilityMetaData.water, GLOBAL_ELEMENT_NAME_TO_COLOR.water .. BlzGetAbilityTooltip(metaData.abilityMetaData.water, 0) .. COLOR_WHITE, 0)
+                tooltipsAlreadySet[metaData.abilityMetaData.water] = true
+            end
+        end
+        if metaData.abilityMetaData.earth then
+            BlzSetAbilityPosX(metaData.abilityMetaData.earth, 2)
+            BlzSetAbilityPosY(metaData.abilityMetaData.earth, 0)
+            if not tooltipsAlreadySet[metaData.abilityMetaData.earth] then
+                BlzSetAbilityTooltip(metaData.abilityMetaData.earth, GLOBAL_ELEMENT_NAME_TO_COLOR.earth .. BlzGetAbilityTooltip(metaData.abilityMetaData.earth, 0) .. COLOR_WHITE, 0)
+                tooltipsAlreadySet[metaData.abilityMetaData.earth] = true
+            end
+        end
+        if metaData.abilityMetaData.fire then
+            BlzSetAbilityPosX(metaData.abilityMetaData.fire, 3)
+            BlzSetAbilityPosY(metaData.abilityMetaData.fire, 0)
+            if not tooltipsAlreadySet[metaData.abilityMetaData.fire] then
+                BlzSetAbilityTooltip(metaData.abilityMetaData.fire, GLOBAL_ELEMENT_NAME_TO_COLOR.fire .. BlzGetAbilityTooltip(metaData.abilityMetaData.fire, 0) .. COLOR_WHITE, 0)
+                tooltipsAlreadySet[metaData.abilityMetaData.fire] = true
+            end
+        end
+    end    
+end
+
 function GetUnitActivatedElements(unit)
     local unitType = GetUnitTypeId(unit)
     local name
@@ -288,42 +413,54 @@ function GetUnitActivatedElements(unit)
     end
 
     return {
-        fire = string.find(name, GLOBAL_ELEMENT_NAME_TO_STRING.fire) ~= nil,
-        earth = string.find(name, GLOBAL_ELEMENT_NAME_TO_STRING.earth) ~= nil,
-        water = string.find(name, GLOBAL_ELEMENT_NAME_TO_STRING.water) ~= nil
+        water = string.find(name, GLOBAL_ELEMENT_NAME_TO_COLORED_STRING.water) ~= nil,
+        earth = string.find(name, GLOBAL_ELEMENT_NAME_TO_COLORED_STRING.earth) ~= nil,
+        fire = string.find(name, GLOBAL_ELEMENT_NAME_TO_COLORED_STRING.fire) ~= nil
     }
 end
 
-function ActivateElementalAbilities(unit)
+function SetupUnitAbilities(unit)
     local unitType = GetUnitTypeId(unit)
     local elements = GetUnitActivatedElements(unit)
 
-    local fireAbililtyId, earthAbililtyId, waterAbililtyId
+    local metaData = GetUnitMetaData(unit)
+    if not metaData then
+        return
+    end
+    local abilityMetaData = metaData.abilityMetaData
+    if not abilityMetaData then
+        return
+    end
+
+    if abilityMetaData.passive then
+        UnitAddAbility(unit, abilityMetaData.passive)
+        SetAbilityUIState(unit, abilityMetaData.passive, false, false)
+    end
     
-    if unitType == CIRCLE_OF_POWER_METADATA.unitTypeId then
-        fireAbililtyId = CIRCLE_OF_POWER_METADATA.fireAbilityId
-        earthAbililtyId = CIRCLE_OF_POWER_METADATA.earthAbilityId
-        waterAbililtyId = CIRCLE_OF_POWER_METADATA.waterAbilityId
-    else
-        local metaData = GetUnitMetaData(unit)
-        if metaData then
-            local abilityMetaData = metaData.abilityMetaData
-            fireAbililtyId = abilityMetaData.fire
-            earthAbililtyId = abilityMetaData.earth
-            waterAbililtyId = abilityMetaData.water
-        else
-            return
+    local hideWhenDisabled = metaData == CIRCLE_OF_POWER_METADATA
+    if abilityMetaData.water then
+        UnitAddAbility(unit, abilityMetaData.water)
+        SetAbilityUIState(unit, abilityMetaData.water, not elements.water, not elements.water and hideWhenDisabled)
+        SetAbilityHotkey(unit, abilityMetaData.water, 'W')
+        if not elements.water and not hideWhenDisabled then
+            SetUnitAbilityTooltip(unit, abilityMetaData.water, GetUnitAbilityTooltip(unit, abilityMetaData.water) .. ' (disabled)')
         end
     end
-    
-    if fireAbililtyId then
-        SetAbilityUIState(unit, fireAbililtyId, not elements.fire, false)
+    if abilityMetaData.earth then
+        UnitAddAbility(unit, abilityMetaData.earth)
+        SetAbilityUIState(unit, abilityMetaData.earth, not elements.earth, not elements.earth and hideWhenDisabled)
+        SetAbilityHotkey(unit, abilityMetaData.earth, 'E')
+        if not elements.earth and not hideWhenDisabled then
+            SetUnitAbilityTooltip(unit, abilityMetaData.earth, GetUnitAbilityTooltip(unit, abilityMetaData.earth) .. ' (disabled)')
+        end
     end
-    if earthAbililtyId then
-        SetAbilityUIState(unit, earthAbililtyId, not elements.earth, false)
-    end
-    if waterAbililtyId then
-        SetAbilityUIState(unit, waterAbililtyId, not elements.water, false)
+    if abilityMetaData.fire then
+        UnitAddAbility(unit, abilityMetaData.fire)
+        SetAbilityUIState(unit, abilityMetaData.fire, not elements.fire, not elements.fire and hideWhenDisabled)
+        SetAbilityHotkey(unit, abilityMetaData.fire, 'R')
+        if not elements.fire and not hideWhenDisabled then
+            SetUnitAbilityTooltip(unit, abilityMetaData.fire, GetUnitAbilityTooltip(unit, abilityMetaData.fire) .. ' (disabled)')
+        end
     end
 end
 
@@ -358,7 +495,7 @@ function CopyUnitGear(sourceUnit, targetUnit)
         BlzSetHeroProperName(targetUnit, name)
     end
     
-    ActivateElementalAbilities(targetUnit)
+    SetupUnitAbilities(targetUnit)
 end
 
 function SwapUnitPositions(sourceUnit, targetUnit)
@@ -414,21 +551,19 @@ function SpawnWaveForPlayer(playerId)
             local y = GetUnitY(unit)            
             local clonedUnit = CreateUnit(proxyPlayer, unitType, x + offset.x, y + offset.y, CalcUnitRotationAngle(x, y, 0, 0))
             UnitRemoveAbility(clonedUnit, INVULNERABLE_ABILITY_ID)
+            --UnitAddAbility(clonedUnit, ATTACK_ABILITY_ID)
 
+            --[[
             local heroLevel = GetHeroLevel(unit)
             if heroLevel > 0 then
                 for i = 1, heroLevel - 1 do
                     SetHeroLevel(clonedUnit, heroLevel, false)
                 end
             end
+            --]]
 
-            for itemSlot = 1, 6 do
-                local item = UnitItemInSlot(unit, itemSlot)
-                if (item) then
-                    local clonedItem = UnitAddItemById(clonedUnit, itemType)
-                    SetItemDroppable(clonedItem, false)
-                end
-            end
+            CopyUnitGear(unit, clonedUnit)
+            SetupUnitAbilities(clonedUnit)
 
             local attackLoc = Location(0, 0)
             IssuePointOrderLoc(clonedUnit, 'attack', attackLoc)
@@ -497,6 +632,14 @@ local playerBuilders = {
 }
 local playerDecks = {}
 
+function MapListValues(tbl, fn)
+    local result = {}
+    for i = 1, #tbl do
+        table.insert(result, fn(tbl[i]))
+    end
+    return result
+end
+
 function get_table_keys(t)
     local keys = {}
     for key, _ in pairs(t) do
@@ -539,16 +682,15 @@ function UnlockPlayerTiles(playerId, count)
             SetItemDroppable(item, false)
         end
 
-        local elements = get_table_keys(GLOBAL_ELEMENT_NAME_TO_STRING)
+        local elements = get_table_keys(GLOBAL_ELEMENT_NAME_TO_COLORED_STRING)
         local shuffledElements = CloneAndShuffleArray(elements)
         local elemNames = {}
         for element = 1, elementCount do
-            local elementName = table.remove(shuffledElements, 1)
-            UnitAddAbility(circle, CIRCLE_OF_POWER_METADATA[elementName .. 'AbilityId'])
-            table.insert(elemNames, GLOBAL_ELEMENT_NAME_TO_STRING[elementName])
+            table.insert(elemNames, GLOBAL_ELEMENT_NAME_TO_COLORED_STRING[table.remove(shuffledElements, 1)])
         end
         local name = table.concat(elemNames, ' ')
         BlzSetUnitName(circle, name)
+        SetupUnitAbilities(circle)
     end
 end
 
@@ -679,8 +821,8 @@ function SwapTileUnits(caster, target)
     RemoveUnit(caster)
     RemoveUnit(target)
 
-    ActivateElementalAbilities(newCaster)
-    ActivateElementalAbilities(newTarget)
+    SetupUnitAbilities(newCaster)
+    SetupUnitAbilities(newTarget)
 
     UnitRemoveAbility(newCaster, SWAP_UNITS_ABILITY_ID)
 end
@@ -782,7 +924,7 @@ function OnUnitDrafted(unit)
     UnitAddAbility(realUnit, SWAP_UNITS_ABILITY_ID)
     UnitRemoveAbility(realUnit, ATTACK_ABILITY_ID)
     UnitRemoveAbility(realUnit, MOVE_ABILITY_ID)
-    ActivateElementalAbilities(realUnit)
+    SetupUnitAbilities(realUnit)
 
     SelectUnitForPlayerSingle(playerBuilders.primary[playerId], player)
     
@@ -960,11 +1102,28 @@ function InitPlayers()
     InitPlayerAlliances()
 end
 
+function PrintDebugInfo()
+    local duplicates = DEBUG_GetDuplicateAbilityIds()
+    if #duplicates > 0 then
+        print('duplicated abilities: ' .. table.concat(duplicates, ' '))
+    else
+        print('no duplicates')
+    end
+
+    local unused = DEBUG_GetUnusedAbilityIds()
+    if #unused > 0 then
+        print('unused abilities: ' .. table.concat(unused, ' '))
+    else
+        print('no unused abilities')
+    end
+end
+
 function Init()
 	MeleeStartingVisibility()
 	MeleeClearExcessUnits()
 	FogEnableOff()
 	FogMaskEnableOff()
+    InitAbilityGridPositions()
 	InitPlayers()
     CreateWaveSpawnLabels()
     CreateSpawnTimer()
@@ -987,6 +1146,9 @@ function Init()
     local buildTrigger = CreateTrigger()
     TriggerRegisterAnyUnitEventBJ(buildTrigger, EVENT_PLAYER_UNIT_CONSTRUCT_FINISH)
     TriggerAddAction(buildTrigger, OnConstructFinish)
+
+    --PrintDebugInfo()
+    
 end
 
 --[[
