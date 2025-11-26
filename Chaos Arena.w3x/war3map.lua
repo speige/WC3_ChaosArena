@@ -2,7 +2,7 @@ gg_trg_Melee_Initialization = nil
 function InitGlobals()
 end
 
---NOTE: copy/paste into WorldEditor before saving map
+--NOTE: copy/paste into WorldEditor triggers module before saving map
 function UnitMetaData(name, unitTypeId, dummyBuildingUnitTypeId, draftItemTypeId, draftAbilityId, abilityMetaData)
     return { name = name, unitTypeId = unitTypeId, dummyBuildingUnitTypeId = dummyBuildingUnitTypeId, draftItemTypeId = draftItemTypeId, draftAbilityId = draftAbilityId, abilityMetaData = abilityMetaData }
 end
@@ -113,45 +113,72 @@ local abilityIds = {
     Tornado = FourCC('A03U'),
     Tranquility = FourCC('A01Q'),
     Transmute = FourCC('A00T'),
-    VampiricAura = FourCC('A02X'),
     Vengeance = FourCC('A020'),
     Volcano = FourCC('A023'),
     VorpalBlades = FourCC('A044'),
-    WarStomp = FourCC('A02M')
+    WarStomp = FourCC('A02M'),
+    Aura_Agility = FourCC('A006'),
+    Aura_Armor = FourCC('A00N'),
+    Aura_Damage = FourCC('A00G'),
+    Aura_Intelligence = FourCC('A02X'),
+    Aura_MaxMana = FourCC('A03W'),
+    Aura_MaxHP = FourCC('A00R'),
+    Aura_Strength = FourCC('A03V')
 }
 
 local draftableUnits = {
-    akama = UnitMetaData('akama', FourCC('N009'), FourCC('h00S'), FourCC('I001'), FourCC('A01O'), UnitAbilityMetaData(abilityIds.Immolation, abilityIds.HardenedSkin,abilityIds.Taunt, nil)),
-    alchemist = UnitMetaData('alchemist', FourCC('N000'), FourCC('h00O'), FourCC('I000'), FourCC('A01C'), UnitAbilityMetaData(abilityIds.HealingSpray, abilityIds.AcidBomb,abilityIds.Transmute, nil)),
-    archimonde = UnitMetaData('archimonde', FourCC('U005'), FourCC('h00N'), FourCC('I002'), FourCC('A01K'), UnitAbilityMetaData(abilityIds.RainOfChaos, abilityIds.DarkPortal,abilityIds.Bash, nil)),
-    archmange = UnitMetaData('archmange', FourCC('H002'), FourCC('h00C'), FourCC('I003'), FourCC('A011'), UnitAbilityMetaData(abilityIds.LifeDrain, abilityIds.Blizzard,abilityIds.SummonWaterElemental, nil)),
-    beastmaster = UnitMetaData('beastmaster', FourCC('N001'), FourCC('h00T'), FourCC('I004'), FourCC('A01F'), UnitAbilityMetaData(abilityIds.SummonBear, abilityIds.SummonQuilbeast,abilityIds.Stampede, nil)),
-    blademaster = UnitMetaData('blademaster', FourCC('O000'), FourCC('h00F'), FourCC('I005'), FourCC('A014'), UnitAbilityMetaData(abilityIds.CriticalStrike, abilityIds.MirrorImage,abilityIds.Bladestorm, nil)),
-    bloodMage = UnitMetaData('bloodMage', FourCC('H004'), FourCC('h00E'), FourCC('I006'), FourCC('A013'), UnitAbilityMetaData(abilityIds.FlameStrike, abilityIds.Banish,abilityIds.Phoenix, nil)),
-    brewmaster = UnitMetaData('brewmaster', FourCC('N005'), FourCC('h00U'), FourCC('I007'), FourCC('A01G'), UnitAbilityMetaData(abilityIds.BreathOfFire, abilityIds.DrunkenBrawler,abilityIds.StormEarthAndFire, nil)),
-    cryptLord = UnitMetaData('cryptLord', FourCC('U003'), FourCC('h00M'), FourCC('I008'), FourCC('A01B'), UnitAbilityMetaData(abilityIds.Impale, abilityIds.SpikedCarapace,abilityIds.LocustSwarm, nil)),
-    darkRanger = UnitMetaData('darkRanger', FourCC('N007'), FourCC('h00V'), FourCC('I009'), FourCC('A01H'), UnitAbilityMetaData(abilityIds.Silence, abilityIds.BlackArrow,abilityIds.Charm, nil)),
-    deathKnight = UnitMetaData('deathKnight', FourCC('U000'), FourCC('h00J'), FourCC('I00A'), FourCC('A018'), UnitAbilityMetaData(abilityIds.DeathCoil, abilityIds.DeathPact,abilityIds.AnimateDead, nil)),
-    demonHunter = UnitMetaData('demonHunter', FourCC('E002'), FourCC('h007'), FourCC('I00B'), FourCC('A00X'), UnitAbilityMetaData(abilityIds.ManaBurn, abilityIds.Evasion,abilityIds.Metamorphosis, nil)),
-    dreadlord = UnitMetaData('dreadlord', FourCC('U002'), FourCC('h00L'), FourCC('I00C'), FourCC('A01A'), UnitAbilityMetaData(abilityIds.VampiricAura, abilityIds.Sleep,abilityIds.CarrionSwarm, nil)),
-    farSeer = UnitMetaData('farSeer', FourCC('O001'), FourCC('h00G'), FourCC('I00D'), FourCC('A015'), UnitAbilityMetaData(abilityIds.FeralSpirit, abilityIds.ChainLightning,abilityIds.Earthquake, nil)),
-    firelord = UnitMetaData('firelord', FourCC('N004'), FourCC('h00W'), FourCC('I00E'), FourCC('A01I'), UnitAbilityMetaData(abilityIds.Incinerate, abilityIds.SoulBurn,abilityIds.SummonLavaSpawn, nil)),
-    guldan = UnitMetaData('guldan', FourCC('O003'), FourCC('h00X'), FourCC('I00F'), FourCC('A01L'), UnitAbilityMetaData(abilityIds.DiseaseCloud, abilityIds.HealingWard,abilityIds.Doom, nil)),
-    jaina = UnitMetaData('jaina', FourCC('H009'), FourCC('h00Y'), FourCC('I00G'), FourCC('A01M'), UnitAbilityMetaData(abilityIds.RainOfFire, abilityIds.HealingWave,abilityIds.Tornado, nil)),
-    keeperOfTheGrove = UnitMetaData('keeperOfTheGrove', FourCC('E000'), FourCC('h005'), FourCC('I00H'), FourCC('A00V'), UnitAbilityMetaData(abilityIds.EntanglingRoots, abilityIds.ForceOfNature,abilityIds.Tranquility, nil)),
-    lich = UnitMetaData('lich', FourCC('U001'), FourCC('h00K'), FourCC('I00I'), FourCC('A019'), UnitAbilityMetaData(abilityIds.FrostNova, abilityIds.FrostArmor,abilityIds.DeathAndDecay, nil)),
-    mountainKing = UnitMetaData('mountainKing', FourCC('H003'), FourCC('h00D'), FourCC('I00J'), FourCC('A012'), UnitAbilityMetaData(abilityIds.StormBolt, abilityIds.Bash,abilityIds.Avatar, nil)),
-    murloc = UnitMetaData('murloc', FourCC('N008'), FourCC('h00P'), FourCC('I00K'), FourCC('A01N'), UnitAbilityMetaData(abilityIds.RaiseDead, abilityIds.LightningShield,abilityIds.AerialShackles, nil)),
-    ogreMauler = UnitMetaData('ogreMauler', FourCC('E004'), FourCC('h008'), FourCC('I00L'), FourCC('A00Y'), UnitAbilityMetaData(abilityIds.Inferno, abilityIds.CarrionBeetles,abilityIds.Volcano, nil)),
-    paladin = UnitMetaData('paladin', FourCC('H001'), FourCC('h00B'), FourCC('I00M'), FourCC('A010'), UnitAbilityMetaData(abilityIds.HolyLight, abilityIds.DivineShield,abilityIds.Resurrection, nil)),
-    pitLord = UnitMetaData('pitLord', FourCC('N006'), FourCC('h00Z'), FourCC('I00N'), FourCC('A01J'), UnitAbilityMetaData(abilityIds.HowlOfTerror, abilityIds.CleavingAttack,abilityIds.Immolation, nil)),
-    priestessOfTheMoon = UnitMetaData('priestessOfTheMoon', FourCC('E001'), FourCC('h006'), FourCC('I00O'), FourCC('A00W'), UnitAbilityMetaData(abilityIds.ThunderClap, abilityIds.SearingArrows,abilityIds.Starfall, nil)),
-    seaWitch = UnitMetaData('seaWitch', FourCC('N002'), FourCC('h00Q'), FourCC('I00P'), FourCC('A01D'), UnitAbilityMetaData(abilityIds.ForkedLightning, abilityIds.FrostArrows,abilityIds.ManaShield, nil)),
-    shadowHunter = UnitMetaData('shadowHunter', FourCC('O004'), FourCC('h00I'), FourCC('I00Q'), FourCC('A017'), UnitAbilityMetaData(abilityIds.Hex, abilityIds.SerpentWard,abilityIds.BigBadVoodoo, nil)),
-    taurenChieftain = UnitMetaData('taurenChieftain', FourCC('O002'), FourCC('h00H'), FourCC('I00R'), FourCC('A016'), UnitAbilityMetaData(abilityIds.Shockwave, abilityIds.Reincarnation,abilityIds.WarStomp, nil)),
-    tinker = UnitMetaData('tinker', FourCC('N003'), FourCC('h00R'), FourCC('I00S'), FourCC('A01E'), UnitAbilityMetaData(abilityIds.PocketFactory, abilityIds.ClusterRockets,abilityIds.RoboGoblin, nil)),
-    warden = UnitMetaData('warden', FourCC('E003'), FourCC('h00A'), FourCC('I00T'), FourCC('A00Z'), UnitAbilityMetaData(abilityIds.FanOfKnives, abilityIds.ShadowStrike,abilityIds.Vengeance, nil))
+    akama = UnitMetaData('akama', FourCC('N009'), FourCC('h00S'), FourCC('I001'), FourCC('A01O'), UnitAbilityMetaData(abilityIds.Immolation, abilityIds.HardenedSkin, abilityIds.Taunt, abilityIds.Aura_Armor)),
+    alchemist = UnitMetaData('alchemist', FourCC('N000'), FourCC('h00O'), FourCC('I000'), FourCC('A01C'), UnitAbilityMetaData(abilityIds.HealingSpray, abilityIds.AcidBomb, abilityIds.Transmute, abilityIds.Aura_Strength)),
+    archimonde = UnitMetaData('archimonde', FourCC('U005'), FourCC('h00N'), FourCC('I002'), FourCC('A01K'), UnitAbilityMetaData(abilityIds.RainOfChaos, abilityIds.DarkPortal, abilityIds.Bash, abilityIds.Aura_MaxMana)),
+    archmange = UnitMetaData('archmange', FourCC('H002'), FourCC('h00C'), FourCC('I003'), FourCC('A011'), UnitAbilityMetaData(abilityIds.LifeDrain, abilityIds.Blizzard, abilityIds.SummonWaterElemental, abilityIds.Aura_MaxHP)),
+    beastmaster = UnitMetaData('beastmaster', FourCC('N001'), FourCC('h00T'), FourCC('I004'), FourCC('A01F'), UnitAbilityMetaData(abilityIds.SummonBear, abilityIds.SummonQuilbeast, abilityIds.Stampede, abilityIds.Aura_Agility)),
+    blademaster = UnitMetaData('blademaster', FourCC('O000'), FourCC('h00F'), FourCC('I005'), FourCC('A014'), UnitAbilityMetaData(abilityIds.CriticalStrike, abilityIds.MirrorImage, abilityIds.Bladestorm, abilityIds.Aura_Damage)),
+    bloodMage = UnitMetaData('bloodMage', FourCC('H004'), FourCC('h00E'), FourCC('I006'), FourCC('A013'), UnitAbilityMetaData(abilityIds.FlameStrike, abilityIds.Banish, abilityIds.Phoenix, abilityIds.Aura_MaxHP)),
+    brewmaster = UnitMetaData('brewmaster', FourCC('N005'), FourCC('h00U'), FourCC('I007'), FourCC('A01G'), UnitAbilityMetaData(abilityIds.BreathOfFire, abilityIds.DrunkenBrawler, abilityIds.StormEarthAndFire, abilityIds.Aura_Armor)),
+    cryptLord = UnitMetaData('cryptLord', FourCC('U003'), FourCC('h00M'), FourCC('I008'), FourCC('A01B'), UnitAbilityMetaData(abilityIds.Impale, abilityIds.SpikedCarapace, abilityIds.LocustSwarm, abilityIds.Aura_Intelligence)),
+    darkRanger = UnitMetaData('darkRanger', FourCC('N007'), FourCC('h00V'), FourCC('I009'), FourCC('A01H'), UnitAbilityMetaData(abilityIds.Silence, abilityIds.BlackArrow, abilityIds.Charm, abilityIds.Aura_Agility)),
+    deathKnight = UnitMetaData('deathKnight', FourCC('U000'), FourCC('h00J'), FourCC('I00A'), FourCC('A018'), UnitAbilityMetaData(abilityIds.DeathCoil, abilityIds.DeathPact, abilityIds.AnimateDead, abilityIds.Aura_Intelligence)),
+    demonHunter = UnitMetaData('demonHunter', FourCC('E002'), FourCC('h007'), FourCC('I00B'), FourCC('A00X'), UnitAbilityMetaData(abilityIds.ManaBurn, abilityIds.Evasion, abilityIds.Metamorphosis, abilityIds.Aura_Damage)),
+    dreadlord = UnitMetaData('dreadlord', FourCC('U002'), FourCC('h00L'), FourCC('I00C'), FourCC('A01A'), UnitAbilityMetaData(abilityIds.SpiritLink, abilityIds.Sleep, abilityIds.CarrionSwarm, abilityIds.Aura_Strength)),
+    farSeer = UnitMetaData('farSeer', FourCC('O001'), FourCC('h00G'), FourCC('I00D'), FourCC('A015'), UnitAbilityMetaData(abilityIds.FeralSpirit, abilityIds.ChainLightning, abilityIds.Earthquake, abilityIds.Aura_MaxMana)),
+    firelord = UnitMetaData('firelord', FourCC('N004'), FourCC('h00W'), FourCC('I00E'), FourCC('A01I'), UnitAbilityMetaData(abilityIds.Incinerate, abilityIds.SoulBurn, abilityIds.SummonLavaSpawn, abilityIds.Aura_Agility)),
+    guldan = UnitMetaData('guldan', FourCC('O003'), FourCC('h00X'), FourCC('I00F'), FourCC('A01L'), UnitAbilityMetaData(abilityIds.DiseaseCloud, abilityIds.HealingWard, abilityIds.Doom, abilityIds.Aura_Armor)),
+    jaina = UnitMetaData('jaina', FourCC('H009'), FourCC('h00Y'), FourCC('I00G'), FourCC('A01M'), UnitAbilityMetaData(abilityIds.RainOfFire, abilityIds.HealingWave, abilityIds.Tornado, abilityIds.Aura_MaxHP)),
+    keeperOfTheGrove = UnitMetaData('keeperOfTheGrove', FourCC('E000'), FourCC('h005'), FourCC('I00H'), FourCC('A00V'), UnitAbilityMetaData(abilityIds.EntanglingRoots, abilityIds.ForceOfNature, abilityIds.Tranquility, abilityIds.Aura_MaxMana)),
+    lich = UnitMetaData('lich', FourCC('U001'), FourCC('h00K'), FourCC('I00I'), FourCC('A019'), UnitAbilityMetaData(abilityIds.FrostNova, abilityIds.FrostArmor, abilityIds.DeathAndDecay, abilityIds.Aura_Armor)),
+    mountainKing = UnitMetaData('mountainKing', FourCC('H003'), FourCC('h00D'), FourCC('I00J'), FourCC('A012'), UnitAbilityMetaData(abilityIds.StormBolt, abilityIds.Bash, abilityIds.Avatar, abilityIds.Aura_Strength)),
+    murloc = UnitMetaData('murloc', FourCC('N008'), FourCC('h00P'), FourCC('I00K'), FourCC('A01N'), UnitAbilityMetaData(abilityIds.RaiseDead, abilityIds.LightningShield, abilityIds.AerialShackles, abilityIds.Aura_Agility)),
+    ogreMauler = UnitMetaData('ogreMauler', FourCC('E004'), FourCC('h008'), FourCC('I00L'), FourCC('A00Y'), UnitAbilityMetaData(abilityIds.Inferno, abilityIds.CarrionBeetles, abilityIds.Volcano, abilityIds.Aura_MaxMana)),
+    paladin = UnitMetaData('paladin', FourCC('H001'), FourCC('h00B'), FourCC('I00M'), FourCC('A010'), UnitAbilityMetaData(abilityIds.HolyLight, abilityIds.DivineShield, abilityIds.Resurrection, abilityIds.Aura_Intelligence)),
+    pitLord = UnitMetaData('pitLord', FourCC('N006'), FourCC('h00Z'), FourCC('I00N'), FourCC('A01J'), UnitAbilityMetaData(abilityIds.HowlOfTerror, abilityIds.CleavingAttack, abilityIds.Immolation, abilityIds.Aura_MaxHP)),
+    priestessOfTheMoon = UnitMetaData('priestessOfTheMoon', FourCC('E001'), FourCC('h006'), FourCC('I00O'), FourCC('A00W'), UnitAbilityMetaData(abilityIds.ThunderClap, abilityIds.SearingArrows, abilityIds.Starfall, abilityIds.Aura_Damage)),
+    seaWitch = UnitMetaData('seaWitch', FourCC('N002'), FourCC('h00Q'), FourCC('I00P'), FourCC('A01D'), UnitAbilityMetaData(abilityIds.ForkedLightning, abilityIds.FrostArrows, abilityIds.ManaShield, abilityIds.Aura_MaxMana)),
+    shadowHunter = UnitMetaData('shadowHunter', FourCC('O004'), FourCC('h00I'), FourCC('I00Q'), FourCC('A017'), UnitAbilityMetaData(abilityIds.Hex, abilityIds.SerpentWard, abilityIds.BigBadVoodoo, abilityIds.Aura_MaxHP)),
+    taurenChieftain = UnitMetaData('taurenChieftain', FourCC('O002'), FourCC('h00H'), FourCC('I00R'), FourCC('A016'), UnitAbilityMetaData(abilityIds.Shockwave, abilityIds.Reincarnation, abilityIds.WarStomp, abilityIds.Aura_Damage)),
+    tinker = UnitMetaData('tinker', FourCC('N003'), FourCC('h00R'), FourCC('I00S'), FourCC('A01E'), UnitAbilityMetaData(abilityIds.PocketFactory, abilityIds.ClusterRockets, abilityIds.RoboGoblin, abilityIds.Aura_Intelligence)),
+    warden = UnitMetaData('warden', FourCC('E003'), FourCC('h00A'), FourCC('I00T'), FourCC('A00Z'), UnitAbilityMetaData(abilityIds.FanOfKnives, abilityIds.ShadowStrike, abilityIds.Vengeance, abilityIds.Aura_Strength))
 }
+
+function GetUnusedAbilityIds()
+    local used = {}
+    local result = {}
+
+    for _, unit in pairs(draftableUnits) do
+        local meta = unit.abilityMetaData
+        if meta.fire    then used[meta.fire]    = true end
+        if meta.earth   then used[meta.earth]   = true end
+        if meta.water   then used[meta.water]   = true end
+        if meta.passive then used[meta.passive] = true end
+    end
+
+    for name, id in pairs(abilityIds) do
+        if not used[id] then
+            result[name] = id
+        end
+    end
+
+    return result
+end
 
 local GLOBAL_DRAFT_SETS = {
     unitTypeIds = {},
