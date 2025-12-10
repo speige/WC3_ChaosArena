@@ -947,6 +947,7 @@ function OnUnitDrafted(unit)
     UnitRemoveAbility(realUnit, ATTACK_ABILITY_ID)
     UnitRemoveAbility(realUnit, MOVE_ABILITY_ID)
     SetupUnitAbilities(realUnit)
+    PauseUnit(realUnit, true) --NOTE: Prevents placmholders from casting abilities
 
     SelectUnitForPlayerSingle(playerBuilders.primary[playerId], player)
     

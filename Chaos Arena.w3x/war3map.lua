@@ -555,7 +555,7 @@ function SpawnWaveForPlayer(playerId)
             local y = GetUnitY(unit)            
             local clonedUnit = CreateUnit(proxyPlayer, unitType, x + offset.x, y + offset.y, CalcUnitRotationAngle(x, y, 0, 0))
             UnitRemoveAbility(clonedUnit, INVULNERABLE_ABILITY_ID)
-            UnitAddAbility(clonedUnit, ATTACK_ABILITY_ID)
+            --UnitAddAbility(clonedUnit, ATTACK_ABILITY_ID)
 
             --[[
             local heroLevel = GetHeroLevel(unit)
@@ -951,6 +951,7 @@ function OnUnitDrafted(unit)
     UnitRemoveAbility(realUnit, ATTACK_ABILITY_ID)
     UnitRemoveAbility(realUnit, MOVE_ABILITY_ID)
     SetupUnitAbilities(realUnit)
+    PauseUnit(realUnit, true) --NOTE: Prevents placmholders from casting abilities
 
     SelectUnitForPlayerSingle(playerBuilders.primary[playerId], player)
     
@@ -1057,9 +1058,11 @@ function ApplyNegativeHPRegen()
                     for i = #unitsInWave, 1, -1 do
                         local unit = unitsInWave[i]
                         if IsUnitAliveBJ(unit) and GetUnitState(unit, UNIT_STATE_LIFE) > 0 then
+                            local baseDamage = 1.0
                             local damage = baseDamage * damageMultiplier
 
                             SetUnitState(unit, UNIT_STATE_LIFE, GetUnitState(unit, UNIT_STATE_LIFE) - damage)
+                            UnitAddAbility(unit, FourCC('B007'))
                             if not IsUnitAliveBJ(unit) or GetUnitState(unit, UNIT_STATE_LIFE) <= 0 then
                                 table.remove(unitsInWave, i)
                             end
@@ -1080,9 +1083,7 @@ function GrantPassiveXP()
             local player = Player(playerId)
             if GetPlayerSlotState(player) == PLAYER_SLOT_STATE_PLAYING then
                 local builder = playerBuilders.primary[playerId]
-                if builder then
-                    AddHeroXP(builder, 1, true)
-                end
+                AddHeroXP(builder, 1, true)
             end
         end
     end)
@@ -1187,7 +1188,6 @@ function PrintDebugInfo()
 end
 
 function Init()
-    xpcall(function()
 	MeleeStartingVisibility()
 	MeleeClearExcessUnits()
 	FogEnableOff()
@@ -1217,7 +1217,6 @@ function Init()
     local buildTrigger = CreateTrigger()
     TriggerRegisterAnyUnitEventBJ(buildTrigger, EVENT_PLAYER_UNIT_CONSTRUCT_FINISH)
     TriggerAddAction(buildTrigger, OnConstructFinish)
-    end, function(error) print(error) end)
 
     --PrintDebugInfo()
     

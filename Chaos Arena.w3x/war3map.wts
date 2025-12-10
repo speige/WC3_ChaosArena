@@ -1846,3 +1846,333 @@ STRING 539
 Units from prior waves take increasing damage over time the longer the stay alive
 }
 
+STRING 540
+// Abilities: A00U (Entangling Roots), Tip (Tooltip - Normal)
+{
+Entangling Roots
+}
+
+STRING 541
+// Abilities: A01P (Force of Nature), Tip (Tooltip - Normal)
+{
+Force of Nature
+}
+
+STRING 542
+// Abilities: A01R (Searing Arrows), Tip (Tooltip - Normal)
+{
+Searing Arrows
+}
+
+STRING 543
+// Abilities: A01T (Thunder Clap), Tip (Tooltip - Normal)
+{
+Thunder Clap
+}
+
+STRING 544
+// Abilities: A01U (Mana Burn), Tip (Tooltip - Normal)
+{
+Mana Burn
+}
+
+STRING 545
+// Abilities: A01V (Immolation), Tip (Tooltip - Normal)
+{
+Activate Immolation
+}
+
+STRING 546
+// Abilities: A01X (Evasion), Tip (Tooltip - Normal)
+{
+Evasion
+}
+
+STRING 547
+// Abilities: A01Y (Fan of Knives), Tip (Tooltip - Normal)
+{
+Fan of Knives
+}
+
+STRING 548
+// Abilities: A01Z (Shadow Strike), Tip (Tooltip - Normal)
+{
+Shadow Strike
+}
+
+STRING 549
+// Abilities: A022 (Carrion Beetles), Tip (Tooltip - Normal)
+{
+Carrion Beetles
+}
+
+STRING 550
+// Abilities: A024 (Holy Light), Tip (Tooltip - Normal)
+{
+Holy Light
+}
+
+STRING 551
+// Abilities: A025 (Divine Shield), Tip (Tooltip - Normal)
+{
+Divine Shield
+}
+
+STRING 552
+// Abilities: A027 (Blizzard), Tip (Tooltip - Normal)
+{
+Blizzard
+}
+
+STRING 553
+// Abilities: A029 (Summon Water Elemental), Tip (Tooltip - Normal)
+{
+Summon Water Elemental
+}
+
+STRING 554
+// Abilities: A02A (Bash), Tip (Tooltip - Normal)
+{
+Bash
+}
+
+STRING 555
+// Abilities: A02B (Storm Bolt), Tip (Tooltip - Normal)
+{
+Storm Bolt
+}
+
+STRING 556
+// Abilities: A02D (Flame Strike), Tip (Tooltip - Normal)
+{
+Flame Strike
+}
+
+STRING 557
+// Abilities: A02E (Banish), Tip (Tooltip - Normal)
+{
+Banish
+}
+
+STRING 558
+// Abilities: A02F (Critical Strike), Tip (Tooltip - Normal)
+{
+Critical Strike
+}
+
+STRING 559
+// Abilities: A02G (Mirror Image), Tip (Tooltip - Normal)
+{
+Mirror Image
+}
+
+STRING 560
+// Abilities: A02I (Chain Lightning), Tip (Tooltip - Normal)
+{
+Chain Lightning
+}
+
+STRING 561
+// Abilities: A02J (Feral Spirit), Tip (Tooltip - Normal)
+{
+Feral Spirit
+}
+
+STRING 562
+// Abilities: A02M (War Stomp), Tip (Tooltip - Normal)
+{
+War Stomp
+}
+
+STRING 563
+// Abilities: A02N (Shockwave), Tip (Tooltip - Normal)
+{
+Shockwave
+}
+
+STRING 564
+// Abilities: A02O (Serpent Ward), Tip (Tooltip - Normal)
+{
+Serpent Ward
+}
+
+STRING 565
+// Abilities: A02P (Hex), Tip (Tooltip - Normal)
+{
+Hex
+}
+
+STRING 566
+// Abilities: A02R (Death Coil), Tip (Tooltip - Normal)
+{
+Death Coil
+}
+
+STRING 567
+// Abilities: A02S (Death Pact), Tip (Tooltip - Normal)
+{
+Death Pact
+}
+
+STRING 568
+// Abilities: A02U (Frost Nova), Tip (Tooltip - Normal)
+{
+Frost Nova
+}
+
+STRING 569
+// Abilities: A02V (Frost Armor), Tip (Tooltip - Normal)
+{
+Frost Armor
+}
+
+STRING 570
+// Abilities: A02Y (Sleep), Tip (Tooltip - Normal)
+{
+Sleep
+}
+
+STRING 571
+// Abilities: A02Z (Carrion Swarm), Tip (Tooltip - Normal)
+{
+Carrion Swarm
+}
+
+STRING 572
+// Abilities: A030 (Impale), Tip (Tooltip - Normal)
+{
+Impale
+}
+
+STRING 573
+// Abilities: A032 (Spiked Carapace), Tip (Tooltip - Normal)
+{
+Spiked Carapace
+}
+
+STRING 574
+// Abilities: A033 (Healing Spray), Tip (Tooltip - Normal)
+{
+Healing Spray
+}
+
+STRING 575
+// Abilities: A034 (Acid Bomb), Tip (Tooltip - Normal)
+{
+Acid Bomb
+}
+
+STRING 576
+// Abilities: A035 (Forked Lightning), Tip (Tooltip - Normal)
+{
+Forked Lightning
+}
+
+STRING 577
+// Abilities: A036 (Frost Arrows), Tip (Tooltip - Normal)
+{
+Frost Arrows
+}
+
+STRING 578
+// Abilities: A037 (Mana Shield), Tip (Tooltip - Normal)
+{
+Activate Mana Shield
+}
+
+STRING 579
+// Abilities: A038 (Pocket Factory), Tip (Tooltip - Normal)
+{
+Pocket Factory
+}
+
+STRING 580
+// Abilities: A039 (Cluster Rockets), Tip (Tooltip - Normal)
+{
+Cluster Rockets
+}
+
+STRING 581
+// Abilities: A03B (Summon Bear), Tip (Tooltip - Normal)
+{
+Summon Bear
+}
+
+STRING 582
+// Abilities: A03C (Summon Quilbeast), Tip (Tooltip - Normal)
+{
+Summon Quilbeast
+}
+
+STRING 583
+// Abilities: A03E (Breath of Fire), Tip (Tooltip - Normal)
+{
+Breath of Fire
+}
+
+STRING 584
+// Abilities: A03F (Drunken Brawler), Tip (Tooltip - Normal)
+{
+Drunken Brawler
+}
+
+STRING 585
+// Abilities: A03H (Silence), Tip (Tooltip - Normal)
+{
+Silence
+}
+
+STRING 586
+// Abilities: A03I (Black Arrow), Tip (Tooltip - Normal)
+{
+Black Arrow
+}
+
+STRING 587
+// Abilities: A03J (Incinerate), Tip (Tooltip - Normal)
+{
+Incinerate
+}
+
+STRING 588
+// Abilities: A03K (Soul Burn), Tip (Tooltip - Normal)
+{
+Soul Burn
+}
+
+STRING 589
+// Abilities: A03L (Summon Lava Spawn), Tip (Tooltip - Normal)
+{
+Summon Lava Spawn
+}
+
+STRING 590
+// Abilities: A03M (Howl of Terror), Tip (Tooltip - Normal)
+{
+Howl of Terror
+}
+
+STRING 591
+// Abilities: A03N (Cleaving Attack), Tip (Tooltip - Normal)
+{
+Cleaving Attack
+}
+
+STRING 592
+// Abilities: A03S (Rain of Fire), Tip (Tooltip - Normal)
+{
+Rain of Fire
+}
+
+STRING 593
+// Abilities: A03T (Healing Wave), Tip (Tooltip - Normal)
+{
+Healing Wave
+}
+
+STRING 594
+// Abilities: A004 (Life Drain), Tip (Tooltip - Normal)
+{
+Life Drain
+}
+
