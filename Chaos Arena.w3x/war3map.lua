@@ -258,7 +258,7 @@ for _, value in pairs(draftableUnits) do
     GLOBAL_DRAFT_SETS.draftAbilityIds[value.draftAbilityId] = value
 end
 
-local BUILDER_UNIT_TYPE_ID = FourCC('h000')
+local BUILDER_UNIT_TYPE_ID = FourCC('O005')
 local ALTAR_UNIT_TYPE_ID = FourCC('h010')
 local DRAFT_ABILITY_ID = FourCC('A000')
 local CANCEL_ABILITY_ID = FourCC('A001')
@@ -555,7 +555,7 @@ function SpawnWaveForPlayer(playerId)
             local y = GetUnitY(unit)            
             local clonedUnit = CreateUnit(proxyPlayer, unitType, x + offset.x, y + offset.y, CalcUnitRotationAngle(x, y, 0, 0))
             UnitRemoveAbility(clonedUnit, INVULNERABLE_ABILITY_ID)
-            --UnitAddAbility(clonedUnit, ATTACK_ABILITY_ID)
+            UnitAddAbility(clonedUnit, ATTACK_ABILITY_ID)
 
             --[[
             local heroLevel = GetHeroLevel(unit)
@@ -572,13 +572,35 @@ function SpawnWaveForPlayer(playerId)
             local attackLoc = Location(0, 0)
             IssuePointOrderLoc(clonedUnit, 'attack', attackLoc)
             RemoveLocation(attackLoc)
+
+            if not currentWaveUnits[playerId] then
+                currentWaveUnits[playerId] = {}
+            end
+            table.insert(currentWaveUnits[playerId], clonedUnit)
         end
     end)
     
     DestroyGroup(group)
 end
 
+local currentWaveUnits = {}
+local oldWaves = {}
+local waveNumber = 0
 function SpawnWaveAllPlayers()
+    waveNumber = waveNumber + 1
+    for playerId = 0, 11 do
+        if currentWaveUnits[playerId] and #currentWaveUnits[playerId] > 0 then
+            if not oldWaves[playerId] then
+                oldWaves[playerId] = {}
+            end
+            oldWaves[playerId][waveNumber - 1] = {}
+            for _, unit in ipairs(currentWaveUnits[playerId]) do
+                table.insert(oldWaves[playerId][waveNumber - 1], unit)
+            end
+        end
+        currentWaveUnits[playerId] = {}
+    end
+
     for playerId = 0, 11 do
         local player = Player(playerId)
         if GetPlayerSlotState(player) == PLAYER_SLOT_STATE_PLAYING then
@@ -945,7 +967,7 @@ function OnSoulSiphonEffect()
 	local AOE_RADIUS = 175
     local casterOwner = GetOwningPlayer(caster)
     local group = CreateGroup()
-    GroupEnumUnitsInRange(group, x, y, AOE_RADIUS, nil)
+    GroupEnumUnitsInRange(group, targetX, targetY, AOE_RADIUS, nil)
     
     ForGroup(group, function()
         local target = GetEnumUnit()
@@ -962,7 +984,7 @@ function OnSoulSiphonEffect()
             if math.random(1, 100) <= executeChance then
                 KillUnit(target)
                 AdjustPlayerStateBJ(1, casterOwner, PLAYER_STATE_RESOURCE_LUMBER)
-                --AdjustPlayerStateBJ(5, casterOwner, PLAYER_STATE_RESOURCE_GOLD) -- should already be done by death event
+                --AdjustPlayerStateBJ(5, casterOwner, PLAYER_STATE_RESOURCE_GOLD) -- todo: test if already granted by OnDeath event
             end
         end
     end)
@@ -977,14 +999,13 @@ function OnHealingWaveEffect()
 	local AOE_RADIUS = 350
     local casterOwner = GetOwningPlayer(caster)
     local group = CreateGroup()
-    GroupEnumUnitsInRange(group, x, y, AOE_RADIUS, nil)
+    GroupEnumUnitsInRange(group, targetX, targetY, AOE_RADIUS, nil)
     
     ForGroup(group, function()
         local target = GetEnumUnit()        
         if IsUnitOwnedByPlayer(target, casterOwner) and GetUnitState(target, UNIT_STATE_LIFE) > 0 then
             local maxHP = GetUnitState(target, UNIT_STATE_MAX_LIFE)
             local currentHP = GetUnitState(target, UNIT_STATE_LIFE)
-            local missingHP = maxHP - currentHP
             local percentHP = 100 * currentHP / maxHP
             
             local healAmount = (100 - percentHP) * maxHP / 4           
@@ -1019,6 +1040,49 @@ function GrantWoodPassive()
             local player = Player(playerId)
             if GetPlayerSlotState(player) == PLAYER_SLOT_STATE_PLAYING then
                 AdjustPlayerStateBJ(1, player, PLAYER_STATE_RESOURCE_LUMBER)
+            end
+        end
+    end)
+end
+
+function ApplyNegativeHPRegen()
+    local hpRegenTimer = CreateTimer()
+    TimerStart(hpRegenTimer, 1.0, true, function()
+        for playerId = 0, 11 do
+            if oldWaves[playerId] then
+                for waveId, unitsInWave in pairs(oldWaves[playerId]) do
+                    local ageOfWave = waveNumber - waveId
+                    local damageMultiplier = math.pow(1.1, ageOfWave)
+
+                    for i = #unitsInWave, 1, -1 do
+                        local unit = unitsInWave[i]
+                        if IsUnitAliveBJ(unit) and GetUnitState(unit, UNIT_STATE_LIFE) > 0 then
+                            local damage = baseDamage * damageMultiplier
+
+                            SetUnitState(unit, UNIT_STATE_LIFE, GetUnitState(unit, UNIT_STATE_LIFE) - damage)
+                            if not IsUnitAliveBJ(unit) or GetUnitState(unit, UNIT_STATE_LIFE) <= 0 then
+                                table.remove(unitsInWave, i)
+                            end
+                        else
+                            table.remove(unitsInWave, i)
+                        end
+                    end
+                end
+            end
+        end
+    end)
+end
+
+function GrantPassiveXP()
+    local xpTimer = CreateTimer()
+    TimerStart(xpTimer, 5.0, true, function()
+        for playerId = 0, 11 do
+            local player = Player(playerId)
+            if GetPlayerSlotState(player) == PLAYER_SLOT_STATE_PLAYING then
+                local builder = playerBuilders.primary[playerId]
+                if builder then
+                    AddHeroXP(builder, 1, true)
+                end
             end
         end
     end)
@@ -1123,6 +1187,7 @@ function PrintDebugInfo()
 end
 
 function Init()
+    xpcall(function()
 	MeleeStartingVisibility()
 	MeleeClearExcessUnits()
 	FogEnableOff()
@@ -1133,6 +1198,8 @@ function Init()
     CreateSpawnTimer()
     InitFoodCapTimer()
     GrantWoodPassive()
+    ApplyNegativeHPRegen()
+    GrantPassiveXP()
 
     local worldBounds = GetWorldBounds()
     MIN_X = GetRectMinX(worldBounds)
@@ -1150,6 +1217,7 @@ function Init()
     local buildTrigger = CreateTrigger()
     TriggerRegisterAnyUnitEventBJ(buildTrigger, EVENT_PLAYER_UNIT_CONSTRUCT_FINISH)
     TriggerAddAction(buildTrigger, OnConstructFinish)
+    end, function(error) print(error) end)
 
     --PrintDebugInfo()
     

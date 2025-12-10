@@ -84,7 +84,7 @@ Force 1
 }
 
 STRING 30
-// Units: h000 (Avatar), Name (Name)
+// Units: O005 (Avatar), Name (Name)
 {
 Avatar
 }
@@ -1832,5 +1832,17 @@ STRING 537
 // Abilities: A042 (Water), Tip (Tooltip - Normal)
 {
 |cff0000ffWater|r
+}
+
+STRING 538
+// Buffs/Effects: B007 (), Bufftip (Tooltip)
+{
+Anti-Snowball Poison
+}
+
+STRING 539
+// Buffs/Effects: B007 (), Buffubertip (Tooltip - Extended)
+{
+Units from prior waves take increasing damage over time the longer the stay alive
 }
 
