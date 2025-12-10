@@ -180,6 +180,22 @@ function GetUnitTypeIdMetaData(unitTypeId)
     return nil
 end
 
+function MapListValues(tbl, fn)
+    local result = {}
+    for i = 1, #tbl do
+        table.insert(result, fn(tbl[i]))
+    end
+    return result
+end
+
+function get_table_keys(t)
+    local keys = {}
+    for key, _ in pairs(t) do
+        table.insert(keys, key)
+    end
+    return keys
+end
+
 function DEBUG_GetDuplicateAbilityIds()
     local duplicated = {}
     local used = {}
@@ -261,7 +277,8 @@ local CANCEL_ABILITY_ID = FourCC('A001')
 local SWAP_UNITS_ABILITY_ID = FourCC('A03Z')
 local ATTACK_ABILITY_ID = FourCC('Aatk')
 local MOVE_ABILITY_ID = FourCC('Amov')
-local INVULNERABLE_ABILITY_ID = FourCC('Avul') --note: used to hide health bars (also requires ObjectEditor IsBuilding=true, but can still move)
+--note: used to hide health bars (also requires ObjectEditor IsBuilding=true, but can still move)
+local INVULNERABLE_ABILITY_ID = FourCC('Avul')
 
 local ORDER_IDs = {
     stop = 851972
@@ -348,10 +365,12 @@ function CalcUnitRotationAngle(unitLocationX, unitLocationY, lookAtX, lookAtY)
     return result
 end
 
+local HOTKEY_ON = ConvertAbilityStringField(FourCC('ahky'))
+local HOTKEY_OFF = ConvertAbilityStringField(FourCC('auhk'))
 function SetAbilityHotkey(unit, abilityId, key)
     local ability = BlzGetUnitAbility(unit, abilityId)
-    BlzSetAbilityStringField(ability, ConvertAbilityStringField(FourCC('ahky')), key)
-    BlzSetAbilityStringField(ability, ConvertAbilityStringField(FourCC('auhk')), key)
+    BlzSetAbilityStringField(ability, HOTKEY_ON, key)
+    BlzSetAbilityStringField(ability, HOTKEY_OFF, key)
 end
 
 function GetUnitAbilityTooltip(unit, abilityId, tooltip)
@@ -419,6 +438,14 @@ function GetUnitActivatedElements(unit)
     }
 end
 
+function SetAbilityUIState(whichUnit, abilityId, disabled, hidden)
+    --NOTE: abilities have internal counter for disabled & hidden counts in case they're called simultaneously from multiple timed sources. Trick to reset counter is remove/add, then call the real values you want after a slight delay
+    UnitRemoveAbility(whichUnit, abilityId)
+    UnitAddAbility(whichUnit, abilityId)
+    BlzUnitDisableAbility(whichUnit, abilityId, disabled, hidden)
+end
+
+
 function SetupUnitAbilities(unit)
     local unitType = GetUnitTypeId(unit)
     local elements = GetUnitActivatedElements(unit)
@@ -433,13 +460,11 @@ function SetupUnitAbilities(unit)
     end
 
     if abilityMetaData.passive then
-        UnitAddAbility(unit, abilityMetaData.passive)
         SetAbilityUIState(unit, abilityMetaData.passive, false, false)
     end
     
     local hideWhenDisabled = metaData == CIRCLE_OF_POWER_METADATA
     if abilityMetaData.water then
-        UnitAddAbility(unit, abilityMetaData.water)
         SetAbilityUIState(unit, abilityMetaData.water, not elements.water, not elements.water and hideWhenDisabled)
         SetAbilityHotkey(unit, abilityMetaData.water, 'W')
         if not elements.water and not hideWhenDisabled then
@@ -447,7 +472,6 @@ function SetupUnitAbilities(unit)
         end
     end
     if abilityMetaData.earth then
-        UnitAddAbility(unit, abilityMetaData.earth)
         SetAbilityUIState(unit, abilityMetaData.earth, not elements.earth, not elements.earth and hideWhenDisabled)
         SetAbilityHotkey(unit, abilityMetaData.earth, 'E')
         if not elements.earth and not hideWhenDisabled then
@@ -455,7 +479,6 @@ function SetupUnitAbilities(unit)
         end
     end
     if abilityMetaData.fire then
-        UnitAddAbility(unit, abilityMetaData.fire)
         SetAbilityUIState(unit, abilityMetaData.fire, not elements.fire, not elements.fire and hideWhenDisabled)
         SetAbilityHotkey(unit, abilityMetaData.fire, 'R')
         if not elements.fire and not hideWhenDisabled then
@@ -467,7 +490,7 @@ end
 function CopyUnitGear(sourceUnit, targetUnit)
     for slotIndex = 0, 5 do
         local item = UnitItemInSlot(targetUnit, slotIndex)
-        if (item) then
+        if item then
             RemoveItem(item)
         end
     end
@@ -518,16 +541,16 @@ function GetSpawnOffset(playerId)
     local startX = GetPlayerStartLocationX(player)
     local startY = GetPlayerStartLocationY(player)
     local result = { x = 0, y = 0 }
-    if (math.abs(startX) >= math.abs(startY)) then
+    if math.abs(startX) >= math.abs(startY) then
         result.x = offset
 
-        if (startX > 0) then
+        if startX > 0 then
             result.x = -1 * result.x
         end
     else
         result.y = offset
 
-        if (startY > 0) then
+        if startY > 0 then
             result.y = -1 * result.y
         end
     end
@@ -654,22 +677,6 @@ local playerBuilders = {
 }
 local playerDecks = {}
 
-function MapListValues(tbl, fn)
-    local result = {}
-    for i = 1, #tbl do
-        table.insert(result, fn(tbl[i]))
-    end
-    return result
-end
-
-function get_table_keys(t)
-    local keys = {}
-    for key, _ in pairs(t) do
-        table.insert(keys, key)
-    end
-    return keys
-end
-
 function CloneAndShuffleArray(arr)
     local shuffled = {}
     for i = 1, #arr do
@@ -769,7 +776,7 @@ function DrawChoicesFromDeck(playerId)
 end
 
 function AddDraftItemsToAltar(playerId)    
-    if (GetPlayerState(Player(playerId), PLAYER_STATE_RESOURCE_FOOD_USED) >= GetPlayerState(Player(playerId), PLAYER_STATE_RESOURCE_FOOD_CAP)) then
+    if GetPlayerState(Player(playerId), PLAYER_STATE_RESOURCE_FOOD_USED) >= GetPlayerState(Player(playerId), PLAYER_STATE_RESOURCE_FOOD_CAP) then
         return
     end
 
@@ -795,11 +802,22 @@ function OnConstructFinish()
     end
 end
 
-function SetAbilityUIState(whichUnit, abilityId, disabled, hidden)
-    --NOTE: abilities have internal counter for disable & hidden counts in case they're called simultaneously from multiple timed sources, but remove/add resets counter
-    UnitRemoveAbility(whichUnit, abilityId)
-    UnitAddAbility(whichUnit, abilityId)
-    BlzUnitDisableAbility(whichUnit, abilityId, disabled, hidden)
+local STOP_ORDER_ID = 851972
+function OnIssuedOrder() 
+    if GetIssuedOrderId() == STOP_ORDER_ID then
+        return
+    end
+
+    if GetSpellAbilityId() == SWAP_UNITS_ABILITY_ID then
+        return
+    end
+
+    local unit = GetTriggerUnit()
+    if GetPlayerId(GetOwningPlayer(unit)) <= 11 and unitTypeIdToName[GetUnitTypeId(unit)] ~= nil then
+        IssueImmediateOrderById(unit, STOP_ORDER_ID)
+        PauseUnit(unit, true)
+        PauseUnit(unit, false)
+    end
 end
 
 local MIN_X, MIN_Y
@@ -836,7 +854,8 @@ function SwapTileUnits(caster, target)
     CopyUnitGear(target, newCaster)
     CopyUnitGear(caster, newTarget)
 
-    if GetUnitAbilityLevel(target, SWAP_UNITS_ABILITY_ID) > 0 then
+    local targetStillHadSwap = UnitRemoveAbility(target, SWAP_UNITS_ABILITY_ID)
+    if targetStillHadSwap then
         UnitAddAbility(newTarget, SWAP_UNITS_ABILITY_ID)
     end
 
@@ -845,8 +864,6 @@ function SwapTileUnits(caster, target)
 
     SetupUnitAbilities(newCaster)
     SetupUnitAbilities(newTarget)
-
-    UnitRemoveAbility(newCaster, SWAP_UNITS_ABILITY_ID)
 end
 
 function OnSpellEffect()
@@ -886,7 +903,7 @@ end
 function UnitHasItems(unit)
     for slotIndex = 0, 5 do
         local item = UnitItemInSlot(unit, slotIndex)
-        if (item) then
+        if item then
             return true
         end
     end
@@ -901,7 +918,7 @@ function OnUnitDrafted(unit)
 
     for slotIndex = 0, 5 do
         local item = UnitItemInSlot(altar, slotIndex)
-        if (item) then
+        if item then
             RemoveItem(item)
         end
     end
@@ -947,11 +964,10 @@ function OnUnitDrafted(unit)
     UnitRemoveAbility(realUnit, ATTACK_ABILITY_ID)
     UnitRemoveAbility(realUnit, MOVE_ABILITY_ID)
     SetupUnitAbilities(realUnit)
-    PauseUnit(realUnit, true) --NOTE: Prevents placmholders from casting abilities
 
     SelectUnitForPlayerSingle(playerBuilders.primary[playerId], player)
     
-    --note: takes a second to update food cap, which we need to avoid drafting if maxed
+    --NOTE: takes a second to update food cap, which we need to avoid drafting if maxed
     RunDelayed(function()
         AddDraftItemsToAltar(GetPlayerId(GetOwningPlayer(builder)))
     end, 1)
@@ -981,7 +997,8 @@ function OnSoulSiphonEffect()
             if math.random(1, 100) <= executeChance then
                 KillUnit(target)
                 AdjustPlayerStateBJ(1, casterOwner, PLAYER_STATE_RESOURCE_LUMBER)
-                --AdjustPlayerStateBJ(5, casterOwner, PLAYER_STATE_RESOURCE_GOLD) -- todo: test if already granted by OnDeath event
+                -- todo: test if already granted by OnDeath event
+                --AdjustPlayerStateBJ(5, casterOwner, PLAYER_STATE_RESOURCE_GOLD)
             end
         end
     end)
@@ -1042,6 +1059,7 @@ function GrantWoodPassive()
     end)
 end
 
+local ANTI_SNOWBALL_POISON = FourCC('B007')
 function ApplyNegativeHPRegen()
     local hpRegenTimer = CreateTimer()
     TimerStart(hpRegenTimer, 1.0, true, function()
@@ -1058,7 +1076,8 @@ function ApplyNegativeHPRegen()
                             local damage = baseDamage * damageMultiplier
 
                             SetUnitState(unit, UNIT_STATE_LIFE, GetUnitState(unit, UNIT_STATE_LIFE) - damage)
-                            UnitAddAbility(unit, FourCC('B007'))
+                            --todo: test, but it appears there's no function for adding buffs so I probably need to do it with a dummy unit casting a spell
+                            UnitAddAbility(unit, ANTI_SNOWBALL_POISON)
                             if not IsUnitAliveBJ(unit) or GetUnitState(unit, UNIT_STATE_LIFE) <= 0 then
                                 table.remove(unitsInWave, i)
                             end
@@ -1074,12 +1093,12 @@ end
 
 function GrantPassiveXP()
     local xpTimer = CreateTimer()
-    TimerStart(xpTimer, 5.0, true, function()
+    TimerStart(xpTimer, 60.0, true, function()
         for playerId = 0, 11 do
             local player = Player(playerId)
             if GetPlayerSlotState(player) == PLAYER_SLOT_STATE_PLAYING then
                 local builder = playerBuilders.primary[playerId]
-                AddHeroXP(builder, 1, true)
+                AddHeroXP(builder, 15, true)
             end
         end
     end)
@@ -1119,7 +1138,7 @@ function InitPlayerAlliances()
         SetPlayerTeam(proxyPlayer, team)
 
         for otherPlayerIndex=0,11 do
-            if (playerIndex ~= otherPlayerIndex) then
+            if playerIndex ~= otherPlayerIndex then
                 local otherProxyPlayer = Player(playerIdMapping_realToProxy[otherPlayerIndex])
                 SetPlayerAlliance(otherProxyPlayer, proxyPlayer, ALLIANCE_PASSIVE, true)
                 SetPlayerAlliance(proxyPlayer, otherProxyPlayer, ALLIANCE_PASSIVE, true)
@@ -1213,8 +1232,11 @@ function Init()
     local buildTrigger = CreateTrigger()
     TriggerRegisterAnyUnitEventBJ(buildTrigger, EVENT_PLAYER_UNIT_CONSTRUCT_FINISH)
     TriggerAddAction(buildTrigger, OnConstructFinish)
-
     --PrintDebugInfo()
+
+    local disableDraftUnitAbilities = CreateTrigger()
+    TriggerRegisterAnyUnitEventBJ(disableDraftUnitAbilities, EVENT_PLAYER_UNIT_ISSUED_ORDER)
+    TriggerAddAction(disableDraftUnitAbilities, OnIssuedOrder)
     
 end
 

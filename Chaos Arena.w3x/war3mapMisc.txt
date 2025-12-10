@@ -2,4 +2,7 @@
 FoodCeiling=9
 HeroExpRange=0.0
 MaxLevelHeroesDrainExp=0
+NeedHeroXP=100
+NeedHeroXPFormulaA=1.5
+NeedHeroXPFormulaB=0.0
 

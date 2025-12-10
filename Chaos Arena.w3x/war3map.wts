@@ -2176,3 +2176,64 @@ STRING 594
 Life Drain
 }
 
+STRING 595
+// Upgrades: R000 (Animal War Training), Name (Name)
+{
+|cffff0000Fire|r
+}
+
+STRING 596
+// Upgrades: R000 (Animal War Training), Tip (Tooltip)
+{
+Unlocks the summoned unit's |cffff0000Fire|r ability
+}
+
+STRING 597
+// Upgrades: R000 (Animal War Training), Hotkey (Hotkey)
+{
+R
+}
+
+STRING 598
+// Upgrades: R001 (Animal War Training), Name (Name)
+{
+|cff0000ffWater|r
+}
+
+STRING 599
+// Upgrades: R001 (Animal War Training), Tip (Tooltip)
+{
+Unlocks the summoned unit's |cff0000ffWater|r ability
+}
+
+STRING 600
+// Upgrades: R001 (Animal War Training), Hotkey (Hotkey)
+{
+W
+}
+
+STRING 601
+// Upgrades: R002 (Animal War Training), Name (Name)
+{
+|cff00ff00Earth|r
+
+}
+
+STRING 602
+// Upgrades: R002 (Animal War Training), Tip (Tooltip)
+{
+Unlocks the summoned unit's |cff00ff00Earth|r ability
+}
+
+STRING 603
+// Upgrades: R002 (Animal War Training), Hotkey (Hotkey)
+{
+E
+}
+
+STRING 605
+// Units: O005 (Avatar), Propernames (Proper Names)
+{
+Avatar, 
+}
+
