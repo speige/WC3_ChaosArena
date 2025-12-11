@@ -414,10 +414,10 @@ function UpdateHeroLevel(unit, level)
     end
 end
 
-local TARGETS_DEBRIS = 1 << 8
+local TARGETS_ITEM = 1 << 5
 function DisableAttacks(unit)
-    BlzSetUnitWeaponIntegerField(unit, UNIT_WEAPON_IF_ATTACK_TARGETS_ALLOWED, 0, TARGETS_DEBRIS)
-    BlzSetUnitWeaponIntegerField(unit, UNIT_WEAPON_IF_ATTACK_TARGETS_ALLOWED, 1, TARGETS_DEBRIS)
+    BlzSetUnitWeaponIntegerField(unit, UNIT_WEAPON_IF_ATTACK_TARGETS_ALLOWED, 0, TARGETS_ITEM)
+    BlzSetUnitWeaponIntegerField(unit, UNIT_WEAPON_IF_ATTACK_TARGETS_ALLOWED, 1, TARGETS_ITEM)
 end
 
 function CalcUnitRotationAngle(unitLocationX, unitLocationY, lookAtX, lookAtY)
@@ -632,6 +632,12 @@ function GetSpawnOffset(playerId)
     return result
 end
 
+local spawnedUnitsPerPlayerPerWave = {}
+for playerId = 0, 11 do
+    spawnedUnitsPerPlayerPerWave[playerId] = {}
+end
+
+local waveNumber = 0
 function SpawnWaveForPlayer(playerId)
     local player = Player(playerId)
     local proxyPlayer = Player(playerIdMapping_realToProxy[playerId])
@@ -669,32 +675,17 @@ function SpawnWaveForPlayer(playerId)
             IssuePointOrderLoc(clonedUnit, 'attack', attackLoc)
             RemoveLocation(attackLoc)
 
-            if not currentWaveUnits[playerId] then
-                currentWaveUnits[playerId] = {}
-            end
-            table.insert(currentWaveUnits[playerId], clonedUnit)
+            table.insert(spawnedUnitsPerPlayerPerWave[playerId][waveNumber], clonedUnit)
         end
     end)
     
     DestroyGroup(group)
 end
 
-local currentWaveUnits = {}
-local oldWaves = {}
-local waveNumber = 0
 function SpawnWaveAllPlayers()
     waveNumber = waveNumber + 1
     for playerId = 0, 11 do
-        if currentWaveUnits[playerId] and #currentWaveUnits[playerId] > 0 then
-            if not oldWaves[playerId] then
-                oldWaves[playerId] = {}
-            end
-            oldWaves[playerId][waveNumber - 1] = {}
-            for _, unit in ipairs(currentWaveUnits[playerId]) do
-                table.insert(oldWaves[playerId][waveNumber - 1], unit)
-            end
-        end
-        currentWaveUnits[playerId] = {}
+        spawnedUnitsPerPlayerPerWave[playerId][waveNumber] = {}
     end
 
     for playerId = 0, 11 do
@@ -1199,31 +1190,35 @@ function GrantWoodPassive()
     end)
 end
 
+function pow(base, exponent)
+    return math.exp(math.log(base) * exponent)
+end
+
 local ANTI_SNOWBALL_POISON = FourCC('B007')
 function ApplyNegativeHPRegen()
     local hpRegenTimer = CreateTimer()
-    TimerStart(hpRegenTimer, 1.0, true, function()
+    TimerStart(hpRegenTimer, 15.0, true, function()
         for playerId = 0, 11 do
-            if oldWaves[playerId] then
-                for waveId, unitsInWave in pairs(oldWaves[playerId]) do
-                    local ageOfWave = waveNumber - waveId
-                    local damageMultiplier = math.pow(1.1, ageOfWave)
+            for waveIndex = waveNumber-1, 1, -1 do
+                local ageOfWave = waveNumber - waveIndex
+                local damageMultiplier = pow(1.1, ageOfWave) - 1
+                local waveUnits = spawnedUnitsPerPlayerPerWave[playerId][waveIndex]
+                for unitIndex = #waveUnits, 1, -1 do
+                    local unit = waveUnits[unitIndex]
+                    local currentLife = GetUnitState(unit, UNIT_STATE_LIFE)
+                    if currentLife > 0 then
+                        local damage = GetUnitState(unit, UNIT_STATE_MAX_LIFE) * damageMultiplier
+                        local newLife = currentLife - damage
 
-                    for i = #unitsInWave, 1, -1 do
-                        local unit = unitsInWave[i]
-                        if IsUnitAliveBJ(unit) and GetUnitState(unit, UNIT_STATE_LIFE) > 0 then
-                            local baseDamage = 1.0
-                            local damage = baseDamage * damageMultiplier
-
-                            SetUnitState(unit, UNIT_STATE_LIFE, GetUnitState(unit, UNIT_STATE_LIFE) - damage)
-                            --todo: test, but it appears there's no function for adding buffs so I probably need to do it with a dummy unit casting a spell
-                            UnitAddAbility(unit, ANTI_SNOWBALL_POISON)
-                            if not IsUnitAliveBJ(unit) or GetUnitState(unit, UNIT_STATE_LIFE) <= 0 then
-                                table.remove(unitsInWave, i)
-                            end
-                        else
-                            table.remove(unitsInWave, i)
+                        SetUnitState(unit, UNIT_STATE_LIFE, newLife)
+                        --todo: test, but it appears there's no function for adding buffs so I probably need to do it with a dummy unit casting a spell
+                        UnitAddAbility(unit, ANTI_SNOWBALL_POISON)
+                        SetUnitAbilityLevel(unit, ANTI_SNOWBALL_POISON, 1)
+                        if newLife <= 0 then
+                            table.remove(waveUnits, unitIndex)
                         end
+                    else
+                        table.remove(waveUnits, unitIndex)
                     end
                 end
             end
@@ -1379,7 +1374,6 @@ function Init()
     local itemSoldTrigger = CreateTrigger()
     TriggerRegisterAnyUnitEventBJ(itemSoldTrigger, EVENT_PLAYER_UNIT_SELL_ITEM)
     TriggerAddAction(itemSoldTrigger, OnItemSold)
-    
 end
 
 --[[
