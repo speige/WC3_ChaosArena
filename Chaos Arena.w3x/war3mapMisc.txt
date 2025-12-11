@@ -1,8 +1,15 @@
 [Misc]
 FoodCeiling=9
+GrantHeroXP=0
+GrantHeroXPFormulaC=0.0
+GrantNormalXP=0
+GrantNormalXPFormulaB=0.0
+GrantNormalXPFormulaC=0.0
 HeroExpRange=0.0
+HeroFactorXP=0
 MaxLevelHeroesDrainExp=0
 NeedHeroXP=100
 NeedHeroXPFormulaA=1.5
 NeedHeroXPFormulaB=0.0
+SummonedKillFactor=1.0
 

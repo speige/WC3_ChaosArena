@@ -45,7 +45,6 @@ local abilityIds = {
     DrunkenBrawler = FourCC('A03F'),
     Earthquake = FourCC('A02K'),
     EntanglingRoots = FourCC('A00U'),
-    Evasion = FourCC('A01X'),
     FaerieFire = FourCC('A00I'),
     FanOfKnives = FourCC('A01Y'),
     FeralSpirit = FourCC('A02J'),
@@ -83,7 +82,6 @@ local abilityIds = {
     RainOfFire = FourCC('A03S'),
     RaiseDead = FourCC('A00E'),
     Reincarnation = FourCC('A02L'),
-    ResistantSkin = FourCC('A045'),
     Resurrection = FourCC('A026'),
     RoboGoblin = FourCC('A03A'),
     SearingArrows = FourCC('A01R'),
@@ -101,7 +99,6 @@ local abilityIds = {
     Stampede = FourCC('A03D'),
     Starfall = FourCC('A01S'),
     StatisTrap = FourCC('A009'),
-    StoneForm = FourCC('A03Y'),
     StormBolt = FourCC('A02B'),
     StormEarthAndFire = FourCC('A03G'),
     SummonBear = FourCC('A03B'),
@@ -138,7 +135,7 @@ local draftableUnits = {
     cryptLord = UnitMetaData('cryptLord', FourCC('U003'), FourCC('h00M'), FourCC('I008'), FourCC('A01B'), UnitAbilityMetaData(abilityIds.Impale, abilityIds.SpikedCarapace, abilityIds.LocustSwarm, abilityIds.Aura_Intelligence)),
     darkRanger = UnitMetaData('darkRanger', FourCC('N007'), FourCC('h00V'), FourCC('I009'), FourCC('A01H'), UnitAbilityMetaData(abilityIds.Silence, abilityIds.BlackArrow, abilityIds.Charm, abilityIds.Aura_Agility)),
     deathKnight = UnitMetaData('deathKnight', FourCC('U000'), FourCC('h00J'), FourCC('I00A'), FourCC('A018'), UnitAbilityMetaData(abilityIds.DeathCoil, abilityIds.DeathPact, abilityIds.AnimateDead, abilityIds.Aura_Intelligence)),
-    demonHunter = UnitMetaData('demonHunter', FourCC('E002'), FourCC('h007'), FourCC('I00B'), FourCC('A00X'), UnitAbilityMetaData(abilityIds.ManaBurn, abilityIds.Evasion, abilityIds.Metamorphosis, abilityIds.Aura_Damage)),
+    demonHunter = UnitMetaData('demonHunter', FourCC('E002'), FourCC('h007'), FourCC('I00B'), FourCC('A00X'), UnitAbilityMetaData(abilityIds.ManaBurn, abilityIds.PhaseShift, abilityIds.Metamorphosis, abilityIds.Aura_Damage)),
     dreadlord = UnitMetaData('dreadlord', FourCC('U002'), FourCC('h00L'), FourCC('I00C'), FourCC('A01A'), UnitAbilityMetaData(abilityIds.SpiritLink, abilityIds.Sleep, abilityIds.CarrionSwarm, abilityIds.Aura_Strength)),
     farSeer = UnitMetaData('farSeer', FourCC('O001'), FourCC('h00G'), FourCC('I00D'), FourCC('A015'), UnitAbilityMetaData(abilityIds.FeralSpirit, abilityIds.ChainLightning, abilityIds.Earthquake, abilityIds.Aura_MaxMana)),
     firelord = UnitMetaData('firelord', FourCC('N004'), FourCC('h00W'), FourCC('I00E'), FourCC('A01I'), UnitAbilityMetaData(abilityIds.Incinerate, abilityIds.SoulBurn, abilityIds.SummonLavaSpawn, abilityIds.Aura_Agility)),
@@ -274,9 +271,12 @@ for _, value in pairs(draftableUnits) do
     GLOBAL_DRAFT_SETS.draftAbilityIds[value.draftAbilityId] = value
 end
 
+local PATHING_BLOCKER_UNIT_TYPE_ID = FourCC('YTfb')
 local BUILDER_UNIT_TYPE_ID = FourCC('O005')
 local ALTAR_UNIT_TYPE_ID = FourCC('h010')
+local BLACKSMITH_UNIT_TYPE_ID = FourCC('n00B')
 local DRAFT_ABILITY_ID = FourCC('A000')
+local UPGRADE_ABILITY_ID = FourCC('A01X')
 local CANCEL_ABILITY_ID = FourCC('A001')
 local SWAP_UNITS_ABILITY_ID = FourCC('A03Z')
 local ATTACK_ABILITY_ID = FourCC('Aatk')
@@ -289,17 +289,16 @@ local ORDER_IDs = {
 }
 
 local GLOBAL_ITEM_SET = {}
-table.insert(GLOBAL_ITEM_SET, FourCC('bgst'))
-table.insert(GLOBAL_ITEM_SET, FourCC('belv'))
-table.insert(GLOBAL_ITEM_SET, FourCC('cnob'))
-table.insert(GLOBAL_ITEM_SET, FourCC('rat6'))
-table.insert(GLOBAL_ITEM_SET, FourCC('gcel'))
-table.insert(GLOBAL_ITEM_SET, FourCC('rhth'))
-table.insert(GLOBAL_ITEM_SET, FourCC('pmna'))
-table.insert(GLOBAL_ITEM_SET, FourCC('prvt'))
-table.insert(GLOBAL_ITEM_SET, FourCC('rde4'))
-table.insert(GLOBAL_ITEM_SET, FourCC('ciri'))
---table.insert(GLOBAL_ITEM_SET, FourCC('texp')) -- need to create custom item that's not consumeable but passively adds XP [also, circle needs to be converted to hero or game crashes]
+table.insert(GLOBAL_ITEM_SET, FourCC('bgst')) -- Belt of Giant Strength +6
+table.insert(GLOBAL_ITEM_SET, FourCC('belv')) -- Boots of Quel'Thalas (+6 agility)
+table.insert(GLOBAL_ITEM_SET, FourCC('cnob')) -- Circlet of Nobility (+2 Strength, Agility Intelligence)
+table.insert(GLOBAL_ITEM_SET, FourCC('rat6')) -- Claws of Attack +5
+table.insert(GLOBAL_ITEM_SET, FourCC('gcel')) -- Gloves of Haste (+.15)
+table.insert(GLOBAL_ITEM_SET, FourCC('rhth')) -- Khadgar's Gem of Health (+300 health)
+table.insert(GLOBAL_ITEM_SET, FourCC('pmna')) -- Pendant of Mana (+250)
+table.insert(GLOBAL_ITEM_SET, FourCC('prvt')) -- Periapt of Vitality (+150 health) - duplicate of rhth?
+table.insert(GLOBAL_ITEM_SET, FourCC('rde4')) -- Ring of Protection (+5 armor)
+table.insert(GLOBAL_ITEM_SET, FourCC('ciri')) -- Robe of the Magi (+6 intelligence)
 
 local GLOBAL_ELEMENT_NAME_TO_COLOR = {
     water = '|cff0000ff',
@@ -319,6 +318,11 @@ local GLOBAL_TILE_SETUP = {
     itemCounts = {},
     elementCounts = {}
 }
+
+local playerIdMapping_draftedUnitsCount = {}
+for playerId = 0, 11 do
+    playerIdMapping_draftedUnitsCount[playerId] = 0
+end
 
 local playerIdMapping_realToProxy = {}
 for playerId = 0, 11 do
@@ -360,6 +364,26 @@ function WeightedRandom(weights)
     return #weights
 end
 
+function UpdateHeroLevel(unit, level)
+    level = math.max(level, 1)
+    
+    local currentHeroLevel = GetHeroLevel(unit)
+    if level > currentHeroLevel then
+        SetHeroLevel(unit, level, false)
+    elseif level < currentHeroLevel then
+        UnitStripHeroLevel(unit, currentHeroLevel - level)
+    end
+end
+
+--local UNIT_WEAPON1_ATTACK_TARGETS_ALLOWED = ConvertUnitWeaponIntegerField('ua1g')
+--local UNIT_WEAPON2_ATTACK_TARGETS_ALLOWED = ConvertUnitWeaponIntegerField('ua2g')
+local TARGETS_DEBRIS = 1 << 8
+function DisableAttacks(unit)
+    BlzSetUnitWeaponIntegerField(unit, UNIT_WEAPON_IF_ATTACK_TARGETS_ALLOWED, 0, TARGETS_DEBRIS)
+    BlzSetUnitWeaponIntegerField(unit, UNIT_WEAPON_IF_ATTACK_TARGETS_ALLOWED, 1, TARGETS_DEBRIS)
+    --BlzSetUnitWeaponIntegerField(unit, UNIT_WEAPON1_ATTACK_TARGETS_ALLOWED, index, value)
+end
+
 function CalcUnitRotationAngle(unitLocationX, unitLocationY, lookAtX, lookAtY)
     local unitLocation = Location(unitLocationX, unitLocationY)
     local lookAtLocation = Location(lookAtX, lookAtY)
@@ -385,6 +409,16 @@ end
 function SetUnitAbilityTooltip(unit, abilityId, tooltip)
     local ability = BlzGetUnitAbility(unit, abilityId)
     BlzSetAbilityStringLevelField(ability, ABILITY_SLF_TOOLTIP_NORMAL, 0, tooltip)
+end
+
+function HideUnitHealthAndManaBars(unit, hidden)
+    --BlzSetUnitBooleanField(unit, UNIT_BF_IS_A_BUILDING, hidden) -- only hides health if invulnerable, doesn't hide mana
+    local scale = math.abs(BlzGetUnitRealField(unit, UNIT_RF_SELECTION_SCALE))
+    if hidden then
+        scale = scale * -1
+    end
+
+    BlzSetUnitRealField(unit, UNIT_RF_SELECTION_SCALE, scale)
 end
 
 function InitAbilityGridPositions()
@@ -578,16 +612,11 @@ function SpawnWaveForPlayer(playerId)
             local y = GetUnitY(unit)            
             local clonedUnit = CreateUnit(proxyPlayer, unitType, x + offset.x, y + offset.y, CalcUnitRotationAngle(x, y, 0, 0))
             UnitRemoveAbility(clonedUnit, INVULNERABLE_ABILITY_ID)
-            --UnitAddAbility(clonedUnit, ATTACK_ABILITY_ID)
 
-            --[[
             local heroLevel = GetHeroLevel(unit)
-            if heroLevel > 0 then
-                for i = 1, heroLevel - 1 do
-                    SetHeroLevel(clonedUnit, heroLevel, false)
-                end
+            if heroLevel > 1 then
+                UpdateHeroLevel(clonedUnit, heroLevel, false)
             end
-            --]]
 
             CopyUnitGear(unit, clonedUnit)
             SetupUnitAbilities(clonedUnit)
@@ -677,7 +706,8 @@ end
 
 local playerBuilders = {
     primary = {},
-    altar = {}
+    altar = {},
+    blacksmith = {}
 }
 local playerDecks = {}
 
@@ -730,6 +760,7 @@ end
 function InitPlayerDecks()
     for playerId = 0, 11 do
         playerDecks[playerId] = CloneAndShuffleArray(get_table_keys(GLOBAL_DRAFT_SETS.draftItemTypeIds))
+        AddDraftItemsToAltar(playerId)
     end
 end
 
@@ -748,8 +779,11 @@ function InitPlayerBase(playerId)
     UnitRemoveAbility(altar, ATTACK_ABILITY_ID)
     UnitAddAbility(altar, INVULNERABLE_ABILITY_ID)
 
+    local blacksmith = CreateUnit(PLAYER(PLAYER_NEUTRAL_PASSIVE), BLACKSMITH_UNIT_TYPE_ID, startLocation.x - offset.x / 2, startLocation.y - offset.y / 2, lookAtAngle)
+
     playerBuilders.primary[playerId] = builder
     playerBuilders.altar[playerId] = altar
+    playerBuilders.blacksmith[playerId] = blacksmith
 
     UnlockPlayerTiles(playerId, 3)
 
@@ -780,10 +814,6 @@ function DrawChoicesFromDeck(playerId)
 end
 
 function AddDraftItemsToAltar(playerId)    
-    if GetPlayerState(Player(playerId), PLAYER_STATE_RESOURCE_FOOD_USED) >= GetPlayerState(Player(playerId), PLAYER_STATE_RESOURCE_FOOD_CAP) then
-        return
-    end
-
     local altar = playerBuilders.altar[playerId]
     if not altar then
         return
@@ -847,16 +877,25 @@ function SwapTileUnits(caster, target)
     local newCaster = CreateUnit(player, casterType, targetX, targetY, targetFacing)
     local newTarget = CreateUnit(player, targetType, casterX, casterY, casterFacing)
     
-    UnitRemoveAbility(newCaster, ATTACK_ABILITY_ID)
     UnitRemoveAbility(newCaster, MOVE_ABILITY_ID)
     UnitAddAbility(newCaster, INVULNERABLE_ABILITY_ID)
-    
-    UnitRemoveAbility(newTarget, ATTACK_ABILITY_ID)
+    DisableAttacks(newCaster)    
+
     UnitRemoveAbility(newTarget, MOVE_ABILITY_ID)
     UnitAddAbility(newTarget, INVULNERABLE_ABILITY_ID)
+    DisableAttacks(newTarget)    
     
     CopyUnitGear(target, newCaster)
     CopyUnitGear(caster, newTarget)
+
+    local newTargetHeroLevel = GetHeroLevel(target)
+    if newTargetHeroLevel > 1 then
+        UpdateHeroLevel(newTarget, newTargetHeroLevel, false)
+    end
+    local newCasterHeroLevel = GetHeroLevel(caster)
+    if newCasterHeroLevel > 1 then
+        UpdateHeroLevel(newCaster, newCasterHeroLevel, false)
+    end
 
     local targetStillHadSwap = UnitRemoveAbility(target, SWAP_UNITS_ABILITY_ID)
     if targetStillHadSwap then
@@ -868,22 +907,28 @@ function SwapTileUnits(caster, target)
 
     SetupUnitAbilities(newCaster)
     SetupUnitAbilities(newTarget)
+    HideUnitHealthAndManaBars(newCaster, true)
+    HideUnitHealthAndManaBars(newTarget, true)
 end
 
 function OnSpellEffect()
     local abilityId = GetSpellAbilityId()
     local unit = GetSpellAbilityUnit()
     local player = GetOwningPlayer(unit)
+    local unitTypeId = GetUnitTypeId(unit)
 
-    if abilityId == CANCEL_ABILITY_ID and GetUnitTypeId(unit) == ALTAR_UNIT_TYPE_ID then
-        -- IssueImmediateOrder(unit, ORDER_IDs.stop)
+    if abilityId == CANCEL_ABILITY_ID and (unitTypeId == ALTAR_UNIT_TYPE_ID or unitTypeId == BLACKSMITH_UNIT_TYPE_ID) then
         SelectUnitForPlayerSingle(playerBuilders.primary[GetPlayerId(player)], player)
         return
     end
 
     if abilityId == DRAFT_ABILITY_ID then
-        -- IssueImmediateOrder(unit, ORDER_IDs.stop)
         SelectUnitForPlayerSingle(playerBuilders.altar[GetPlayerId(player)], player)
+        return
+    end
+
+    if abilityId == UPGRADE_ABILITY_ID then
+        SelectUnitForPlayerSingle(playerBuilders.blacksmith[GetPlayerId(player)], player)
         return
     end
 
@@ -920,11 +965,12 @@ function OnUnitDrafted(unit)
     local playerId = GetPlayerId(player)
     local altar = playerBuilders.altar[playerId]
 
-    for slotIndex = 0, 5 do
-        local item = UnitItemInSlot(altar, slotIndex)
-        if item then
-            RemoveItem(item)
-        end
+    local foodUsed = GetPlayerState(player, PLAYER_STATE_RESOURCE_FOOD_USED)
+    local foodCap = GetPlayerState(player, PLAYER_STATE_RESOURCE_FOOD_CAP)
+    if foodUsed > foodCap then
+        DisplayTextToPlayer(player, 0, 0, 'Food Cap Exceeded')
+        RemoveUnit(unit)
+        return
     end
 
     local circle
@@ -943,6 +989,19 @@ function OnUnitDrafted(unit)
 
     RemoveLocation(unitLocation)
     DestroyGroup(group)
+
+    if circle == nil then
+        DisplayTextToPlayer(player, 0, 0, 'Must build on Circle of Power')
+        RemoveUnit(unit)
+        return        
+    end
+
+    for slotIndex = 0, 5 do
+        local item = UnitItemInSlot(altar, slotIndex)
+        if item then
+            RemoveItem(item)
+        end
+    end
 
     local dummyUnitTypeId = GetUnitTypeId(unit)
     local realUnitTypeId = GLOBAL_DRAFT_SETS.dumyBuildingUnitTypeIds[dummyUnitTypeId].unitTypeId
@@ -965,16 +1024,20 @@ function OnUnitDrafted(unit)
 
     UnitAddAbility(realUnit, INVULNERABLE_ABILITY_ID)
     UnitAddAbility(realUnit, SWAP_UNITS_ABILITY_ID)
-    UnitRemoveAbility(realUnit, ATTACK_ABILITY_ID)
     UnitRemoveAbility(realUnit, MOVE_ABILITY_ID)
+    DisableAttacks(realUnit)
     SetupUnitAbilities(realUnit)
+    HideUnitHealthAndManaBars(realUnit, true)
+    local draftedCount = playerIdMapping_draftedUnitsCount[playerId] + 1
+    playerIdMapping_draftedUnitsCount[playerId] = draftedCount
+    if draftedCount > 1 then
+        UpdateHeroLevel(realUnit, draftedCount, false)
+    end
+    --BlzSetUnitStringField(realUnit, ConvertUnitStringField('upat'), 'PathTextures\4x4SimpleSolid.tga')
 
     SelectUnitForPlayerSingle(playerBuilders.primary[playerId], player)
     
-    --NOTE: takes a second to update food cap, which we need to avoid drafting if maxed
-    RunDelayed(function()
-        AddDraftItemsToAltar(GetPlayerId(GetOwningPlayer(builder)))
-    end, 1)
+    AddDraftItemsToAltar(playerId)
 end
 
 function OnSoulSiphonEffect()
@@ -1042,9 +1105,9 @@ function OnUnitDeath()
         local killerOwner = GetOwningPlayer(killer)
         local killerIndex = GetPlayerId(killerOwner)
         
-        local actualPlayer = Player(playerIdMapping_proxyToReal[killerIndex])
-        if actualPlayer then
-            AdjustPlayerStateBJ(1, actualPlayer, PLAYER_STATE_RESOURCE_GOLD)
+        local actualPlayerId = playerIdMapping_proxyToReal[killerIndex]
+        if actualPlayerId then
+            AdjustPlayerStateBJ(1, Player(actualPlayerId), PLAYER_STATE_RESOURCE_GOLD)
         else
             AdjustPlayerStateBJ(1, killerOwner, PLAYER_STATE_RESOURCE_GOLD)
         end
@@ -1120,11 +1183,8 @@ function InitFoodCapTimer()
                 local player = Player(playerId)
                 if GetPlayerSlotState(player) == PLAYER_SLOT_STATE_PLAYING then
                     SetPlayerStateBJ(player, PLAYER_STATE_RESOURCE_FOOD_CAP, foodCap)
-                    if foodCap  == 0 and foodCap < 9 then
+                    if math.fmod(foodCap, 3) == 0 and foodCap < 9 then
                         UnlockPlayerTiles(playerId, 3)
-                    end
-                    if not UnitHasItems(playerBuilders.altar[playerId]) then
-                        AddDraftItemsToAltar(playerId)
                     end
                 end
             end
@@ -1187,7 +1247,7 @@ function InitPlayers()
     InitPlayerTiles()
     InitPlayerBases()
     InitPlayerDecks()
-    InitPlayerAlliances()
+    InitPlayerAlliances()    
 end
 
 function PrintDebugInfo()
@@ -1240,6 +1300,7 @@ function Init()
 
     local disableDraftUnitAbilities = CreateTrigger()
     TriggerRegisterAnyUnitEventBJ(disableDraftUnitAbilities, EVENT_PLAYER_UNIT_ISSUED_ORDER)
+    TriggerRegisterAnyUnitEventBJ(disableDraftUnitAbilities, EVENT_PLAYER_UNIT_SPELL_CHANNEL)
     TriggerAddAction(disableDraftUnitAbilities, OnIssuedOrder)
     
 end

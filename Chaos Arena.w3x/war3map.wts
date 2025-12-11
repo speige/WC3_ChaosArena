@@ -1495,22 +1495,10 @@ STRING 462
 Akama
 }
 
-STRING 463
-// Abilities: A00G (Damage Aura), Ubertip (Tooltip - Normal - Extended)
-{
-+ 10% attack damage to all player's units
-}
-
 STRING 464
-// Abilities: A00G (Damage Aura), Name (Name)
+// Abilities: A00G (Attack Damage Aura), Tip (Tooltip - Normal)
 {
 Damage Aura
-}
-
-STRING 466
-// Abilities: A006 (Agility Aura), Ubertip (Tooltip - Normal - Extended)
-{
-+ 10% agility to all player's units
 }
 
 STRING 467
@@ -1519,22 +1507,10 @@ STRING 467
 Agility Aura
 }
 
-STRING 469
-// Abilities: A00N (Armor Aura), Ubertip (Tooltip - Normal - Extended)
-{
-+ 10% armor to all player's units
-}
-
 STRING 470
 // Abilities: A00N (Armor Aura), Name (Name)
 {
 Armor Aura
-}
-
-STRING 472
-// Abilities: A00R (Max HP Aura), Ubertip (Tooltip - Normal - Extended)
-{
-+ 10% max HP to all player's units
 }
 
 STRING 473
@@ -1543,34 +1519,16 @@ STRING 473
 Max HP Aura
 }
 
-STRING 475
-// Abilities: A02X (Intelligence Aura), Ubertip (Tooltip - Normal - Extended)
-{
-+ 10% intelligence to all player's units
-}
-
 STRING 476
 // Abilities: A02X (Intelligence Aura), Name (Name)
 {
 Intelligence Aura
 }
 
-STRING 478
-// Abilities: A03V (Strength Aura), Ubertip (Tooltip - Normal - Extended)
-{
-+ 10% strength to all player's units
-}
-
 STRING 479
 // Abilities: A03V (Strength Aura), Name (Name)
 {
 Strength Aura
-}
-
-STRING 481
-// Abilities: A03W (Max Mana Aura), Ubertip (Tooltip - Normal - Extended)
-{
-+ 10% max mana to all player's units
 }
 
 STRING 482
@@ -1600,23 +1558,6 @@ Transfers its power to the drafted unit
 May provide: Items and Elemental abilities (|cffff0000Fire|r |cff00ff00Earth|r |cff0000ffWater|r)
 }
 
-STRING 487
-// Abilities: A000 (Draft Unit), Tip (Tooltip - Normal)
-{
-Pick unit to summon onto circle placeholders
-}
-
-STRING 488
-// Abilities: A002 (Draft Unit Tooltip), Tip (Tooltip - Normal)
-{
-Pick hero from inventory
-Place on a |cff00ff00green circle|r to summon
-Will gain items & abilities from |cff00ff00circle|r
-Select |cff00ff00circle|r first to see powers
-
-Other heroes will be discarded permanently. Choose wisely.
-}
-
 STRING 491
 // Abilities: A041 (Fire), Ubertip (Tooltip - Normal - Extended)
 {
@@ -1636,37 +1577,37 @@ Unlocks the summoned unit's |cff0000ffWater|r ability
 }
 
 STRING 498
-// Abilities: A041 (Fire), Hotkey (Hotkey - Normal)
+// Items: I00Y (Vampiric Aura), Hotkey (Hotkey)
 {
 R
 }
 
 STRING 499
-// Abilities: A041 (Fire), Unhotkey (Hotkey - Turn Off)
+// Abilities: A041 (Fire), Hotkey (Hotkey - Normal)
 {
 R
 }
 
 STRING 500
-// Abilities: A040 (Earth), Hotkey (Hotkey - Normal)
+// Items: I00X (Mana Burn), Hotkey (Hotkey)
 {
 E
 }
 
 STRING 501
-// Abilities: A040 (Earth), Unhotkey (Hotkey - Turn Off)
+// Abilities: A040 (Earth), Hotkey (Hotkey - Normal)
 {
 E
 }
 
 STRING 502
-// Abilities: A042 (Water), Hotkey (Hotkey - Normal)
+// Items: I00W (Evasion), Hotkey (Hotkey)
 {
 W
 }
 
 STRING 503
-// Abilities: A042 (Water), Unhotkey (Hotkey - Turn Off)
+// Abilities: A042 (Water), Hotkey (Hotkey - Normal)
 {
 W
 }
@@ -1677,22 +1618,10 @@ STRING 511
 Strength Aura
 }
 
-STRING 512
-// Buffs/Effects: B000 (), Buffubertip (Tooltip - Extended)
-{
-+ 10% strength
-}
-
 STRING 513
 // Abilities: A006 (Agility Aura), Tip (Tooltip - Normal)
 {
 Agility Aura
-}
-
-STRING 514
-// Buffs/Effects: B001 (), Buffubertip (Tooltip - Extended)
-{
-+ 10% agility
 }
 
 STRING 515
@@ -1701,34 +1630,10 @@ STRING 515
 Armor Aura
 }
 
-STRING 516
-// Buffs/Effects: B002 (), Buffubertip (Tooltip - Extended)
-{
-+ 10% armor
-}
-
-STRING 517
-// Abilities: A00G (Damage Aura), Tip (Tooltip - Normal)
-{
-Damage Aura
-}
-
-STRING 518
-// Buffs/Effects: B003 (), Buffubertip (Tooltip - Extended)
-{
-+ 10% damage
-}
-
 STRING 519
 // Abilities: A02X (Intelligence Aura), Tip (Tooltip - Normal)
 {
 Intelligence Aura
-}
-
-STRING 520
-// Buffs/Effects: B004 (), Buffubertip (Tooltip - Extended)
-{
-+ 10% intelligence
 }
 
 STRING 521
@@ -1737,62 +1642,8 @@ STRING 521
 Max HP Aura
 }
 
-STRING 522
-// Buffs/Effects: B005 (), Buffubertip (Tooltip - Extended)
-{
-+ 10% max HP
-}
-
 STRING 523
 // Abilities: A03W (Max Mana Aura), Tip (Tooltip - Normal)
-{
-Max Mana Aura
-}
-
-STRING 524
-// Buffs/Effects: B006 (), Buffubertip (Tooltip - Extended)
-{
-+ 10% max mana
-}
-
-STRING 525
-// Buffs/Effects: B000 (), Bufftip (Tooltip)
-{
-Strength Aura
-}
-
-STRING 526
-// Buffs/Effects: B001 (), Bufftip (Tooltip)
-{
-Agility Aura
-}
-
-STRING 527
-// Buffs/Effects: B002 (), Bufftip (Tooltip)
-{
-Armor Aura
-}
-
-STRING 528
-// Buffs/Effects: B003 (), Bufftip (Tooltip)
-{
-Damage Aura
-}
-
-STRING 529
-// Buffs/Effects: B004 (), Bufftip (Tooltip)
-{
-Intelligence Aura
-}
-
-STRING 530
-// Buffs/Effects: B005 (), Bufftip (Tooltip)
-{
-Max HP Aura
-}
-
-STRING 531
-// Buffs/Effects: B006 (), Bufftip (Tooltip)
 {
 Max Mana Aura
 }
@@ -1871,7 +1722,7 @@ Thunder Clap
 }
 
 STRING 544
-// Abilities: A01U (Mana Burn), Tip (Tooltip - Normal)
+// Items: I00X (Mana Burn), Tip (Tooltip - Basic)
 {
 Mana Burn
 }
@@ -1883,7 +1734,7 @@ Activate Immolation
 }
 
 STRING 546
-// Abilities: A01X (Evasion), Tip (Tooltip - Normal)
+// Items: I00W (Evasion), Tip (Tooltip - Basic)
 {
 Evasion
 }
@@ -1955,7 +1806,7 @@ Banish
 }
 
 STRING 558
-// Abilities: A02F (Critical Strike), Tip (Tooltip - Normal)
+// Items: I00V (Critical Strike), Tip (Tooltip - Basic)
 {
 Critical Strike
 }
@@ -2176,64 +2027,447 @@ STRING 594
 Life Drain
 }
 
-STRING 595
-// Upgrades: R000 (Animal War Training), Name (Name)
-{
-|cffff0000Fire|r
-}
-
-STRING 596
-// Upgrades: R000 (Animal War Training), Tip (Tooltip)
-{
-Unlocks the summoned unit's |cffff0000Fire|r ability
-}
-
-STRING 597
-// Upgrades: R000 (Animal War Training), Hotkey (Hotkey)
-{
-R
-}
-
-STRING 598
-// Upgrades: R001 (Animal War Training), Name (Name)
-{
-|cff0000ffWater|r
-}
-
-STRING 599
-// Upgrades: R001 (Animal War Training), Tip (Tooltip)
-{
-Unlocks the summoned unit's |cff0000ffWater|r ability
-}
-
-STRING 600
-// Upgrades: R001 (Animal War Training), Hotkey (Hotkey)
-{
-W
-}
-
-STRING 601
-// Upgrades: R002 (Animal War Training), Name (Name)
-{
-|cff00ff00Earth|r
-
-}
-
-STRING 602
-// Upgrades: R002 (Animal War Training), Tip (Tooltip)
-{
-Unlocks the summoned unit's |cff00ff00Earth|r ability
-}
-
-STRING 603
-// Upgrades: R002 (Animal War Training), Hotkey (Hotkey)
-{
-E
-}
-
 STRING 605
 // Units: O005 (Avatar), Propernames (Proper Names)
 {
 Avatar, 
+}
+
+STRING 606
+// Abilities: A002 (Draft Unit Tooltip), Tip (Tooltip - Normal)
+{
+Pick hero from inventory
+Place on a power circle to summon
+Will gain items & abilities from circle
+
+Other heroes will be discarded permanently. Choose wisely.
+}
+
+STRING 614
+// Abilities: A00G (Attack Damage Aura), Ubertip (Tooltip - Normal - Extended)
+{
+Grants +1 stack |cffFFFFFF(|cffffff00per hero level|cffFFFFFF) attack damage aura to all player's units
+}
+
+STRING 615
+// Abilities: A00G (Attack Damage Aura), Name (Name)
+{
+Attack Damage Aura
+}
+
+STRING 616
+// Abilities: A006 (Agility Aura), Ubertip (Tooltip - Normal - Extended)
+{
+Grants +1 stack |cffFFFFFF(|cffffff00per hero level|cffFFFFFF) agility aura to all player's units
+}
+
+STRING 617
+// Abilities: A00N (Armor Aura), Ubertip (Tooltip - Normal - Extended)
+{
+Grants +1 stack |cffFFFFFF(|cffffff00per hero level|cffFFFFFF) armor aura to all player's units
+}
+
+STRING 618
+// Abilities: A00R (Max HP Aura), Ubertip (Tooltip - Normal - Extended)
+{
+Grants +1 stack |cffFFFFFF(|cffffff00per hero level|cffFFFFFF) max HP aura to all player's units
+}
+
+STRING 619
+// Abilities: A02X (Intelligence Aura), Ubertip (Tooltip - Normal - Extended)
+{
+Grants +1 stack |cffFFFFFF(|cffffff00per hero level|cffFFFFFF) intelligence aura to all player's units
+}
+
+STRING 620
+// Abilities: A03V (Strength Aura), Ubertip (Tooltip - Normal - Extended)
+{
+Grants +1 stack |cffFFFFFF(|cffffff00per hero level|cffFFFFFF) strength aura to all player's units
+}
+
+STRING 621
+// Abilities: A03W (Max Mana Aura), Ubertip (Tooltip - Normal - Extended)
+{
+Grants +1 stack |cffFFFFFF(|cffffff00per hero level|cffFFFFFF) max mana aura to all player's units
+}
+
+STRING 623
+// Buffs/Effects: B000 (), Buffubertip (Tooltip - Extended)
+{
++ 10% per stack
+}
+
+STRING 625
+// Buffs/Effects: B001 (), Buffubertip (Tooltip - Extended)
+{
++ 10% per stack
+}
+
+STRING 627
+// Buffs/Effects: B002 (), Buffubertip (Tooltip - Extended)
+{
++ 10% per stack
+}
+
+STRING 629
+// Buffs/Effects: B003 (), Buffubertip (Tooltip - Extended)
+{
++ 10% per stack
+}
+
+STRING 631
+// Buffs/Effects: B004 (), Buffubertip (Tooltip - Extended)
+{
++ 10% per stack
+}
+
+STRING 633
+// Buffs/Effects: B005 (), Buffubertip (Tooltip - Extended)
+{
++ 10% per stack
+}
+
+STRING 635
+// Buffs/Effects: B006 (), Buffubertip (Tooltip - Extended)
+{
++ 10% per stack
+}
+
+STRING 636
+// Buffs/Effects: B000 (), Bufftip (Tooltip)
+{
+Bonus Strength - from passive Auras (stackable)
+}
+
+STRING 637
+// Buffs/Effects: B001 (), Bufftip (Tooltip)
+{
+Bonus Agility - from passive Auras (stackable)
+}
+
+STRING 638
+// Buffs/Effects: B002 (), Bufftip (Tooltip)
+{
+Bonus Armor - from passive Auras (stackable)
+}
+
+STRING 639
+// Buffs/Effects: B003 (), Bufftip (Tooltip)
+{
+Bonus Attack Damage - from passive Auras (stackable)
+}
+
+STRING 641
+// Buffs/Effects: B005 (), Bufftip (Tooltip)
+{
+Bonus Max HP - from passive Auras (stackable)
+}
+
+STRING 642
+// Buffs/Effects: B006 (), Bufftip (Tooltip)
+{
+Bonus Max Mana - from passive Auras (stackable)
+}
+
+STRING 643
+// Buffs/Effects: B004 (), Bufftip (Tooltip)
+{
+Bonus Intelligence - from passive Auras (stackable)
+}
+
+STRING 644
+// Items: I011 (Mana Regen), Tip (Tooltip - Basic)
+{
+Mana Regen
+}
+
+STRING 645
+// Upgrades: R003 (Cloud), effect1 (Effect 1)
+{
+rmnr
+}
+
+STRING 646
+// Items: I00U (Spiked Armor), Tip (Tooltip - Basic)
+{
+Spiked Armor
+}
+
+STRING 647
+// Items: I00V (Critical Strike), Name (Name)
+{
+Critical Strike
+}
+
+STRING 648
+// Abilities: A02F (Critical Strike), Tip (Tooltip - Normal)
+{
+Critical Strike
+}
+
+STRING 649
+// Upgrades: R007 (Cloud), Name (Name)
+{
+Critical Strike
+}
+
+STRING 653
+// Items: I010 (HP Regen), Tip (Tooltip - Basic)
+{
+HP Regen
+}
+
+STRING 654
+// Upgrades: R00B (Cloud), effect1 (Effect 1)
+{
+rhpr
+}
+
+STRING 655
+// Items: I00Z (Long Rifles), Tip (Tooltip - Basic)
+{
+Long Rifles
+}
+
+STRING 656
+// Upgrades: R00C (Cloud), effect1 (Effect 1)
+{
+ratr
+}
+
+STRING 658
+// Upgrades: R004 (Cloud), effect1 (Effect 1)
+{
+rspp
+}
+
+STRING 665
+// Items: I00Y (Vampiric Aura), Tip (Tooltip - Basic)
+{
+Vampiric Aura
+}
+
+STRING 666
+// Items: I00X (Mana Burn), Name (Name)
+{
+Mana Burn
+}
+
+STRING 667
+// Abilities: A01U (Mana Burn), Tip (Tooltip - Normal)
+{
+Mana Burn
+}
+
+STRING 676
+// Items: I011 (Mana Regen), Name (Name)
+{
+Mana Regen
+}
+
+STRING 677
+// Items: I00U (Spiked Armor), Name (Name)
+{
+Spiked Armor
+}
+
+STRING 678
+// Items: I00W (Evasion), Name (Name)
+{
+Evasion
+}
+
+STRING 679
+// Items: I00Y (Vampiric Aura), Name (Name)
+{
+Vampiric Aura
+}
+
+STRING 680
+// Items: I010 (HP Regen), Name (Name)
+{
+HP Regen
+}
+
+STRING 681
+// Items: I00Z (Long Rifles), Name (Name)
+{
+Long Rifles
+}
+
+STRING 682
+// Abilities: A049 (Mana Burn), Name (Name)
+{
+Mana Burn
+}
+
+STRING 683
+// Units: n00B (Blacksmith), Name (Name)
+{
+Blacksmith
+}
+
+STRING 702
+// Items: I00V (Critical Strike), Ubertip (Tooltip - Extended)
+{
+Gives a % chance to do bonus damage on attacks
+|cFFFFFF00(Upgrades your entire army)
+}
+
+STRING 703
+// Items: I00U (Spiked Armor), Ubertip (Tooltip - Extended)
+{
+Reflects a % of incoming attack damage back to the attacker
+|cFFFFFF00(Upgrades your entire army)
+}
+
+STRING 704
+// Items: I00W (Evasion), Ubertip (Tooltip - Extended)
+{
+Gives a % chance to dodge attacks
+|cFFFFFF00(Upgrades your entire army)
+}
+
+STRING 705
+// Items: I00X (Mana Burn), Ubertip (Tooltip - Extended)
+{
+Drains mana every attack
+|cFFFFFF00(Upgrades your entire army)
+}
+
+STRING 706
+// Items: I00Y (Vampiric Aura), Ubertip (Tooltip - Extended)
+{
+Heals for a % of damage on all attacks
+|cFFFFFF00(Upgrades your entire army)
+}
+
+STRING 707
+// Items: I00Z (Long Rifles), Ubertip (Tooltip - Extended)
+{
+Increases Attack Range
+|cFFFFFF00(Upgrades your entire army)
+}
+
+STRING 708
+// Items: I010 (HP Regen), Ubertip (Tooltip - Extended)
+{
+Increases HP regen
+|cFFFFFF00(Upgrades your entire army)
+}
+
+STRING 709
+// Items: I011 (Mana Regen), Ubertip (Tooltip - Extended)
+{
+Increases Mana regen
+|cFFFFFF00(Upgrades your entire army)
+}
+
+STRING 710
+// Upgrades: R003 (Cloud), Name (Name)
+{
+Mana Regen
+}
+
+STRING 711
+// Upgrades: R004 (Cloud), Name (Name)
+{
+Spiked Armor
+}
+
+STRING 712
+// Upgrades: R006 (Cloud), Name (Name)
+{
+Evasion
+}
+
+STRING 713
+// Upgrades: R00A (Cloud), Name (Name)
+{
+Vampiric Aura
+}
+
+STRING 714
+// Upgrades: R00B (Cloud), Name (Name)
+{
+HP Regen
+}
+
+STRING 715
+// Upgrades: R00C (Cloud), Name (Name)
+{
+Long Rifles
+}
+
+STRING 716
+// Upgrades: R00D (Cloud), Name (Name)
+{
+Mana Burn
+}
+
+STRING 717
+// Items: I00U (Spiked Armor), Hotkey (Hotkey)
+{
+F
+}
+
+STRING 718
+// Items: I00V (Critical Strike), Hotkey (Hotkey)
+{
+Q
+}
+
+STRING 719
+// Items: I00Z (Long Rifles), Hotkey (Hotkey)
+{
+A
+}
+
+STRING 720
+// Items: I010 (HP Regen), Hotkey (Hotkey)
+{
+S
+}
+
+STRING 721
+// Items: I011 (Mana Regen), Hotkey (Hotkey)
+{
+D
+}
+
+STRING 722
+// Abilities: A041 (Fire), Unhotkey (Hotkey - Turn Off)
+{
+R
+}
+
+STRING 723
+// Abilities: A040 (Earth), Unhotkey (Hotkey - Turn Off)
+{
+E
+}
+
+STRING 724
+// Abilities: A042 (Water), Unhotkey (Hotkey - Turn Off)
+{
+W
+}
+
+STRING 725
+// Abilities: A000 (Draft Unit), Tip (Tooltip - Normal)
+{
+Pick unit to summon onto circle of power
+}
+
+STRING 726
+// Abilities: A01X (Upgrade Army), Name (Name)
+{
+Upgrade Army
+}
+
+STRING 727
+// Abilities: A01X (Upgrade Army), Tip (Tooltip - Normal)
+{
+Purchase whole army upgrades for gold
 }
 
