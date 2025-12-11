@@ -156,6 +156,45 @@ local draftableUnits = {
     warden = UnitMetaData('warden', FourCC('E003'), FourCC('h00A'), FourCC('I00T'), FourCC('A00Z'), UnitAbilityMetaData(abilityIds.FanOfKnives, abilityIds.ShadowStrike, abilityIds.Vengeance, abilityIds.Aura_Strength))
 }
 
+local purchaseableUpgrades = {
+    criticalStrike = {
+        item = FourCC('I00V'),
+        upgrade = FourCC('R007'),
+        ability = FourCC('A045')
+    },
+    evasion = {
+        item = FourCC('I00W'),
+        upgrade = FourCC('R006'),
+        ability = FourCC('A04B')
+    },
+    hpRegen = {
+        item = FourCC('I010'),
+        upgrade = FourCC('R00B')
+    },
+    longRifles = {
+        item = FourCC('I00Z'),
+        upgrade = FourCC('R00C')
+    },
+    manaBurn = {
+        item = FourCC('I00X'),
+        upgrade = FourCC('R00D'),
+        ability = FourCC('A049')
+    },
+    manaRegen = {
+        item = FourCC('I011'),
+        upgrade = FourCC('R003')
+    },
+    spikedArmor = {
+        item = FourCC('I00U'),
+        upgrade = FourCC('R004')
+    },
+    vampiricAura = {
+        item = FourCC('I00Y'),
+        upgrade = FourCC('R00A'),
+        ability = FourCC('A04A')
+    },
+}
+
 local unitTypeIdToName = {}
 for key, metaData in pairs(draftableUnits) do
     unitTypeIdToName[metaData.unitTypeId] = key
@@ -375,13 +414,10 @@ function UpdateHeroLevel(unit, level)
     end
 end
 
---local UNIT_WEAPON1_ATTACK_TARGETS_ALLOWED = ConvertUnitWeaponIntegerField('ua1g')
---local UNIT_WEAPON2_ATTACK_TARGETS_ALLOWED = ConvertUnitWeaponIntegerField('ua2g')
 local TARGETS_DEBRIS = 1 << 8
 function DisableAttacks(unit)
     BlzSetUnitWeaponIntegerField(unit, UNIT_WEAPON_IF_ATTACK_TARGETS_ALLOWED, 0, TARGETS_DEBRIS)
     BlzSetUnitWeaponIntegerField(unit, UNIT_WEAPON_IF_ATTACK_TARGETS_ALLOWED, 1, TARGETS_DEBRIS)
-    --BlzSetUnitWeaponIntegerField(unit, UNIT_WEAPON1_ATTACK_TARGETS_ALLOWED, index, value)
 end
 
 function CalcUnitRotationAngle(unitLocationX, unitLocationY, lookAtX, lookAtY)
@@ -574,25 +610,25 @@ function SwapUnitPositions(sourceUnit, targetUnit)
 end
 
 function GetSpawnOffset(playerId)
-    local offset = 500
+    local SPAWN_OFFSET = 500
     local player = Player(playerId)
     local startX = GetPlayerStartLocationX(player)
     local startY = GetPlayerStartLocationY(player)
     local result = { x = 0, y = 0 }
     if math.abs(startX) >= math.abs(startY) then
-        result.x = offset
+        result.x = SPAWN_OFFSET
 
         if startX > 0 then
             result.x = -1 * result.x
         end
     else
-        result.y = offset
+        result.y = SPAWN_OFFSET
 
         if startY > 0 then
             result.y = -1 * result.y
         end
     end
-    
+
     return result
 end
 
@@ -620,6 +656,14 @@ function SpawnWaveForPlayer(playerId)
 
             CopyUnitGear(unit, clonedUnit)
             SetupUnitAbilities(clonedUnit)
+
+            for key, data in pairs(purchaseableUpgrades) do
+                if data.ability then
+                    if GetPlayerTechResearched(player, data.upgrade, true) then
+                        SetAbilityUIState(clonedUnit, data.ability, false, true)
+                    end
+                end
+            end
 
             local attackLoc = Location(0, 0)
             IssuePointOrderLoc(clonedUnit, 'attack', attackLoc)
@@ -727,9 +771,7 @@ local playerTileCoords = {}
 
 function UnlockPlayerTiles(playerId, count)
     local player = Player(playerId)
-    local offset = GetSpawnOffset(playerId)
-    local startLocation = { x = GetPlayerStartLocationX(player), y = GetPlayerStartLocationY(player) }
-    local lookAtAngle = CalcUnitRotationAngle(startLocation.x, startLocation.y, startLocation.x + offset.x, startLocation.y + offset.y)
+    local lookAtAngle = CalcUnitRotationAngle(0, 0, 0, 0)
 
     for tile = 1, count do
         local tileIndex = 9 - #playerTileCoords[playerId] + 1
@@ -768,18 +810,25 @@ function InitPlayerBase(playerId)
     local player = Player(playerId)
     local offset = GetSpawnOffset(playerId)
     local startLocation = { x = GetPlayerStartLocationX(player), y = GetPlayerStartLocationY(player) }
-
     local lookAtAngle = CalcUnitRotationAngle(startLocation.x, startLocation.y, startLocation.x + offset.x, startLocation.y + offset.y)
+
     local builder = CreateUnit(player, BUILDER_UNIT_TYPE_ID, startLocation.x, startLocation.y, lookAtAngle)
     UnitRemoveAbility(builder, ATTACK_ABILITY_ID)
     UnitAddAbility(builder, INVULNERABLE_ABILITY_ID)
 
-    local offset = GetSpawnOffset(playerId)
-    local altar = CreateUnit(player, ALTAR_UNIT_TYPE_ID, startLocation.x - offset.x / 2, startLocation.y - offset.y / 2, lookAtAngle)
+    local buildingStartPosition = { x = startLocation.x - offset.x / 2, y = startLocation.y - offset.y / 2 }
+    local buildingOffsets = { x = 0, y = 0 }
+    if math.abs(offset.x) > math.abs(offset.y) then
+        buildingOffsets.y = 200
+    else
+        buildingOffsets.x = 200
+    end
+    local altar = CreateUnit(player, ALTAR_UNIT_TYPE_ID, buildingStartPosition.x + buildingOffsets.x, buildingStartPosition.y + buildingOffsets.y, lookAtAngle)    
     UnitRemoveAbility(altar, ATTACK_ABILITY_ID)
     UnitAddAbility(altar, INVULNERABLE_ABILITY_ID)
 
-    local blacksmith = CreateUnit(PLAYER(PLAYER_NEUTRAL_PASSIVE), BLACKSMITH_UNIT_TYPE_ID, startLocation.x - offset.x / 2, startLocation.y - offset.y / 2, lookAtAngle)
+    --NOTE: Neutral allows other players to see what purchases have been made
+    local blacksmith = CreateUnit(player, BLACKSMITH_UNIT_TYPE_ID, buildingStartPosition.x - math.max(buildingOffsets.x, 10), buildingStartPosition.y - math.max(buildingOffsets.y, 10), lookAtAngle)    
 
     playerBuilders.primary[playerId] = builder
     playerBuilders.altar[playerId] = altar
@@ -834,6 +883,22 @@ function OnConstructFinish()
     if GLOBAL_DRAFT_SETS.dumyBuildingUnitTypeIds[unitType] then
         OnUnitDrafted(unit)
     end
+end
+
+function OnItemSold()
+    local item = GetSoldItem()
+    local itemType = GetItemTypeId(item)
+    local unit = GetBuyingUnit()
+    local player = GetOwningPlayer(unit)
+
+    for key, data in pairs(purchaseableUpgrades) do
+        if data.item == itemType then
+            AddPlayerTechResearched(player, data.upgrade, 1)
+            break
+        end
+    end
+
+    RemoveItem(item)
 end
 
 local STOP_ORDER_ID = 851972
@@ -917,8 +982,17 @@ function OnSpellEffect()
     local player = GetOwningPlayer(unit)
     local unitTypeId = GetUnitTypeId(unit)
 
-    if abilityId == CANCEL_ABILITY_ID and (unitTypeId == ALTAR_UNIT_TYPE_ID or unitTypeId == BLACKSMITH_UNIT_TYPE_ID) then
+    if abilityId == CANCEL_ABILITY_ID and unitTypeId == ALTAR_UNIT_TYPE_ID then
         SelectUnitForPlayerSingle(playerBuilders.primary[GetPlayerId(player)], player)
+        return
+    end
+
+    if abilityId == CANCEL_ABILITY_ID and unitTypeId == BLACKSMITH_UNIT_TYPE_ID then
+        for i = 0, #playerBuilders.blacksmith do
+            if playerBuilders.blacksmith[i] == unit then
+                SelectUnitForPlayerSingle(playerBuilders.primary[i], Player(i))
+            end
+        end
         return
     end
 
@@ -1033,7 +1107,6 @@ function OnUnitDrafted(unit)
     if draftedCount > 1 then
         UpdateHeroLevel(realUnit, draftedCount, false)
     end
-    --BlzSetUnitStringField(realUnit, ConvertUnitStringField('upat'), 'PathTextures\4x4SimpleSolid.tga')
 
     SelectUnitForPlayerSingle(playerBuilders.primary[playerId], player)
     
@@ -1302,6 +1375,10 @@ function Init()
     TriggerRegisterAnyUnitEventBJ(disableDraftUnitAbilities, EVENT_PLAYER_UNIT_ISSUED_ORDER)
     TriggerRegisterAnyUnitEventBJ(disableDraftUnitAbilities, EVENT_PLAYER_UNIT_SPELL_CHANNEL)
     TriggerAddAction(disableDraftUnitAbilities, OnIssuedOrder)
+    
+    local itemSoldTrigger = CreateTrigger()
+    TriggerRegisterAnyUnitEventBJ(itemSoldTrigger, EVENT_PLAYER_UNIT_SELL_ITEM)
+    TriggerAddAction(itemSoldTrigger, OnItemSold)
     
 end
 

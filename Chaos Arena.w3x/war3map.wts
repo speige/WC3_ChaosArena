@@ -1291,12 +1291,6 @@ STRING 424
 Draft Unit
 }
 
-STRING 425
-// Abilities: A001 (Cancel), Tip (Tooltip - Normal)
-{
-Pick unit to summon on green circle
-}
-
 STRING 427
 // Abilities: A002 (Draft Unit Tooltip), Name (Name)
 {
@@ -2469,5 +2463,23 @@ STRING 727
 // Abilities: A01X (Upgrade Army), Tip (Tooltip - Normal)
 {
 Purchase whole army upgrades for gold
+}
+
+STRING 728
+// Abilities: A000 (Draft Unit), Hotkey (Hotkey - Normal)
+{
+Q
+}
+
+STRING 729
+// Abilities: A01X (Upgrade Army), Hotkey (Hotkey - Normal)
+{
+W
+}
+
+STRING 730
+// Abilities: A001 (Cancel), Tip (Tooltip - Normal)
+{
+Cancel
 }
 
