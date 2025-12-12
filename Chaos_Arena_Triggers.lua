@@ -516,7 +516,7 @@ function SetAbilityUIState(whichUnit, abilityId, disabled, hidden)
 end
 
 
-function SetupUnitAbilities(unit)
+function SetupUnitAbilities(unit, includeDisabled)
     local unitType = GetUnitTypeId(unit)
     local elements = GetUnitActivatedElements(unit)
 
@@ -533,26 +533,31 @@ function SetupUnitAbilities(unit)
         SetAbilityUIState(unit, abilityMetaData.passive, false, false)
     end
     
-    local hideWhenDisabled = metaData == CIRCLE_OF_POWER_METADATA
     if abilityMetaData.water then
-        SetAbilityUIState(unit, abilityMetaData.water, not elements.water, not elements.water and hideWhenDisabled)
-        SetAbilityHotkey(unit, abilityMetaData.water, 'W')
-        if not elements.water and not hideWhenDisabled then
-            SetUnitAbilityTooltip(unit, abilityMetaData.water, GetUnitAbilityTooltip(unit, abilityMetaData.water) .. ' (disabled)')
+        if elements.water or includeDisabled then
+            SetAbilityUIState(unit, abilityMetaData.water, not elements.water, not elements.water)
+            SetAbilityHotkey(unit, abilityMetaData.water, 'W')
+            if not elements.water then
+                SetUnitAbilityTooltip(unit, abilityMetaData.water, GetUnitAbilityTooltip(unit, abilityMetaData.water) .. ' (disabled)')
+            end
         end
     end
     if abilityMetaData.earth then
-        SetAbilityUIState(unit, abilityMetaData.earth, not elements.earth, not elements.earth and hideWhenDisabled)
-        SetAbilityHotkey(unit, abilityMetaData.earth, 'E')
-        if not elements.earth and not hideWhenDisabled then
-            SetUnitAbilityTooltip(unit, abilityMetaData.earth, GetUnitAbilityTooltip(unit, abilityMetaData.earth) .. ' (disabled)')
+        if elements.earth or includeDisabled then
+            SetAbilityUIState(unit, abilityMetaData.earth, not elements.earth, not elements.earth)
+            SetAbilityHotkey(unit, abilityMetaData.earth, 'E')
+            if not elements.earth then
+                SetUnitAbilityTooltip(unit, abilityMetaData.earth, GetUnitAbilityTooltip(unit, abilityMetaData.earth) .. ' (disabled)')
+            end
         end
     end
     if abilityMetaData.fire then
-        SetAbilityUIState(unit, abilityMetaData.fire, not elements.fire, not elements.fire and hideWhenDisabled)
-        SetAbilityHotkey(unit, abilityMetaData.fire, 'R')
-        if not elements.fire and not hideWhenDisabled then
-            SetUnitAbilityTooltip(unit, abilityMetaData.fire, GetUnitAbilityTooltip(unit, abilityMetaData.fire) .. ' (disabled)')
+        if elements.fire or includeDisabled then
+            SetAbilityUIState(unit, abilityMetaData.fire, not elements.fire, not elements.fire)
+            SetAbilityHotkey(unit, abilityMetaData.fire, 'R')
+            if not elements.fire then
+                SetUnitAbilityTooltip(unit, abilityMetaData.fire, GetUnitAbilityTooltip(unit, abilityMetaData.fire) .. ' (disabled)')
+            end
         end
     end
 end
@@ -587,8 +592,6 @@ function CopyUnitGear(sourceUnit, targetUnit)
     else
         BlzSetHeroProperName(targetUnit, name)
     end
-    
-    SetupUnitAbilities(targetUnit)
 end
 
 function SwapUnitPositions(sourceUnit, targetUnit)
@@ -657,7 +660,7 @@ function SpawnWaveForPlayer(playerId)
             end
 
             CopyUnitGear(unit, clonedUnit)
-            SetupUnitAbilities(clonedUnit)
+            SetupUnitAbilities(clonedUnit, false)
 
             for key, data in pairs(purchaseableUpgrades) do
                 if data.ability then
@@ -754,8 +757,16 @@ function CloneAndShuffleArray(arr)
     return shuffled
 end
 
-local playerTileCoords = {}
+local gameTimerSecondsElapsed = 0
+function InitGameTimer()
+    local countdownTimer = CreateTimer()
+    TimerStart(countdownTimer, 1, true, function()
+        gameTimerSecondsElapsed = gameTimerSecondsElapsed + 1
+        OnGameTimerSecondsTick()
+    end)
+end
 
+local playerTileCoords = {}
 function UnlockPlayerTiles(playerId, count)
     local player = Player(playerId)
     local lookAtAngle = CalcUnitRotationAngle(0, 0, 0, 0)
@@ -782,7 +793,7 @@ function UnlockPlayerTiles(playerId, count)
         end
         local name = table.concat(elemNames, ' ')
         BlzSetUnitName(circle, name)
-        SetupUnitAbilities(circle)
+        SetupUnitAbilities(circle, false)
     end
 end
 
@@ -859,9 +870,6 @@ function AddDraftItemsToAltar(playerId)
     for i = 1, #items do
         UnitAddItemById(altar, items[i])
     end
-    --SetUnitAnimation(altar, 'levelup')
-    --PlaySound('Sounds/Internal/Abilities/Spells/Other/Levelup')
-    --SelectUnitForPlayerSingle(altar, Player(playerId))
 end
 
 function OnConstructFinish()
@@ -957,8 +965,8 @@ function SwapTileUnits(caster, target)
     RemoveUnit(caster)
     RemoveUnit(target)
 
-    SetupUnitAbilities(newCaster)
-    SetupUnitAbilities(newTarget)
+    SetupUnitAbilities(newCaster, true)
+    SetupUnitAbilities(newTarget, true)
     HideUnitHealthAndManaBars(newCaster, true)
     HideUnitHealthAndManaBars(newTarget, true)
 end
@@ -1064,6 +1072,17 @@ function OnUnitDrafted(unit)
         end
     end
 
+    local draftedCount = playerIdMapping_draftedUnitsCount[playerId] + 1
+    playerIdMapping_draftedUnitsCount[playerId] = draftedCount
+
+    local builder = playerBuilders.primary[playerId]
+    local nextDraftTimeInSeconds = GetDraftCooldownMinutes(draftedCount) * 60
+    BlzEndUnitAbilityCooldown(builder, DRAFT_ABILITY_ID)
+    local cooldownSeconds = nextDraftTimeInSeconds - gameTimerSecondsElapsed
+    if cooldownSeconds > 0 then
+        BlzStartUnitAbilityCooldown(builder, DRAFT_ABILITY_ID, cooldownSeconds)
+    end
+
     local dummyUnitTypeId = GetUnitTypeId(unit)
     local realUnitTypeId = GLOBAL_DRAFT_SETS.dumyBuildingUnitTypeIds[dummyUnitTypeId].unitTypeId
 
@@ -1087,10 +1106,8 @@ function OnUnitDrafted(unit)
     UnitAddAbility(realUnit, SWAP_UNITS_ABILITY_ID)
     UnitRemoveAbility(realUnit, MOVE_ABILITY_ID)
     DisableAttacks(realUnit)
-    SetupUnitAbilities(realUnit)
+    SetupUnitAbilities(realUnit, true)
     HideUnitHealthAndManaBars(realUnit, true)
-    local draftedCount = playerIdMapping_draftedUnitsCount[playerId] + 1
-    playerIdMapping_draftedUnitsCount[playerId] = draftedCount
     if draftedCount > 1 then
         UpdateHeroLevel(realUnit, draftedCount, false)
     end
@@ -1235,24 +1252,42 @@ function GrantPassiveXP()
     end)
 end
 
-function InitFoodCapTimer()
-    local foodCapIncreaseMinutes = {
-        0, 1, 2, 3, 5, 8, 12, 17, 23
-    }
-    
-    for foodCap = 1, #foodCapIncreaseMinutes do
-        local timer = CreateTimer()
-        TimerStart(timer, foodCapIncreaseMinutes[foodCap] * 60, false, function()
-            for playerId = 0, 11 do
-                local player = Player(playerId)
-                if GetPlayerSlotState(player) == PLAYER_SLOT_STATE_PLAYING then
-                    SetPlayerStateBJ(player, PLAYER_STATE_RESOURCE_FOOD_CAP, foodCap)
-                    if math.fmod(foodCap, 3) == 0 and foodCap < 9 then
-                        UnlockPlayerTiles(playerId, 3)
-                    end
-                end
+local foodCapIncreaseMinutes = {
+    0, 1, 2, 3, 5, 8, 12, 17, 23
+}
+function GetDraftCooldownMinutes(foodUsed)
+    return foodCapIncreaseMinutes[math.min(foodUsed+1, #foodCapIncreaseMinutes)]
+end
+
+local nextFoodCapIncreaseSeconds = 0
+local foodCap = 0
+function IncreaseFoodCap()
+    if foodCap >= #foodCapIncreaseMinutes then
+        return
+    end
+
+    foodCap = foodCap + 1
+    nextFoodCapIncreaseSeconds = GetDraftCooldownMinutes(foodCap) * 60
+
+    for playerId = 0, 11 do
+        local player = Player(playerId)
+        if GetPlayerSlotState(player) == PLAYER_SLOT_STATE_PLAYING then
+            SetPlayerStateBJ(player, PLAYER_STATE_RESOURCE_FOOD_CAP, foodCap)
+            if math.fmod(foodCap, 3) == 0 and foodCap < 9 then
+                UnlockPlayerTiles(playerId, 3)
             end
-        end)
+
+            --not working (wrong path to level, only hero models support level up animation due to origin target location in mesh, but can use Abilities\Spells\Other\Levelup\Levelupcaster.mdx)
+            --SetUnitAnimation(playerBuilders.altar[playerId], 'levelup')
+            --PlaySound('Sounds/Internal/Abilities/Spells/Other/Levelup')
+            --SelectUnitForPlayerSingle(playerBuilders.altar[playerId], Player(playerId))
+        end
+    end
+end
+
+function OnGameTimerSecondsTick()
+    if gameTimerSecondsElapsed >= nextFoodCapIncreaseSeconds then
+        IncreaseFoodCap()
     end
 end
 
@@ -1339,7 +1374,7 @@ function Init()
 	InitPlayers()
     CreateWaveSpawnLabels()
     CreateSpawnTimer()
-    InitFoodCapTimer()
+    InitGameTimer()
     GrantWoodPassive()
     ApplyNegativeHPRegen()
     GrantPassiveXP()
