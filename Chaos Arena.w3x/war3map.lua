@@ -496,6 +496,35 @@ function InitAbilityGridPositions()
     end    
 end
 
+function GetUnitAbilityName(unit, abilityId)
+    local ability = BlzGetUnitAbility(unit, abilityId)
+    return BlzGetAbilityStringField(ability, ABILITY_SF_NAME)
+end
+
+function GetItemAbilityName(item, abilityId)
+    local ability = BlzGetItemAbility(item, abilityId)
+    return BlzGetAbilityStringField(ability, ABILITY_SF_NAME)
+end
+
+function SetDraftItemTooltip(item)
+    local metaData = GLOBAL_DRAFT_SETS.draftItemTypeIds[GetItemTypeId(item)]
+    local abilityMetaData = metaData.abilityMetaData
+
+    local waterName = GetAbilityName(abilityMetaData.water)
+    local earthName = GetAbilityName(abilityMetaData.earth)
+    local fireName = GetAbilityName(abilityMetaData.fire)
+    local passiveName = GetAbilityName(abilityMetaData.passive)
+
+    local tooltip = ''
+    tooltip = tooltip .. GLOBAL_ELEMENT_NAME_TO_COLOR.water .. waterName .. '|n'
+    tooltip = tooltip .. GLOBAL_ELEMENT_NAME_TO_COLOR.earth .. earthName .. '|n'
+    tooltip = tooltip .. GLOBAL_ELEMENT_NAME_TO_COLOR.fire .. fireName .. '|n'
+    tooltip = tooltip .. COLOR_WHITE .. 'Aura: ' .. passiveName .. '|n'
+
+    BlzSetItemExtendedTooltip(item, tooltip)
+end
+
+
 function GetUnitActivatedElements(unit)
     local unitType = GetUnitTypeId(unit)
     local name
@@ -872,7 +901,8 @@ function AddDraftItemsToAltar(playerId)
     
     local items = DrawChoicesFromDeck(playerId)
     for i = 1, #items do
-        UnitAddItemById(altar, items[i])
+        local item = UnitAddItemById(altar, items[i])
+        SetDraftItemTooltip(item)
     end
 end
 
@@ -1121,6 +1151,37 @@ function OnUnitDrafted(unit)
     AddDraftItemsToAltar(playerId)
 end
 
+function PerformComputerDraft(playerId)
+    --todo: refactor OnUnitDrafted to take params for chosen item & location so computer can call it directly without actually "using" the item
+    local player = Player(playerId)
+    local altar = playerBuilders.altar[playerId]
+
+    local draftableItems = {}
+    for slotIndex = 0, 5 do
+        local item = UnitItemInSlot(altar, slotIndex)
+        if item then
+            table.insert(draftableItems, item)
+        end
+    end
+
+    local chosenItem = draftableItems[math.random(1, #draftableItems)]
+
+    local circles = {}
+    local group = CreateGroup()
+    GroupEnumUnitsOfPlayer(group, player, nil)
+    ForGroup(group, function()
+        local enumUnit = GetEnumUnit()
+        if GetUnitTypeId(enumUnit) == CIRCLE_OF_POWER_METADATA.unitTypeId then
+            table.insert(circles, enumUnit)
+        end
+    end)
+    DestroyGroup(group)
+
+    local chosenCircle = circles[math.random(1, #circles)]
+    UnitUseItemPoint(altar, chosenItem, GetUnitX(chosenCircle), GetUnitY(chosenCircle))
+end
+
+
 function OnSoulSiphonEffect()
     local caster = GetSpellAbilityUnit()
     local targetX = GetSpellTargetX()
@@ -1279,6 +1340,9 @@ function IncreaseFoodCap()
             SetPlayerStateBJ(player, PLAYER_STATE_RESOURCE_FOOD_CAP, foodCap)
             if math.fmod(foodCap, 3) == 0 and foodCap < 9 then
                 UnlockPlayerTiles(playerId, 3)
+            end
+            if GetPlayerController(player) == MAP_CONTROL_COMPUTER then
+                PerformComputerDraft(playerId)
             end
 
             --not working (wrong path to level, only hero models support level up animation due to origin target location in mesh, but can use Abilities\Spells\Other\Levelup\Levelupcaster.mdx)
