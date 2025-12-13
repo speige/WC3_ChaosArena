@@ -333,7 +333,6 @@ table.insert(GLOBAL_ITEM_SET, FourCC('belv')) -- Boots of Quel'Thalas (+6 agilit
 table.insert(GLOBAL_ITEM_SET, FourCC('cnob')) -- Circlet of Nobility (+2 Strength, Agility Intelligence)
 table.insert(GLOBAL_ITEM_SET, FourCC('rat6')) -- Claws of Attack +5
 table.insert(GLOBAL_ITEM_SET, FourCC('gcel')) -- Gloves of Haste (+.15)
-table.insert(GLOBAL_ITEM_SET, FourCC('rhth')) -- Khadgar's Gem of Health (+300 health)
 table.insert(GLOBAL_ITEM_SET, FourCC('pmna')) -- Pendant of Mana (+250)
 table.insert(GLOBAL_ITEM_SET, FourCC('prvt')) -- Periapt of Vitality (+150 health) - duplicate of rhth?
 table.insert(GLOBAL_ITEM_SET, FourCC('rde4')) -- Ring of Protection (+5 armor)
@@ -568,7 +567,7 @@ function SetupUnitAbilities(unit, includeDisabled)
     
     if abilityMetaData.water then
         if elements.water or includeDisabled then
-            SetAbilityUIState(unit, abilityMetaData.water, not elements.water, not elements.water)
+            SetAbilityUIState(unit, abilityMetaData.water, not elements.water, false)
             SetAbilityHotkey(unit, abilityMetaData.water, 'W')
             if not elements.water then
                 SetUnitAbilityTooltip(unit, abilityMetaData.water, GetUnitAbilityTooltip(unit, abilityMetaData.water) .. ' (disabled)')
@@ -577,7 +576,7 @@ function SetupUnitAbilities(unit, includeDisabled)
     end
     if abilityMetaData.earth then
         if elements.earth or includeDisabled then
-            SetAbilityUIState(unit, abilityMetaData.earth, not elements.earth, not elements.earth)
+            SetAbilityUIState(unit, abilityMetaData.earth, not elements.earth, false)
             SetAbilityHotkey(unit, abilityMetaData.earth, 'E')
             if not elements.earth then
                 SetUnitAbilityTooltip(unit, abilityMetaData.earth, GetUnitAbilityTooltip(unit, abilityMetaData.earth) .. ' (disabled)')
@@ -586,7 +585,7 @@ function SetupUnitAbilities(unit, includeDisabled)
     end
     if abilityMetaData.fire then
         if elements.fire or includeDisabled then
-            SetAbilityUIState(unit, abilityMetaData.fire, not elements.fire, not elements.fire)
+            SetAbilityUIState(unit, abilityMetaData.fire, not elements.fire, false)
             SetAbilityHotkey(unit, abilityMetaData.fire, 'R')
             if not elements.fire then
                 SetUnitAbilityTooltip(unit, abilityMetaData.fire, GetUnitAbilityTooltip(unit, abilityMetaData.fire) .. ' (disabled)')
@@ -820,11 +819,18 @@ function UnlockPlayerTiles(playerId, count)
 
         local elements = get_table_keys(GLOBAL_ELEMENT_NAME_TO_COLORED_STRING)
         local shuffledElements = CloneAndShuffleArray(elements)
-        local elemNames = {}
+        local chosenElements = {}
         for element = 1, elementCount do
-            table.insert(elemNames, GLOBAL_ELEMENT_NAME_TO_COLORED_STRING[table.remove(shuffledElements, 1)])
+            local elementName = table.remove(shuffledElements, 1)
+            chosenElements[elementName] = true
         end
-        local name = table.concat(elemNames, ' ')
+        
+        local name = ''
+        for elementName, elementColor in pairs(GLOBAL_ELEMENT_NAME_TO_COLORED_STRING) do
+            if chosenElements[elementName] then
+                name = name .. elementColor .. ' '
+            end
+        end
         BlzSetUnitName(circle, name)
         SetupUnitAbilities(circle, false)
     end
@@ -868,7 +874,7 @@ function InitPlayerBase(playerId)
     UnlockPlayerTiles(playerId, 3)
 
     SelectUnitForPlayerSingle(builder, player)
-    SetCameraPositionLocForPlayer(player, GetUnitLoc(builder))
+    SetCameraPositionForPlayer(player, GetUnitX(builder), GetUnitY(builder))
 end
 
 function InitPlayerBases()
@@ -1066,7 +1072,6 @@ end
 function OnUnitDrafted(unit)
     local player = GetOwningPlayer(unit)
     local playerId = GetPlayerId(player)
-    local altar = playerBuilders.altar[playerId]
 
     local foodUsed = GetPlayerState(player, PLAYER_STATE_RESOURCE_FOOD_USED)
     local foodCap = GetPlayerState(player, PLAYER_STATE_RESOURCE_FOOD_CAP)
@@ -1078,9 +1083,8 @@ function OnUnitDrafted(unit)
 
     local circle
     local group = CreateGroup()
-    local unitLocation = GetUnitLoc(unit)
-    local unitX = GetLocationX(unitLocation)
-    local unitY = GetLocationY(unitLocation)
+    local unitX = GetUnitX(unit)
+    local unitY = GetUnitY(unit)
     GroupEnumUnitsInRange(group, unitX, unitY, 100, nil)
     ForGroup(group, function()
         local enumUnit = GetEnumUnit()
@@ -1090,7 +1094,6 @@ function OnUnitDrafted(unit)
         end
     end)
 
-    RemoveLocation(unitLocation)
     DestroyGroup(group)
 
     if circle == nil then
@@ -1098,6 +1101,18 @@ function OnUnitDrafted(unit)
         RemoveUnit(unit)
         return        
     end
+
+    local dummyUnitTypeId = GetUnitTypeId(unit)
+    RemoveUnit(unit)
+
+    local realUnitTypeId = GLOBAL_DRAFT_SETS.dumyBuildingUnitTypeIds[dummyUnitTypeId].unitTypeId
+
+    DraftUnit(playerId, realUnitTypeId, circle)
+end
+
+function DraftUnit(playerId, unitTypeId, circle)
+    local player = Player(playerId)
+    local altar = playerBuilders.altar[playerId]
 
     for slotIndex = 0, 5 do
         local item = UnitItemInSlot(altar, slotIndex)
@@ -1117,33 +1132,26 @@ function OnUnitDrafted(unit)
         BlzStartUnitAbilityCooldown(builder, DRAFT_ABILITY_ID, cooldownSeconds)
     end
 
-    local dummyUnitTypeId = GetUnitTypeId(unit)
-    local realUnitTypeId = GLOBAL_DRAFT_SETS.dumyBuildingUnitTypeIds[dummyUnitTypeId].unitTypeId
-
-    local circleLocation = GetUnitLoc(circle)
-    local circleX = GetLocationX(circleLocation)
-    local circleY = GetLocationY(circleLocation)
-    RemoveLocation(circleLocation)
-
-    RemoveUnit(unit)
+    local circleX = GetUnitX(circle)
+    local circleY = GetUnitY(circle)
 
     --todo: check if this is necessary (assuming it'll have collision issues otherwise & bump position slightly)
-    SetUnitX(circle, MIN_X)
-    SetUnitY(circle, MIN_Y)
+    --SetUnitX(circle, MIN_X)
+    --SetUnitY(circle, MIN_Y)
 
-    local realUnit = CreateUnit(player, realUnitTypeId, circleX, circleY, CalcUnitRotationAngle(circleX, circleY, 0, 0))
-    CopyUnitGear(circle, realUnit)
+    local unit = CreateUnit(player, unitTypeId, circleX, circleY, CalcUnitRotationAngle(circleX, circleY, 0, 0))
+    CopyUnitGear(circle, unit)
 
     RemoveUnit(circle)
 
-    UnitAddAbility(realUnit, INVULNERABLE_ABILITY_ID)
-    UnitAddAbility(realUnit, SWAP_UNITS_ABILITY_ID)
-    UnitRemoveAbility(realUnit, MOVE_ABILITY_ID)
-    DisableAttacks(realUnit)
-    SetupUnitAbilities(realUnit, true)
-    HideUnitHealthAndManaBars(realUnit, true)
+    UnitAddAbility(unit, INVULNERABLE_ABILITY_ID)
+    UnitAddAbility(unit, SWAP_UNITS_ABILITY_ID)
+    UnitRemoveAbility(unit, MOVE_ABILITY_ID)
+    DisableAttacks(unit)
+    SetupUnitAbilities(unit, true)
+    HideUnitHealthAndManaBars(unit, true)
     if draftedCount > 1 then
-        UpdateHeroLevel(realUnit, draftedCount, false)
+        UpdateHeroLevel(unit, draftedCount, false)
     end
 
     SelectUnitForPlayerSingle(playerBuilders.primary[playerId], player)
@@ -1152,7 +1160,6 @@ function OnUnitDrafted(unit)
 end
 
 function PerformComputerDraft(playerId)
-    --todo: refactor OnUnitDrafted to take params for chosen item & location so computer can call it directly without actually "using" the item
     local player = Player(playerId)
     local altar = playerBuilders.altar[playerId]
 
@@ -1165,6 +1172,8 @@ function PerformComputerDraft(playerId)
     end
 
     local chosenItem = draftableItems[math.random(1, #draftableItems)]
+    local metaData = GLOBAL_DRAFT_SETS.draftItemTypeIds[GetItemTypeId(chosenItem)]
+    local unitTypeId = metaData.unitTypeId
 
     local circles = {}
     local group = CreateGroup()
@@ -1178,6 +1187,8 @@ function PerformComputerDraft(playerId)
     DestroyGroup(group)
 
     local chosenCircle = circles[math.random(1, #circles)]
+
+    DraftUnit(playerId, unitTypeId, chosenCircle)
     UnitUseItemPoint(altar, chosenItem, GetUnitX(chosenCircle), GetUnitY(chosenCircle))
 end
 
@@ -1370,9 +1381,12 @@ function InitPlayerAlliances()
 
         for otherPlayerIndex=0,11 do
             if playerIndex ~= otherPlayerIndex then
+                local otherPlayer = Player(otherPlayerIndex)
+                local otherTeam = GetPlayerTeam(otherPlayer)
+                local allies = team == otherTeam
                 local otherProxyPlayer = Player(playerIdMapping_realToProxy[otherPlayerIndex])
-                SetPlayerAlliance(otherProxyPlayer, proxyPlayer, ALLIANCE_PASSIVE, true)
-                SetPlayerAlliance(proxyPlayer, otherProxyPlayer, ALLIANCE_PASSIVE, true)
+                SetPlayerAlliance(otherProxyPlayer, proxyPlayer, ALLIANCE_PASSIVE, allies)
+                SetPlayerAlliance(proxyPlayer, otherProxyPlayer, ALLIANCE_PASSIVE, allies)
             end
         end
     end
@@ -1402,12 +1416,17 @@ function InitPlayerTiles()
 end
 
 function InitPlayers()
-    for i = 0, bj_MAX_PLAYER_SLOTS - 1 do
-        local p = Player(i)
-        if GetPlayerSlotState(p) == PLAYER_SLOT_STATE_PLAYING and GetLocalPlayer() == p then
-	        --SetTerrainFogEx(0, 0, 100000, 0.0, 0.0, 0.0, 0.0)
-	        --SetCameraField(CAMERA_FIELD_FARZ, 10000.0, 0)
-        	SetCameraField(CAMERA_FIELD_TARGET_DISTANCE, 3000, 0)
+    for playerId = 0, 11 do
+        local player = Player(playerId)
+        local proxyPlayer = Player(playerIdMapping_realToProxy[playerId])
+        if GetPlayerSlotState(player) == PLAYER_SLOT_STATE_PLAYING then
+            SetPlayerController(proxyPlayer, MAP_CONTROL_COMPUTER)
+            
+            if GetLocalPlayer() == player then
+                --SetTerrainFogEx(0, 0, 100000, 0.0, 0.0, 0.0, 0.0)
+                --SetCameraField(CAMERA_FIELD_FARZ, 10000.0, 0)
+                SetCameraField(CAMERA_FIELD_TARGET_DISTANCE, 3000, 0)
+            end
         end
     end
 
@@ -1504,7 +1523,7 @@ SetPlayerRaceSelectable(Player(0), true)
 SetPlayerController(Player(0), MAP_CONTROL_USER)
 SetPlayerStartLocation(Player(1), 1)
 SetPlayerColor(Player(1), ConvertPlayerColor(1))
-SetPlayerRacePreference(Player(1), RACE_PREF_ORC)
+SetPlayerRacePreference(Player(1), RACE_PREF_HUMAN)
 SetPlayerRaceSelectable(Player(1), true)
 SetPlayerController(Player(1), MAP_CONTROL_USER)
 SetPlayerStartLocation(Player(2), 2)
