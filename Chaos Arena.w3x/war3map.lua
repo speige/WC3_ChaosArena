@@ -673,6 +673,7 @@ function SpawnWaveForPlayer(playerId)
     local player = Player(playerId)
     local proxyPlayer = Player(playerIdMapping_realToProxy[playerId])
     local offset = GetSpawnOffset(playerId)
+    local team = GetPlayerTeam(player)
 
     local group = CreateGroup()
     GroupEnumUnitsOfPlayer(group, player, nil)
@@ -702,9 +703,7 @@ function SpawnWaveForPlayer(playerId)
                 end
             end
 
-            local attackLoc = Location(0, 0)
-            IssuePointOrderLoc(clonedUnit, 'attack', attackLoc)
-            RemoveLocation(attackLoc)
+            IssuePointOrder(clonedUnit, 'attack', 0, 0)
 
             table.insert(spawnedUnitsPerPlayerPerWave[playerId][waveNumber], clonedUnit)
         end
@@ -838,8 +837,11 @@ end
 
 function InitPlayerDecks()
     for playerId = 0, 11 do
-        playerDecks[playerId] = CloneAndShuffleArray(get_table_keys(GLOBAL_DRAFT_SETS.draftItemTypeIds))
-        AddDraftItemsToAltar(playerId)
+        local player = Player(playerId)
+        if GetPlayerSlotState(player) == PLAYER_SLOT_STATE_PLAYING then
+            playerDecks[playerId] = CloneAndShuffleArray(get_table_keys(GLOBAL_DRAFT_SETS.draftItemTypeIds))
+            AddDraftItemsToAltar(playerId)
+        end
     end
 end
 
@@ -1069,6 +1071,153 @@ function UnitHasItems(unit)
     return false
 end
 
+function GetRandomOwnedUnitInRange(unit, range)
+    local player = GetOwningPlayer(unit)
+    local group = CreateGroup()
+    local condition = Condition(function()
+        local filterUnit = GetFilterUnit()
+        if unit ~= filterUnit and GetOwningPlayer(filterUnit) == player then
+            return true
+        end
+        return false        
+    end)
+    GroupEnumUnitsInRange(group, GetUnitX(unit), GetUnitY(unit), range, condition)
+    local unit = FirstOfGroup(group)
+    DestroyCondition(condition)
+    DestroyGroup(group)
+    return unit
+end
+
+function GetRandomEnemyUnitInRange(unit, range)
+    local player = GetOwningPlayer(unit)
+    local team = GetPlayerTeam(player)
+    local group = CreateGroup()
+    local condition = Condition(function()
+        if GetPlayerTeam(GetOwningPlayer(GetFilterUnit())) ~= team then
+            return true
+        end
+        return false
+    end)
+    GroupEnumUnitsInRange(group, GetUnitX(unit), GetUnitY(unit), range, condition)
+    local unit = FirstOfGroup(group)
+    DestroyCondition(condition)
+    DestroyGroup(group)
+    return unit
+end
+
+local TARGETS_ALLOWED_SELF = 1 << 12
+local TARGETS_ALLOWED_PLAYERUNITS = 1 << 13
+local TARGETS_ALLOWED_ENEMY = 1 << 16
+
+local ABILITY_RANGE = ConvertAbilityRealField(FourCC('aran'))
+local ABILITY_TARGETS_ALLOWED = ConvertAbilityIntegerField(FourCC('atar'))
+local ABILITY_ACTIVATE = ConvertAbilityStringField(FourCC('aoro'))
+local ABILITY_USE = ConvertAbilityStringField(FourCC('aord'))
+local aiCycle = 0
+function RunUnitAI(unit)
+    xpcall(function()
+    print('UnitAI: ' .. aiCycle)
+    local unitX = GetUnitX(unit)
+    local unitY = GetUnitY(unit)
+    local abilityId = nil
+
+    local metaData = GetUnitMetaData(unit)
+    if not metaData or not metaData.abilityMetaData then
+        print('no metadata. quitting')
+        return
+    end
+    local abilityMetaData = metaData.abilityMetaData
+
+    if aiCycle == 0 then
+        IssuePointOrder(unit, 'attack', 0, 0)
+        return
+    elseif aiCycle == 1 then
+        abilityId = abilityMetaData.water
+    elseif aiCycle == 2 then
+        abilityId = abilityMetaData.earth
+    elseif aiCycle == 3 then
+        abilityId = abilityMetaData.fire
+    end
+
+    local unitAbility = BlzGetUnitAbility(unit, abilityId)
+    if not unitAbility then
+        print('doesnt have ability. quitting')
+        return
+    end
+
+    if BlzGetUnitAbilityCooldownRemaining(unit, abilityId) > 0 then
+        print('on cooldown. quitting')
+        return
+    end
+
+    local activateOrderString = BlzGetAbilityStringField(unitAbility, ABILITY_ACTIVATE)
+    if activateOrderString ~= '' then
+        print('activating ability: ' .. activateOrderString)
+        IssueImmediateOrder(unit, activateOrderString)
+        return
+    end
+
+    local useOrderString = BlzGetAbilityStringField(unitAbility, ABILITY_USE)
+    local range = BlzGetAbilityRealField(unitAbility, ABILITY_RANGE)
+    local targetsAllowed = BlzGetAbilityIntegerField(unitAbility, ABILITY_TARGETS_ALLOWED)
+
+    if range > 0 and (targetsAllowed & TARGETS_ALLOWED_ENEMY) ~= 0 then
+        local target = GetRandomEnemyUnitInRange(unit, range)
+        if target then
+            print('casting ability at enemy: ' .. useOrderString)
+            IssueTargetOrder(unit, useOrderString, target)
+            return
+        end
+    end
+        
+    if range > 0 and (targetsAllowed & TARGETS_ALLOWED_PLAYERUNITS) ~= 0 then
+        local target = GetRandomOwnedUnitInRange(unit, range)
+        if target then
+            print('casting ability at ally: ' .. useOrderString)
+            IssueTargetOrder(unit, useOrderString, target)
+            return
+        end
+    end
+        
+    if (targetsAllowed & TARGETS_ALLOWED_SELF) ~= 0 then
+        print('casting ability at self: ' .. useOrderString)
+        IssueTargetOrder(unit, useOrderString, unit)
+        return
+    end
+       
+    if range > 0 then
+        print('casting ability at random location: ' .. useOrderString)
+        local targetX = GetRandomReal(unitX - range, unitX + range)
+        local targetY = GetRandomReal(unitY - range, unitY + range)
+        IssuePointOrder(unit, useOrderString, targetX, targetY)
+        return
+    end
+
+    print('casting ability without target: ' .. useOrderString)
+    IssueImmediateOrder(unit, useOrderString)
+    end, function(error) print(error) end)
+end
+
+function aiLoop()
+    aiCycle = math.fmod(aiCycle + 1, 4)
+
+    for playerId = 0, 11 do
+        local player = Player(playerId)
+        if GetPlayerSlotState(player) == PLAYER_SLOT_STATE_PLAYING then
+            local proxyPlayer = Player(playerIdMapping_realToProxy[playerId])
+            local group = CreateGroup()
+            GroupEnumUnitsOfPlayer(group, proxyPlayer, nil)
+            ForGroup(group, function()
+                local unit = GetEnumUnit()
+                if IsUnitAliveBJ(unit) then
+                    RunUnitAI(unit)
+                end
+            end)
+            DestroyGroup(group)
+        end
+    end
+end
+
 function OnUnitDrafted(unit)
     local player = GetOwningPlayer(unit)
     local playerId = GetPlayerId(player)
@@ -1081,19 +1230,18 @@ function OnUnitDrafted(unit)
         return
     end
 
-    local circle
-    local group = CreateGroup()
     local unitX = GetUnitX(unit)
     local unitY = GetUnitY(unit)
-    GroupEnumUnitsInRange(group, unitX, unitY, 100, nil)
-    ForGroup(group, function()
-        local enumUnit = GetEnumUnit()
-        if GetUnitTypeId(enumUnit) == CIRCLE_OF_POWER_METADATA.unitTypeId then
-            circle = enumUnit
-            return
+    local group = CreateGroup()
+    local condition = Condition(function()
+        if GetUnitTypeId(GetFilterUnit()) == CIRCLE_OF_POWER_METADATA.unitTypeId then
+            return true
         end
+        return false        
     end)
-
+    GroupEnumUnitsInRange(group, unitX, unitY, 100, condition)
+    local circle = FirstOfGroup(group)
+    DestroyCondition(condition)
     DestroyGroup(group)
 
     if circle == nil then
@@ -1373,20 +1521,25 @@ end
 function InitPlayerAlliances()
     for playerIndex=0,11 do
         local player = Player(playerIndex)
-        local proxyPlayer = Player(playerIdMapping_realToProxy[playerIndex])
-        SetPlayerAlliance(player, proxyPlayer, ALLIANCE_PASSIVE, true)
-        SetPlayerAlliance(proxyPlayer, player, ALLIANCE_PASSIVE, true)
-        local team = GetPlayerTeam(player)
-        SetPlayerTeam(proxyPlayer, team)
 
-        for otherPlayerIndex=0,11 do
-            if playerIndex ~= otherPlayerIndex then
-                local otherPlayer = Player(otherPlayerIndex)
-                local otherTeam = GetPlayerTeam(otherPlayer)
-                if team == otherTeam then
-                    local otherProxyPlayer = Player(playerIdMapping_realToProxy[otherPlayerIndex])
-                    SetPlayerAlliance(otherProxyPlayer, proxyPlayer, ALLIANCE_PASSIVE, true)
-                    SetPlayerAlliance(proxyPlayer, otherProxyPlayer, ALLIANCE_PASSIVE, true)
+        if GetPlayerSlotState(player) == PLAYER_SLOT_STATE_PLAYING then
+            local proxyPlayer = Player(playerIdMapping_realToProxy[playerIndex])
+            SetPlayerAlliance(player, proxyPlayer, ALLIANCE_PASSIVE, true)
+            SetPlayerAlliance(proxyPlayer, player, ALLIANCE_PASSIVE, true)
+            local team = GetPlayerTeam(player)
+            SetPlayerTeam(proxyPlayer, team)
+
+            for otherPlayerIndex=0,11 do
+                if playerIndex ~= otherPlayerIndex then
+                    local otherPlayer = Player(otherPlayerIndex)
+                    if GetPlayerSlotState(otherPlayer) == PLAYER_SLOT_STATE_PLAYING then
+                        local otherTeam = GetPlayerTeam(otherPlayer)
+                        if team == otherTeam then
+                            local otherProxyPlayer = Player(playerIdMapping_realToProxy[otherPlayerIndex])
+                            SetPlayerAlliance(otherProxyPlayer, proxyPlayer, ALLIANCE_PASSIVE, true)
+                            SetPlayerAlliance(proxyPlayer, otherProxyPlayer, ALLIANCE_PASSIVE, true)
+                        end
+                    end
                 end
             end
         end
@@ -1493,6 +1646,9 @@ function Init()
     local itemSoldTrigger = CreateTrigger()
     TriggerRegisterAnyUnitEventBJ(itemSoldTrigger, EVENT_PLAYER_UNIT_SELL_ITEM)
     TriggerAddAction(itemSoldTrigger, OnItemSold)
+    
+    local aiTimer = CreateTimer()
+    TimerStart(aiTimer, 1.0, true, aiLoop)
 end
 
 --[[
