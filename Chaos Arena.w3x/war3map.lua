@@ -1383,10 +1383,11 @@ function InitPlayerAlliances()
             if playerIndex ~= otherPlayerIndex then
                 local otherPlayer = Player(otherPlayerIndex)
                 local otherTeam = GetPlayerTeam(otherPlayer)
-                local allies = team == otherTeam
-                local otherProxyPlayer = Player(playerIdMapping_realToProxy[otherPlayerIndex])
-                SetPlayerAlliance(otherProxyPlayer, proxyPlayer, ALLIANCE_PASSIVE, allies)
-                SetPlayerAlliance(proxyPlayer, otherProxyPlayer, ALLIANCE_PASSIVE, allies)
+                if team == otherTeam then
+                    local otherProxyPlayer = Player(playerIdMapping_realToProxy[otherPlayerIndex])
+                    SetPlayerAlliance(otherProxyPlayer, proxyPlayer, ALLIANCE_PASSIVE, true)
+                    SetPlayerAlliance(proxyPlayer, otherProxyPlayer, ALLIANCE_PASSIVE, true)
+                end
             end
         end
     end
