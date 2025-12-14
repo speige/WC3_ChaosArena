@@ -2212,3 +2212,21 @@ STRING 730
 Cancel
 }
 
+STRING 749
+// Abilities: A02S (Death Pact), Ubertip (Tooltip - Normal - Extended)
+{
+Steals <AUdp,DataB1,%>% hit points and <AUdp,DataA1,%>% mana from enemy and gives it to the Death Knight.
+}
+
+STRING 750
+// Abilities: A01P (Force of Nature), Ubertip (Tooltip - Normal - Extended)
+{
+Summons <AEfn,DataA1> Treants. Treants have <efon,realHP> hit points and deal <efon,mindmg1> - <efon,maxdmg1> damage. Can learn Nature's Blessing. |nLasts <AEfn,Dur1> seconds. |n|n|cffffcc00Attacks land units.|r
+}
+
+STRING 751
+// Abilities: A00D (Possession), Ubertip (Tooltip - Normal - Extended)
+{
+Displaces the soul of an enemy, giving you permanent control of it, but destroying the caster's body
+}
+
