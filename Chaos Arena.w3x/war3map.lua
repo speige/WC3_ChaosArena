@@ -32,103 +32,103 @@ local abilities = {
     AncestralSpirit = AbilityMetaData(FourCC('A03X'), nil, 'ancestralspirit', 350, ABILITY_TARGETING.GROUND_PLAYERUNITS),
     AnimateDead = AbilityMetaData(FourCC('A02T'), nil, 'animatedead', 400, ABILITY_TARGETING.GROUND_RANDOM),
     AntiMagicShell = AbilityMetaData(FourCC('A00A'), nil, 'antimagicshell', 500, ABILITY_TARGETING.PLAYERUNITS),
-    Avatar = AbilityMetaData(FourCC('A028'), nil, 'avatar', 0, ABILITY_TARGETING.NO_TARGET),
+    Avatar = AbilityMetaData(FourCC('A028'), nil, 'avatar', 0, ABILITY_TARGETING.NO_TARGET), -- working
     Banish = AbilityMetaData(FourCC('A02E'), nil, 'banish', 800, ABILITY_TARGETING.ENEMY), -- working
     Bash = AbilityMetaData(FourCC('A02A'), nil, nil, 0, ABILITY_TARGETING.PASSIVE),
-    BigBadVoodoo = AbilityMetaData(FourCC('A02Q'), nil, 'voodoo', 0, ABILITY_TARGETING.NO_TARGET),
+    BigBadVoodoo = AbilityMetaData(FourCC('A02Q'), nil, 'voodoo', 0, ABILITY_TARGETING.NO_TARGET), -- cancelling immediately after casting because it's channeled
     BlackArrow = AbilityMetaData(FourCC('A03I'), 'blackarrowon', nil, 600, ABILITY_TARGETING.AUTOCAST),
-    Bladestorm = AbilityMetaData(FourCC('A02H'), nil, 'whirlwind', 0, ABILITY_TARGETING.NO_TARGET),
+    Bladestorm = AbilityMetaData(FourCC('A02H'), nil, 'whirlwind', 0, ABILITY_TARGETING.NO_TARGET), -- working
     Blizzard = AbilityMetaData(FourCC('A027'), nil, 'blizzard', 800, ABILITY_TARGETING.ENEMY), -- working
     Bloodlust = AbilityMetaData(FourCC('A005'), 'bloodluston', nil, 600, ABILITY_TARGETING.AUTOCAST),
     BreathOfFire = AbilityMetaData(FourCC('A03E'), nil, 'breathoffire', 375, ABILITY_TARGETING.ENEMY), -- working
     CarrionBeetles = AbilityMetaData(FourCC('A022'), 'Carrionscarabson', nil, 900, ABILITY_TARGETING.AUTOCAST),
-    CarrionSwarm = AbilityMetaData(FourCC('A02Z'), nil, 'carrionswarm', 700, ABILITY_TARGETING.GROUND_ENEMY),
-    ChainLightning = AbilityMetaData(FourCC('A02I'), nil, 'chainlightning', 700, ABILITY_TARGETING.ENEMY),
-    Charm = AbilityMetaData(FourCC('A00S'), nil, 'charm', 700, ABILITY_TARGETING.ENEMY),
+    CarrionSwarm = AbilityMetaData(FourCC('A02Z'), nil, 'carrionswarm', 700, ABILITY_TARGETING.GROUND_ENEMY), -- working
+    ChainLightning = AbilityMetaData(FourCC('A02I'), nil, 'chainlightning', 700, ABILITY_TARGETING.ENEMY), -- working
+    Charm = AbilityMetaData(FourCC('A00S'), nil, 'charm', 700, ABILITY_TARGETING.ENEMY), -- working
     CleavingAttack = AbilityMetaData(FourCC('A03N'), nil, nil, 0, ABILITY_TARGETING.PASSIVE),
     ClusterRockets = AbilityMetaData(FourCC('A039'), nil, 'clusterrockets', 800, ABILITY_TARGETING.ENEMY), -- working
     CriticalStrike = AbilityMetaData(FourCC('A02F'), nil, nil, 0, ABILITY_TARGETING.PASSIVE),
-    Curse = AbilityMetaData(FourCC('A00B'), 'curseon', nil, 700, ABILITY_TARGETING.AUTOCAST),
+    Curse = AbilityMetaData(FourCC('A00B'), 'curseon', nil, 700, ABILITY_TARGETING.AUTOCAST), -- working
     Cyclone = AbilityMetaData(FourCC('A00H'), nil, 'cyclone', 600, ABILITY_TARGETING.ENEMY),
-    DarkPortal = AbilityMetaData(FourCC('A03P'), nil, 'darkportal', 800, ABILITY_TARGETING.GROUND_RANDOM),
+    DarkPortal = AbilityMetaData(FourCC('A03P'), nil, 'darkportal', 800, ABILITY_TARGETING.GROUND_RANDOM), -- working
     DeathAndDecay = AbilityMetaData(FourCC('A02W'), nil, 'deathanddecay', 1000, ABILITY_TARGETING.GROUND_ENEMY),
     DeathCoil = AbilityMetaData(FourCC('A02R'), nil, 'deathcoil', 800, ABILITY_TARGETING.ENEMY),
     DeathPact = AbilityMetaData(FourCC('A02S'), nil, 'deathpact', 800, ABILITY_TARGETING.ENEMY),
     DiseaseCloud = AbilityMetaData(FourCC('A00C'), nil, nil, 0, ABILITY_TARGETING.PASSIVE),
-    DivineShield = AbilityMetaData(FourCC('A025'), nil, 'divineshield', 0, ABILITY_TARGETING.NO_TARGET),
+    DivineShield = AbilityMetaData(FourCC('A025'), nil, 'divineshield', 0, ABILITY_TARGETING.NO_TARGET), -- working
     Doom = AbilityMetaData(FourCC('A03Q'), nil, 'doom', 650, ABILITY_TARGETING.ENEMY),
     DrunkenBrawler = AbilityMetaData(FourCC('A03F'), nil, nil, 0, ABILITY_TARGETING.PASSIVE),
-    Earthquake = AbilityMetaData(FourCC('A02K'), nil, 'earthquake', 1000, ABILITY_TARGETING.GROUND_ENEMY),
-    EntanglingRoots = AbilityMetaData(FourCC('A00U'), nil, 'entanglingroots', 800, ABILITY_TARGETING.ENEMY),
+    Earthquake = AbilityMetaData(FourCC('A02K'), nil, 'earthquake', 1000, ABILITY_TARGETING.GROUND_ENEMY), -- working
+    EntanglingRoots = AbilityMetaData(FourCC('A00U'), nil, 'entanglingroots', 800, ABILITY_TARGETING.ENEMY), -- working
     FaerieFire = AbilityMetaData(FourCC('A00I'), 'faeriefireon', nil, 700, ABILITY_TARGETING.AUTOCAST),
     FanOfKnives = AbilityMetaData(FourCC('A01Y'), nil, 'fanofknives', 0, ABILITY_TARGETING.NO_TARGET),
-    FeralSpirit = AbilityMetaData(FourCC('A02J'), nil, 'spiritwolf', 800, ABILITY_TARGETING.NO_TARGET),
-    FlameStrike = AbilityMetaData(FourCC('A02D'), nil, 'flamestrike', 800, ABILITY_TARGETING.GROUND_ENEMY),
-    ForceOfNature = AbilityMetaData(FourCC('A01P'), nil, 'forceofnature', 800, ABILITY_TARGETING.GROUND_RANDOM),
+    FeralSpirit = AbilityMetaData(FourCC('A02J'), nil, 'spiritwolf', 800, ABILITY_TARGETING.NO_TARGET), -- working
+    FlameStrike = AbilityMetaData(FourCC('A02D'), nil, 'flamestrike', 800, ABILITY_TARGETING.GROUND_ENEMY), -- working
+    ForceOfNature = AbilityMetaData(FourCC('A01P'), nil, 'forceofnature', 800, ABILITY_TARGETING.GROUND_RANDOM), -- broken
     ForkedLightning = AbilityMetaData(FourCC('A035'), nil, 'forkedlightning', 600, ABILITY_TARGETING.ENEMY),
     FrostArmor = AbilityMetaData(FourCC('A02V'), 'forstarmoron', nil, 800, ABILITY_TARGETING.AUTOCAST),
     FrostArrows = AbilityMetaData(FourCC('A036'), 'coldarrowstarg', nil, 600, ABILITY_TARGETING.AUTOCAST),
     FrostNova = AbilityMetaData(FourCC('A02U'), nil, 'frostnova', 800, ABILITY_TARGETING.ENEMY),
     HardenedSkin = AbilityMetaData(FourCC('A00J'), nil, nil, 0, ABILITY_TARGETING.PASSIVE),
-    HealingSpray = AbilityMetaData(FourCC('A033'), nil, 'healingspray', 800, ABILITY_TARGETING.GROUND_PLAYERUNITS),
-    HealingWard = AbilityMetaData(FourCC('A03R'), nil, 'healingward', 500, ABILITY_TARGETING.GROUND_PLAYERUNITS),
+    HealingSpray = AbilityMetaData(FourCC('A033'), nil, 'healingspray', 800, ABILITY_TARGETING.GROUND_PLAYERUNITS), -- working
+    HealingWard = AbilityMetaData(FourCC('A03R'), nil, 'healingward', 500, ABILITY_TARGETING.GROUND_PLAYERUNITS), -- working
     HealingWave = AbilityMetaData(FourCC('A03T'), nil, 'healingwave', 700, ABILITY_TARGETING.PLAYERUNITS),
-    Hex = AbilityMetaData(FourCC('A02P'), nil, 'hex', 800, ABILITY_TARGETING.ENEMY),
+    Hex = AbilityMetaData(FourCC('A02P'), nil, 'hex', 800, ABILITY_TARGETING.ENEMY), -- working
     HolyLight = AbilityMetaData(FourCC('A024'), nil, 'holybolt', 800, ABILITY_TARGETING.PLAYERUNITS),
     HowlOfTerror = AbilityMetaData(FourCC('A03M'), nil, 'howlofterror', 0, ABILITY_TARGETING.NO_TARGET),
     Immolation = AbilityMetaData(FourCC('A01V'), nil, 'immolation', 0, ABILITY_TARGETING.NO_TARGET), -- working
-    Impale = AbilityMetaData(FourCC('A030'), nil, 'impale', 700, ABILITY_TARGETING.GROUND_ENEMY),
-    Incinerate = AbilityMetaData(FourCC('A03J'), nil, 'incinerate', 0, ABILITY_TARGETING.NO_TARGET), -- is this actually a passive?
+    Impale = AbilityMetaData(FourCC('A030'), nil, 'impale', 700, ABILITY_TARGETING.GROUND_ENEMY), -- working
+    Incinerate = AbilityMetaData(FourCC('A03J'), nil, 'incinerate', 0, ABILITY_TARGETING.PASSIVE),
     Inferno = AbilityMetaData(FourCC('A021'), nil, 'inferno', 900, ABILITY_TARGETING.GROUND_RANDOM),
     LifeDrain = AbilityMetaData(FourCC('A004'), nil, 'drain', 500, ABILITY_TARGETING.ENEMY), -- working
     LightningAttack = AbilityMetaData(FourCC('A00K'), nil, nil, 0, ABILITY_TARGETING.PASSIVE),
-    LightningShield = AbilityMetaData(FourCC('A007'), nil, 'lightningshield', 600, ABILITY_TARGETING.PLAYERUNITS),
-    LocustSwarm = AbilityMetaData(FourCC('A031'), nil, 'Locustswarm', 0, ABILITY_TARGETING.NO_TARGET),
+    LightningShield = AbilityMetaData(FourCC('A007'), nil, 'lightningshield', 600, ABILITY_TARGETING.PLAYERUNITS), -- working
+    LocustSwarm = AbilityMetaData(FourCC('A031'), nil, 'Locustswarm', 0, ABILITY_TARGETING.NO_TARGET), -- working
     ManaBurn = AbilityMetaData(FourCC('A01U'), nil, 'manaburn', 300, ABILITY_TARGETING.ENEMY),
     ManaFlare = AbilityMetaData(FourCC('A00L'), nil, 'manaflareon', 200, ABILITY_TARGETING.NO_TARGET),
-    ManaShield = AbilityMetaData(FourCC('A037'), 'manashieldon', nil, 128, ABILITY_TARGETING.AUTOCAST),
-    Metamorphosis = AbilityMetaData(FourCC('A01W'), nil, 'metamorphosis', 0, ABILITY_TARGETING.NO_TARGET),
+    ManaShield = AbilityMetaData(FourCC('A037'), 'manashieldon', nil, 128, ABILITY_TARGETING.AUTOCAST), -- working
+    Metamorphosis = AbilityMetaData(FourCC('A01W'), nil, 'metamorphosis', 0, ABILITY_TARGETING.NO_TARGET), -- seems to cancel immediately after casting
     MirrorImage = AbilityMetaData(FourCC('A02G'), nil, 'mirrorimage', 128, ABILITY_TARGETING.NO_TARGET),
     PhaseShift = AbilityMetaData(FourCC('A00M'), 'phaseshifton', nil, 0, ABILITY_TARGETING.AUTOCAST), -- working
-    Phoenix = AbilityMetaData(FourCC('A02C'), nil, 'summonphoenix', 0, ABILITY_TARGETING.NO_TARGET),
-    PocketFactory = AbilityMetaData(FourCC('A038'), nil, 'summonfactory', 500, ABILITY_TARGETING.GROUND_RANDOM),
+    Phoenix = AbilityMetaData(FourCC('A02C'), nil, 'summonphoenix', 0, ABILITY_TARGETING.NO_TARGET), -- working
+    PocketFactory = AbilityMetaData(FourCC('A038'), nil, 'summonfactory', 500, ABILITY_TARGETING.GROUND_RANDOM), -- working
     Possession = AbilityMetaData(FourCC('A00D'), nil, 'possession', 200, ABILITY_TARGETING.ENEMY),
-    RainOfChaos = AbilityMetaData(FourCC('A03O'), nil, 'rainofchaos', 1000, ABILITY_TARGETING.GROUND_RANDOM),
-    RainOfFire = AbilityMetaData(FourCC('A03S'), nil, 'rainoffire', 800, ABILITY_TARGETING.GROUND_ENEMY),
+    RainOfChaos = AbilityMetaData(FourCC('A03O'), nil, 'rainofchaos', 1000, ABILITY_TARGETING.GROUND_RANDOM), -- working
+    RainOfFire = AbilityMetaData(FourCC('A03S'), nil, 'rainoffire', 800, ABILITY_TARGETING.GROUND_ENEMY), -- working
     RaiseDead = AbilityMetaData(FourCC('A00E'), 'raisedeadon', nil, 600, ABILITY_TARGETING.AUTOCAST),
-    Reincarnation = AbilityMetaData(FourCC('A02L'), nil, nil, 0, ABILITY_TARGETING.PASSIVE),
+    Reincarnation = AbilityMetaData(FourCC('A02L'), nil, nil, 0, ABILITY_TARGETING.PASSIVE), -- working
     Resurrection = AbilityMetaData(FourCC('A026'), nil, 'resurrection', 400, ABILITY_TARGETING.GROUND_PLAYERUNITS),
     RoboGoblin = AbilityMetaData(FourCC('A03A'), nil, 'robogoblin', 0, ABILITY_TARGETING.NO_TARGET),
-    SearingArrows = AbilityMetaData(FourCC('A01R'), nil, 'flamingarrows', 600, ABILITY_TARGETING.NO_TARGET),
-    SerpentWard = AbilityMetaData(FourCC('A02O'), nil, 'ward', 500, ABILITY_TARGETING.GROUND_ENEMY),
+    SearingArrows = AbilityMetaData(FourCC('A01R'), nil, 'flamingarrows', 600, ABILITY_TARGETING.NO_TARGET), -- working
+    SerpentWard = AbilityMetaData(FourCC('A02O'), nil, 'ward', 500, ABILITY_TARGETING.GROUND_ENEMY), -- working
     ShadowStrike = AbilityMetaData(FourCC('A01Z'), nil, 'shadowstrike', 300, ABILITY_TARGETING.ENEMY),
-    Shockwave = AbilityMetaData(FourCC('A02N'), nil, 'shockwave', 700, ABILITY_TARGETING.GROUND_ENEMY),
-    Silence = AbilityMetaData(FourCC('A03H'), nil, 'silence', 900, ABILITY_TARGETING.GROUND_ENEMY),
-    Sleep = AbilityMetaData(FourCC('A02Y'), nil, 'sleep', 800, ABILITY_TARGETING.ENEMY),
+    Shockwave = AbilityMetaData(FourCC('A02N'), nil, 'shockwave', 700, ABILITY_TARGETING.GROUND_ENEMY), -- working
+    Silence = AbilityMetaData(FourCC('A03H'), nil, 'silence', 900, ABILITY_TARGETING.GROUND_ENEMY), -- working
+    Sleep = AbilityMetaData(FourCC('A02Y'), nil, 'sleep', 800, ABILITY_TARGETING.ENEMY), -- working
     SlowPoison = AbilityMetaData(FourCC('A00O'), nil, nil, 0, ABILITY_TARGETING.PASSIVE),
     SoulBurn = AbilityMetaData(FourCC('A03K'), nil, 'soulburn', 700, ABILITY_TARGETING.ENEMY),
     SpellImmunity = AbilityMetaData(FourCC('A00P'), nil, nil, 0, ABILITY_TARGETING.PASSIVE),
     SpikedCarapace = AbilityMetaData(FourCC('A032'), nil, nil, 0, ABILITY_TARGETING.PASSIVE),
-    SpiritLink = AbilityMetaData(FourCC('A008'), nil, 'spiritlink', 750, ABILITY_TARGETING.PLAYERUNITS),
+    SpiritLink = AbilityMetaData(FourCC('A008'), nil, 'spiritlink', 750, ABILITY_TARGETING.PLAYERUNITS), -- not casting
     SpiritTouch = AbilityMetaData(FourCC('A00F'), 'replenishmanaon', nil, 250, ABILITY_TARGETING.AUTOCAST),
-    Stampede = AbilityMetaData(FourCC('A03D'), nil, 'stampede', 300, ABILITY_TARGETING.GROUND_ENEMY),
-    Starfall = AbilityMetaData(FourCC('A01S'), nil, 'starfall', 0, ABILITY_TARGETING.NO_TARGET),
+    Stampede = AbilityMetaData(FourCC('A03D'), nil, 'stampede', 300, ABILITY_TARGETING.GROUND_ENEMY), -- cancelling immediately after casting because it's channeled
+    Starfall = AbilityMetaData(FourCC('A01S'), nil, 'starfall', 0, ABILITY_TARGETING.NO_TARGET), -- cancelling immediately after casting because it's channeled
     StatisTrap = AbilityMetaData(FourCC('A009'), nil, 'stasistrap', 500, ABILITY_TARGETING.GROUND_ENEMY),
-    StormBolt = AbilityMetaData(FourCC('A02B'), nil, 'thunderbolt', 600, ABILITY_TARGETING.ENEMY),
-    StormEarthAndFire = AbilityMetaData(FourCC('A03G'), nil, 'elementalfury', 0, ABILITY_TARGETING.NO_TARGET),
-    SummonBear = AbilityMetaData(FourCC('A03B'), nil, 'summongrizzly', 0, ABILITY_TARGETING.NO_TARGET),
+    StormBolt = AbilityMetaData(FourCC('A02B'), nil, 'thunderbolt', 600, ABILITY_TARGETING.ENEMY), -- working
+    StormEarthAndFire = AbilityMetaData(FourCC('A03G'), nil, 'elementalfury', 0, ABILITY_TARGETING.NO_TARGET), -- working
+    SummonBear = AbilityMetaData(FourCC('A03B'), nil, 'summongrizzly', 0, ABILITY_TARGETING.NO_TARGET), -- working
     SummonLavaSpawn = AbilityMetaData(FourCC('A03L'), nil, 'slimemonster', 0, ABILITY_TARGETING.NO_TARGET),
-    SummonQuilbeast = AbilityMetaData(FourCC('A03C'), nil, 'summonquillbeast', 0, ABILITY_TARGETING.NO_TARGET),
+    SummonQuilbeast = AbilityMetaData(FourCC('A03C'), nil, 'summonquillbeast', 0, ABILITY_TARGETING.NO_TARGET), -- working
     SummonWaterElemental = AbilityMetaData(FourCC('A029'), nil, 'waterelemental', 0, ABILITY_TARGETING.NO_TARGET), -- working
     Taunt = AbilityMetaData(FourCC('A00Q'), nil, 'taunt', 0, ABILITY_TARGETING.NO_TARGET),
-    ThunderClap = AbilityMetaData(FourCC('A01T'), nil, 'thunderclap', 0, ABILITY_TARGETING.NO_TARGET),
-    Tornado = AbilityMetaData(FourCC('A03U'), nil, 'tornado', 700, ABILITY_TARGETING.GROUND_ENEMY),
-    Tranquility = AbilityMetaData(FourCC('A01Q'), nil, 'tranquility', 0, ABILITY_TARGETING.NO_TARGET),
-    Transmute = AbilityMetaData(FourCC('A00T'), nil, 'transmute', 650, ABILITY_TARGETING.ENEMY),
-    Vengeance = AbilityMetaData(FourCC('A020'), nil, 'spiritofvengeance', 0, ABILITY_TARGETING.NO_TARGET),
+    ThunderClap = AbilityMetaData(FourCC('A01T'), nil, 'thunderclap', 0, ABILITY_TARGETING.NO_TARGET), -- working
+    Tornado = AbilityMetaData(FourCC('A03U'), nil, 'tornado', 700, ABILITY_TARGETING.GROUND_ENEMY), -- working
+    Tranquility = AbilityMetaData(FourCC('A01Q'), nil, 'tranquility', 0, ABILITY_TARGETING.NO_TARGET), -- cancelling immediately after casting because it's channeled
+    Transmute = AbilityMetaData(FourCC('A00T'), nil, 'transmute', 650, ABILITY_TARGETING.ENEMY), -- working
+    Vengeance = AbilityMetaData(FourCC('A020'), nil, 'spiritofvengeance', 0, ABILITY_TARGETING.NO_TARGET), -- working
     Volcano = AbilityMetaData(FourCC('A023'), nil, 'volcano', 800, ABILITY_TARGETING.GROUND_ENEMY), -- working
     VorpalBlades = AbilityMetaData(FourCC('A044'), nil, nil, 0, ABILITY_TARGETING.PASSIVE),
-    WarStomp = AbilityMetaData(FourCC('A02M'), nil, 'stomp', 0, ABILITY_TARGETING.NO_TARGET),
+    WarStomp = AbilityMetaData(FourCC('A02M'), nil, 'stomp', 0, ABILITY_TARGETING.NO_TARGET), -- working
     Aura_Agility = AbilityMetaData(FourCC('A006'), nil, nil, nil, nil),
     Aura_Armor = AbilityMetaData(FourCC('A00N'), nil, nil, nil, nil),
     Aura_Damage = AbilityMetaData(FourCC('A00G'), nil, nil, nil, nil),
@@ -1126,22 +1126,20 @@ end
 local ENEMY_AQUISITION_RANGE = 1000
 local aiCycle = 0
 function RunUnitAI(unit)
-    --todo: wait til teleport complete or "aquisition" range has occurred
-    local unitX = GetUnitX(unit)
-    local unitY = GetUnitY(unit)
-    local ability = nil
-
-    local metaData = GetUnitMetaData(unit)
-    if not metaData or not metaData.abilityMetaData then
-        return
-    end
-    local abilityMetaData = metaData.abilityMetaData
-
+    --todo: wait til teleport complete or "ghost aquisition" completed?
     if aiCycle == 0 then
         IssuePointOrder(unit, 'attack', 0, 0)
         return
     end
 
+    local metaData = GetUnitMetaData(unit)
+    if not metaData or not metaData.abilityMetaData then
+        --NOTE: summoned unit
+        return
+    end
+    local abilityMetaData = metaData.abilityMetaData
+
+    local ability = nil
     if aiCycle == 1 then
         ability = abilityMetaData.water
     elseif aiCycle == 2 then
@@ -1178,6 +1176,12 @@ function RunUnitAI(unit)
         end
     end
         
+    --NOTE: avoids wasting self-buffing spells before near a fight
+    local enemy = GetRandomEnemyUnitInRange(unit, ENEMY_AQUISITION_RANGE)
+    if not enemy then
+        return
+    end
+
     if ability.range > 0 and (ability.targetsAllowed == ABILITY_TARGETING.PLAYERUNITS or ability.targetsAllowed == ABILITY_TARGETING.GROUND_PLAYERUNITS) then
         local target = GetRandomOwnedUnitInRange(unit, ability.range)
         if target then
@@ -1197,14 +1201,10 @@ function RunUnitAI(unit)
         return
     end
        
-    --NOTE: avoids wasting self-buffing spells before near a fight
-    local enemy = GetRandomEnemyUnitInRange(unit, ENEMY_AQUISITION_RANGE)
-    if not enemy then
-        return
-    end
-
     if ability.range > 0 and ability.targetsAllowed == ABILITY_TARGETING.GROUND_RANDOM then
         print('casting ability at random location: ' .. ability.order)
+        local unitX = GetUnitX(unit)
+        local unitY = GetUnitY(unit)
         local targetX = GetRandomReal(unitX - ability.range, unitX + ability.range)
         local targetY = GetRandomReal(unitY - ability.range, unitY + ability.range)
         IssuePointOrder(unit, ability.order, targetX, targetY)
@@ -1833,7 +1833,7 @@ DefineStartLocation(1, 1216.0, 2624.0)
 DefineStartLocation(2, 2624.0, 1216.0)
 DefineStartLocation(3, 2944.0, 0.0)
 DefineStartLocation(4, 2624.0, -1216.0)
-DefineStartLocation(5, 1216.0, -2688.0)
+DefineStartLocation(5, 1216.0, -2624.0)
 DefineStartLocation(6, 0.0, -2944.0)
 DefineStartLocation(7, -1216.0, -2624.0)
 DefineStartLocation(8, -2624.0, -1216.0)
