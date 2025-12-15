@@ -349,10 +349,10 @@ local INVULNERABLE_ABILITY_ID = FourCC('Avul')
 
 local _playerTotalKills = {}
 
-local _unitDamageStatsPerPlayer = {}
+local _damageStatsPerPlayerPerUnitPerWave = {}
 for playerId = 0, 11 do
     _playerTotalKills[playerId] = 0
-    _unitDamageStatsPerPlayer[playerId] = 0
+    _damageStatsPerPlayerPerUnitPerWave[playerId] = {}
 end
 
 local ORDER_IDs = {
@@ -1037,9 +1037,9 @@ function SwapTileUnits(caster, target)
         UnitAddAbility(newTarget, SWAP_UNITS_ABILITY_ID)
     end
 
-    local damageStats = _unitDamageStatsPerPlayer[GetPlayerId(player)]
-    damageStats[GetUnitTypeId(caster)] = 0
-    damageStats[GetUnitTypeId(target)] = 0
+    local damageStatsPerUnitPerWave = _damageStatsPerPlayerPerUnitPerWave[GetPlayerId(player)]
+    damageStatsPerUnitPerWave[GetUnitTypeId(caster)] = {}
+    damageStatsPerUnitPerWave[GetUnitTypeId(target)] = {}
 
     RemoveUnit(caster)
     RemoveUnit(target)
@@ -1349,7 +1349,7 @@ function DraftUnit(playerId, unitTypeId, circle)
         UpdateHeroLevel(unit, draftedCount, false)
     end
 
-    _unitDamageStatsPerPlayer[playerId][unitTypeId] = 0
+    _damageStatsPerPlayerPerUnitPerWave[playerId][unitTypeId] = {}
 
     SelectUnitForPlayerSingle(playerBuilders.primary[playerId], player)
     
@@ -1664,6 +1664,89 @@ function PrintDebugInfo()
     end
 end
 
+local _multiboard = nil
+function InitMultiboard()
+    _multiboard = CreateMultiboard()
+    MultiboardSetTitleText(_multiboard, 'Player Kills')
+    MultiboardSetColumnCount(_multiboard, 2)
+    MultiboardSetRowCount(_multiboard, 1)
+    local playerNameColumn = MultiboardGetItem(_multiboard, 0, 0)
+    MultiboardSetItemStyle(playerNameColumn, true, false)
+    MultiboardSetItemWidth(playerNameColumn, 0.10)
+    MultiboardSetItemValue(playerNameColumn, 'Player')
+    MultiboardReleaseItem(playerNameColumn)
+    local killsColumn = MultiboardGetItem(_multiboard, 0, 1)
+    MultiboardSetItemStyle(killsColumn, true, false)
+    MultiboardSetItemWidth(killsColumn, 0.05)
+    MultiboardSetItemValue(killsColumn, 'Kills')
+    MultiboardReleaseItem(killsColumn)
+
+    MultiboardDisplay(_multiboard, true)
+    MultiboardMinimize(_multiboard, true)
+end
+
+local colorPerPlayer = {
+    [0] = 'FF0402',
+    [1] = '0042FF',
+    [2] = '1BE6BA',
+    [3] = '550081',
+    [4] = 'FFFC00',
+    [5] = 'FF8A0D',
+    [6] = '20BF00',
+    [7] = 'E35BAF',
+    [8] = '949697',
+    [9] = '7EBFF1',
+    [10] = '106247',
+    [11] = '4F2B05',    
+    [12] = '9C0000',    
+    [13] = '0000C2',    
+    [14] = '00EBFF',    
+    [15] = 'BD00FF',    
+    [16] = 'ECCC86',    
+    [17] = 'F7A48B',    
+    [18] = 'BFFF80',    
+    [19] = 'DBB8EC',    
+    [20] = '4F4F55',    
+    [21] = 'ECF0FF',    
+    [22] = 'A46F34'
+}
+function ConvertPlayerColorToHex(playerId)
+    return colorPerPlayer[playerId] or 'ffffff'
+end
+
+function UpdateMultiboard()
+    local playerScores = {}
+    for playerId = 0, 11 do
+        local player = Player(playerId)
+        if GetPlayerSlotState(player) == PLAYER_SLOT_STATE_PLAYING then
+            table.insert(playerScores, {player = player, kills = _playerTotalKills[playerId]})
+        end
+    end
+
+    table.sort(playerScores, function(a, b)
+        return a.kills > b.kills
+    end)
+
+    MultiboardSetRowCount(_multiboard, #playerScores + 1)
+
+    for i, data in pairs(playerScores) do
+        local player = data.player
+        local kills = data.kills
+        local playerName = GetPlayerName(player)
+        local colorHex = ConvertPlayerColor(GetPlayerId(player))
+        local coloredPlayerName = '|cff' .. colorHex .. playerName .. '|r'
+
+        local playerNameColumn = MultiboardGetItem(_multiboard, i + 1, 0)
+        MultiboardSetItemValue(playerNameColumn, coloredPlayerName)
+        MultiboardReleaseItem(playerNameColumn)
+        
+        local killsColumn = MultiboardGetItem(_multiboard, i + 1, 1)
+        MultiboardSetItemValue(killsColumn, tostring(kills))
+        MultiboardReleaseItem(killsColumn)
+    end
+    --MultiboardDisplay(_multiboard, true)
+end
+
 function Init()
     --SetRandomSeed(100)
 	MeleeStartingVisibility()
@@ -1678,6 +1761,9 @@ function Init()
     GrantWoodPassive()
     ApplyNegativeHPRegen()
     GrantPassiveXP()
+    InitMultiboard()
+    local multiboardUpdateTimer = CreateTimer()
+    TimerStart(multiboardUpdateTimer, 5.0, true, UpdateMultiboard)
 
     local worldBounds = GetWorldBounds()
     MIN_X = GetRectMinX(worldBounds)
