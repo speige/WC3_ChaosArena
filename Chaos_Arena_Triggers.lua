@@ -347,6 +347,14 @@ local MOVE_ABILITY_ID = FourCC('Amov')
 --note: used to hide health bars (also requires ObjectEditor IsBuilding=true, but can still move)
 local INVULNERABLE_ABILITY_ID = FourCC('Avul')
 
+local _playerTotalKills = {}
+
+local _unitDamageStatsPerPlayer = {}
+for playerId = 0, 11 do
+    _playerTotalKills[playerId] = 0
+    _unitDamageStatsPerPlayer[playerId] = 0
+end
+
 local ORDER_IDs = {
     stop = 851972
 }
@@ -728,7 +736,6 @@ function SpawnWaveForPlayer(playerId)
             end
 
             IssuePointOrder(clonedUnit, 'attack', 0, 0)
-
             table.insert(spawnedUnitsPerPlayerPerWave[playerId][waveNumber], clonedUnit)
         end
     end)
@@ -1029,6 +1036,10 @@ function SwapTileUnits(caster, target)
     if targetStillHadSwap then
         UnitAddAbility(newTarget, SWAP_UNITS_ABILITY_ID)
     end
+
+    local damageStats = _unitDamageStatsPerPlayer[GetPlayerId(player)]
+    damageStats[GetUnitTypeId(caster)] = 0
+    damageStats[GetUnitTypeId(target)] = 0
 
     RemoveUnit(caster)
     RemoveUnit(target)
@@ -1338,6 +1349,8 @@ function DraftUnit(playerId, unitTypeId, circle)
         UpdateHeroLevel(unit, draftedCount, false)
     end
 
+    _unitDamageStatsPerPlayer[playerId][unitTypeId] = 0
+
     SelectUnitForPlayerSingle(playerBuilders.primary[playerId], player)
     
     AddDraftItemsToAltar(playerId)
@@ -1437,17 +1450,19 @@ end
 function OnUnitDeath()
     local dying = GetDyingUnit()
     local killer = GetKillingUnit()
-    
+
     if killer then
         local killerOwner = GetOwningPlayer(killer)
-        local killerIndex = GetPlayerId(killerOwner)
-        
-        local actualPlayerId = playerIdMapping_proxyToReal[killerIndex]
+        local killerPlayerId = GetPlayerId(killerOwner)
+
+        local actualPlayerId = playerIdMapping_proxyToReal[killerPlayerId]
         if actualPlayerId then
-            AdjustPlayerStateBJ(1, Player(actualPlayerId), PLAYER_STATE_RESOURCE_GOLD)
-        else
-            AdjustPlayerStateBJ(1, killerOwner, PLAYER_STATE_RESOURCE_GOLD)
+            killerPlayerId = actualPlayerId
+            killerOwner = Player(actualPlayerId)
         end
+
+        _playerTotalKills[killerPlayerId] = _playerTotalKills[killerPlayerId] + 1
+        AdjustPlayerStateBJ(1, killerOwner, PLAYER_STATE_RESOURCE_GOLD)
     end
 end
 
