@@ -349,10 +349,10 @@ local INVULNERABLE_ABILITY_ID = FourCC('Avul')
 
 local _playerTotalKills = {}
 
-local _damageStatsPerPlayerPerUnitPerWave = {}
+local _damageDealtPerPlayerPerUnitTypePerWave = {}
 for playerId = 0, 11 do
     _playerTotalKills[playerId] = 0
-    _damageStatsPerPlayerPerUnitPerWave[playerId] = {}
+    _damageDealtPerPlayerPerUnitTypePerWave[playerId] = {}
 end
 
 local ORDER_IDs = {
@@ -1050,6 +1050,37 @@ function SwapTileUnits(caster, target)
     HideUnitHealthAndManaBars(newTarget, true)
 end
 
+function OnUnitDamaged()
+    local damagedUnit = GetTriggerUnit()
+    local damagingUnit = GetEventDamageSource()
+    local damage = GetEventDamage()
+    local damagingUnitTypeId = GetUnitTypeId(damagingUnit)
+    
+    if not damagingUnitTypeId then
+        return
+    end
+
+    local damagingPlayer = GetOwningPlayer(damagingUnit)
+    local damagingPlayerId = GetPlayerId(damagingPlayer)
+
+    local realDamagingPlayerId = playerIdMapping_proxyToReal[damagingPlayerId]
+    if realDamagingPlayerId  then
+        damagingPlayerId = realDamagingPlayerId
+    end
+    
+    if damagingPlayerId < 0 or damagingPlayerId > 11 then
+        return
+    end
+
+    local unitDamageDealtPerWave = _damageDealtPerPlayerPerUnitTypePerWave[damagingPlayerId][damagingUnitTypeId]
+    if not unitDamageDealtPerWave then
+        unitDamageDealtPerWave = {}
+        _damageDealtPerPlayerPerUnitTypePerWave[damagingPlayerId][damagingUnitTypeId] = unitDamageDealtPerWave
+    end
+
+    unitDamageDealtPerWave[waveNumber] = (unitDamageDealtPerWave[waveNumber] or 0) + damage
+end
+
 function OnSpellEffect()
     local abilityId = GetSpellAbilityId()
     local unit = GetSpellAbilityUnit()
@@ -1349,8 +1380,7 @@ function DraftUnit(playerId, unitTypeId, circle)
         UpdateHeroLevel(unit, draftedCount, false)
     end
 
-    _damageStatsPerPlayerPerUnitPerWave[playerId][unitTypeId] = {}
-
+    
     SelectUnitForPlayerSingle(playerBuilders.primary[playerId], player)
     
     AddDraftItemsToAltar(playerId)
@@ -1683,6 +1713,7 @@ function InitMultiboard()
 
     MultiboardDisplay(_multiboard, true)
     MultiboardMinimize(_multiboard, true)
+    MultiboardMinimize(_multiboard, false)
 end
 
 local colorPerPlayer = {
@@ -1719,7 +1750,7 @@ function UpdateMultiboard()
     for playerId = 0, 11 do
         local player = Player(playerId)
         if GetPlayerSlotState(player) == PLAYER_SLOT_STATE_PLAYING then
-            table.insert(playerScores, {player = player, kills = _playerTotalKills[playerId]})
+            table.insert(playerScores, { player = player, kills = _playerTotalKills[playerId] })
         end
     end
 
@@ -1733,17 +1764,23 @@ function UpdateMultiboard()
         local player = data.player
         local kills = data.kills
         local playerName = GetPlayerName(player)
-        local colorHex = ConvertPlayerColor(GetPlayerId(player))
+        local colorHex = ConvertPlayerColorToHex(GetPlayerId(player))
         local coloredPlayerName = '|cff' .. colorHex .. playerName .. '|r'
 
-        local playerNameColumn = MultiboardGetItem(_multiboard, i + 1, 0)
+        local playerNameColumn = MultiboardGetItem(_multiboard, i, 0)
+        MultiboardSetItemStyle(playerNameColumn, true, false)
+        MultiboardSetItemWidth(playerNameColumn, 0.10)
         MultiboardSetItemValue(playerNameColumn, coloredPlayerName)
         MultiboardReleaseItem(playerNameColumn)
         
-        local killsColumn = MultiboardGetItem(_multiboard, i + 1, 1)
+        local killsColumn = MultiboardGetItem(_multiboard, i, 1)
+        MultiboardSetItemStyle(killsColumn, true, false)
+        MultiboardSetItemWidth(killsColumn, 0.05)
         MultiboardSetItemValue(killsColumn, tostring(kills))
         MultiboardReleaseItem(killsColumn)
     end
+
+    --MultiboardSetItemIcon
     --MultiboardDisplay(_multiboard, true)
 end
 
@@ -1761,9 +1798,6 @@ function Init()
     GrantWoodPassive()
     ApplyNegativeHPRegen()
     GrantPassiveXP()
-    InitMultiboard()
-    local multiboardUpdateTimer = CreateTimer()
-    TimerStart(multiboardUpdateTimer, 5.0, true, UpdateMultiboard)
 
     local worldBounds = GetWorldBounds()
     MIN_X = GetRectMinX(worldBounds)
@@ -1773,6 +1807,10 @@ function Init()
     local deathTrigger = CreateTrigger()
     TriggerRegisterAnyUnitEventBJ(deathTrigger, EVENT_PLAYER_UNIT_DEATH)
     TriggerAddAction(deathTrigger, OnUnitDeath)
+    
+    local damageTrigger = CreateTrigger()
+    TriggerRegisterAnyUnitEventBJ(damageTrigger, EVENT_PLAYER_UNIT_DAMAGED)
+    TriggerAddAction(damageTrigger, OnUnitDamaged)
     
     local spellTrigger = CreateTrigger()
     TriggerRegisterAnyUnitEventBJ(spellTrigger, EVENT_PLAYER_UNIT_SPELL_EFFECT)
@@ -1794,6 +1832,13 @@ function Init()
     
     local aiTimer = CreateTimer()
     TimerStart(aiTimer, 1.0, true, aiLoop)
+
+    RunDelayed(function()
+        --NOTE: Can't create Multiboard during Init
+        InitMultiboard()
+        local multiboardUpdateTimer = CreateTimer()
+        TimerStart(multiboardUpdateTimer, 5.0, true, UpdateMultiboard)
+    end, 0)
 end
 
 --[[
