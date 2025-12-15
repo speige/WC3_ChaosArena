@@ -28,7 +28,7 @@ end
 
 local abilities = {
     AcidBomb = AbilityMetaData(FourCC('A034'), nil, 'acidbomb', 700, ABILITY_TARGETING.ENEMY),
-    AerialShackles = AbilityMetaData(FourCC('A003'), nil, 'magicleash', 550, ABILITY_TARGETING.ENEMY),
+    AerialShackles = AbilityMetaData(FourCC('A003'), nil, 'magicleash', 550, ABILITY_TARGETING.ENEMY), -- broken?
     AncestralSpirit = AbilityMetaData(FourCC('A03X'), nil, 'ancestralspirit', 350, ABILITY_TARGETING.GROUND_PLAYERUNITS),
     AnimateDead = AbilityMetaData(FourCC('A02T'), nil, 'animatedead', 400, ABILITY_TARGETING.GROUND_RANDOM),
     AntiMagicShell = AbilityMetaData(FourCC('A00A'), nil, 'antimagicshell', 500, ABILITY_TARGETING.PLAYERUNITS),
@@ -54,14 +54,14 @@ local abilities = {
     DeathAndDecay = AbilityMetaData(FourCC('A02W'), nil, 'deathanddecay', 1000, ABILITY_TARGETING.GROUND_ENEMY),
     DeathCoil = AbilityMetaData(FourCC('A02R'), nil, 'deathcoil', 800, ABILITY_TARGETING.ENEMY),
     DeathPact = AbilityMetaData(FourCC('A02S'), nil, 'deathpact', 800, ABILITY_TARGETING.ENEMY),
-    DiseaseCloud = AbilityMetaData(FourCC('A00C'), nil, nil, 0, ABILITY_TARGETING.PASSIVE),
+    DiseaseCloud = AbilityMetaData(FourCC('A00C'), nil, nil, 0, ABILITY_TARGETING.PASSIVE), -- working
     DivineShield = AbilityMetaData(FourCC('A025'), nil, 'divineshield', 0, ABILITY_TARGETING.NO_TARGET), -- working
-    Doom = AbilityMetaData(FourCC('A03Q'), nil, 'doom', 650, ABILITY_TARGETING.ENEMY),
+    Doom = AbilityMetaData(FourCC('A03Q'), nil, 'doom', 650, ABILITY_TARGETING.ENEMY), -- working
     DrunkenBrawler = AbilityMetaData(FourCC('A03F'), nil, nil, 0, ABILITY_TARGETING.PASSIVE),
     Earthquake = AbilityMetaData(FourCC('A02K'), nil, 'earthquake', 1000, ABILITY_TARGETING.GROUND_ENEMY), -- working
     EntanglingRoots = AbilityMetaData(FourCC('A00U'), nil, 'entanglingroots', 800, ABILITY_TARGETING.ENEMY), -- working
     FaerieFire = AbilityMetaData(FourCC('A00I'), 'faeriefireon', nil, 700, ABILITY_TARGETING.AUTOCAST),
-    FanOfKnives = AbilityMetaData(FourCC('A01Y'), nil, 'fanofknives', 0, ABILITY_TARGETING.NO_TARGET),
+    FanOfKnives = AbilityMetaData(FourCC('A01Y'), nil, 'fanofknives', 0, ABILITY_TARGETING.NO_TARGET), -- working
     FeralSpirit = AbilityMetaData(FourCC('A02J'), nil, 'spiritwolf', 800, ABILITY_TARGETING.NO_TARGET), -- working
     FlameStrike = AbilityMetaData(FourCC('A02D'), nil, 'flamestrike', 800, ABILITY_TARGETING.GROUND_ENEMY), -- working
     ForceOfNature = AbilityMetaData(FourCC('A01P'), nil, 'forceofnature', 800, ABILITY_TARGETING.GROUND_RANDOM), -- broken
@@ -75,7 +75,7 @@ local abilities = {
     HealingWave = AbilityMetaData(FourCC('A03T'), nil, 'healingwave', 700, ABILITY_TARGETING.PLAYERUNITS),
     Hex = AbilityMetaData(FourCC('A02P'), nil, 'hex', 800, ABILITY_TARGETING.ENEMY), -- working
     HolyLight = AbilityMetaData(FourCC('A024'), nil, 'holybolt', 800, ABILITY_TARGETING.PLAYERUNITS),
-    HowlOfTerror = AbilityMetaData(FourCC('A03M'), nil, 'howlofterror', 0, ABILITY_TARGETING.NO_TARGET),
+    HowlOfTerror = AbilityMetaData(FourCC('A03M'), nil, 'howlofterror', 0, ABILITY_TARGETING.NO_TARGET), -- working
     Immolation = AbilityMetaData(FourCC('A01V'), nil, 'immolation', 0, ABILITY_TARGETING.NO_TARGET), -- working
     Impale = AbilityMetaData(FourCC('A030'), nil, 'impale', 700, ABILITY_TARGETING.GROUND_ENEMY), -- working
     Incinerate = AbilityMetaData(FourCC('A03J'), nil, 'incinerate', 0, ABILITY_TARGETING.PASSIVE),
@@ -88,20 +88,20 @@ local abilities = {
     ManaFlare = AbilityMetaData(FourCC('A00L'), nil, 'manaflareon', 200, ABILITY_TARGETING.NO_TARGET),
     ManaShield = AbilityMetaData(FourCC('A037'), 'manashieldon', nil, 128, ABILITY_TARGETING.AUTOCAST), -- working
     Metamorphosis = AbilityMetaData(FourCC('A01W'), nil, 'metamorphosis', 0, ABILITY_TARGETING.NO_TARGET), -- seems to cancel immediately after casting
-    MirrorImage = AbilityMetaData(FourCC('A02G'), nil, 'mirrorimage', 128, ABILITY_TARGETING.NO_TARGET),
+    MirrorImage = AbilityMetaData(FourCC('A02G'), nil, 'mirrorimage', 128, ABILITY_TARGETING.NO_TARGET), -- working
     PhaseShift = AbilityMetaData(FourCC('A00M'), 'phaseshifton', nil, 0, ABILITY_TARGETING.AUTOCAST), -- working
     Phoenix = AbilityMetaData(FourCC('A02C'), nil, 'summonphoenix', 0, ABILITY_TARGETING.NO_TARGET), -- working
     PocketFactory = AbilityMetaData(FourCC('A038'), nil, 'summonfactory', 500, ABILITY_TARGETING.GROUND_RANDOM), -- working
     Possession = AbilityMetaData(FourCC('A00D'), nil, 'possession', 200, ABILITY_TARGETING.ENEMY),
     RainOfChaos = AbilityMetaData(FourCC('A03O'), nil, 'rainofchaos', 1000, ABILITY_TARGETING.GROUND_RANDOM), -- working
     RainOfFire = AbilityMetaData(FourCC('A03S'), nil, 'rainoffire', 800, ABILITY_TARGETING.GROUND_ENEMY), -- working
-    RaiseDead = AbilityMetaData(FourCC('A00E'), 'raisedeadon', nil, 600, ABILITY_TARGETING.AUTOCAST),
+    RaiseDead = AbilityMetaData(FourCC('A00E'), 'raisedeadon', nil, 600, ABILITY_TARGETING.AUTOCAST), -- broken
     Reincarnation = AbilityMetaData(FourCC('A02L'), nil, nil, 0, ABILITY_TARGETING.PASSIVE), -- working
     Resurrection = AbilityMetaData(FourCC('A026'), nil, 'resurrection', 400, ABILITY_TARGETING.GROUND_PLAYERUNITS),
     RoboGoblin = AbilityMetaData(FourCC('A03A'), nil, 'robogoblin', 0, ABILITY_TARGETING.NO_TARGET),
     SearingArrows = AbilityMetaData(FourCC('A01R'), nil, 'flamingarrows', 600, ABILITY_TARGETING.NO_TARGET), -- working
     SerpentWard = AbilityMetaData(FourCC('A02O'), nil, 'ward', 500, ABILITY_TARGETING.GROUND_ENEMY), -- working
-    ShadowStrike = AbilityMetaData(FourCC('A01Z'), nil, 'shadowstrike', 300, ABILITY_TARGETING.ENEMY),
+    ShadowStrike = AbilityMetaData(FourCC('A01Z'), nil, 'shadowstrike', 300, ABILITY_TARGETING.ENEMY), -- working
     Shockwave = AbilityMetaData(FourCC('A02N'), nil, 'shockwave', 700, ABILITY_TARGETING.GROUND_ENEMY), -- working
     Silence = AbilityMetaData(FourCC('A03H'), nil, 'silence', 900, ABILITY_TARGETING.GROUND_ENEMY), -- working
     Sleep = AbilityMetaData(FourCC('A02Y'), nil, 'sleep', 800, ABILITY_TARGETING.ENEMY), -- working
@@ -236,6 +236,16 @@ function GetUnitTypeIdMetaData(unitTypeId)
     end
 
     return nil
+end
+
+function ValueExistInTable(tbl, value)
+    for _, existingValue in pairs(unitList) do
+        if existingValue == value then
+            return true
+        end
+    end
+
+    return false
 end
 
 function MapListValues(tbl, fn)
@@ -403,14 +413,14 @@ end
 
 function WeightedRandom(weights)
     local total = 0
-    for _, weight in ipairs(weights) do
+    for _, weight in pairs(weights) do
         total = total + weight
     end
     
     local rand = math.random() * total
     local cumulative = 0
     
-    for i, weight in ipairs(weights) do
+    for i, weight in pairs(weights) do
         cumulative = cumulative + weight
         if rand <= cumulative then
             return i
@@ -945,10 +955,12 @@ function OnItemSold()
     local itemType = GetItemTypeId(item)
     local unit = GetBuyingUnit()
     local player = GetOwningPlayer(unit)
+    local proxyPlayer = Player(playerIdMapping_realToProxy[GetPlayerId(playerId)])
 
     for key, data in pairs(purchaseableUpgrades) do
         if data.item == itemType then
             AddPlayerTechResearched(player, data.upgrade, 1)
+            AddPlayerTechResearched(proxyPlayer, data.upgrade, 1)
             break
         end
     end
@@ -1111,7 +1123,11 @@ function GetRandomEnemyUnitInRange(unit, range)
     local team = GetPlayerTeam(player)
     local group = CreateGroup()
     local condition = Condition(function()
-        if GetPlayerTeam(GetOwningPlayer(GetFilterUnit())) ~= team then
+        local enemyPlayer = GetOwningPlayer(GetFilterUnit())
+        if GetPlayerId(enemyPlayer) <= 11 then
+            return false
+        end
+        if GetPlayerTeam(enemyPlayer) ~= team then
             return true
         end
         return false
@@ -1135,6 +1151,11 @@ function RunUnitAI(unit)
     local metaData = GetUnitMetaData(unit)
     if not metaData or not metaData.abilityMetaData then
         --NOTE: summoned unit
+        local realPlayerId = playerIdMapping_proxyToReal[GetPlayerId(GetOwningPlayer(unit))]
+        local spawnTable = spawnedUnitsPerPlayerPerWave[realPlayerId][waveNumber]
+        if not ValueExistInTable(spawnTable, unit) then
+            table.insert(spawnTable, unit)
+        end
         return
     end
     local abilityMetaData = metaData.abilityMetaData
@@ -1461,6 +1482,13 @@ function ApplyNegativeHPRegen()
                 local waveUnits = spawnedUnitsPerPlayerPerWave[playerId][waveIndex]
                 for unitIndex = #waveUnits, 1, -1 do
                     local unit = waveUnits[unitIndex]
+
+                    local metaData = GetUnitMetaData(unit)
+                    if not metaData then
+                        --NOTE: summoned unit
+                        damageMultiplier = damageMultiplier * 2
+                    end
+                    
                     local currentLife = GetUnitState(unit, UNIT_STATE_LIFE)
                     if currentLife > 0 then
                         local damage = GetUnitState(unit, UNIT_STATE_MAX_LIFE) * damageMultiplier
@@ -1626,6 +1654,7 @@ function PrintDebugInfo()
 end
 
 function Init()
+    SetRandomSeed(100)
 	MeleeStartingVisibility()
 	MeleeClearExcessUnits()
 	FogEnableOff()
