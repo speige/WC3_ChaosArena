@@ -22,8 +22,8 @@ function UnitMetaData(name, unitTypeId, dummyBuildingUnitTypeId, draftItemTypeId
     return { name = name, unitTypeId = unitTypeId, dummyBuildingUnitTypeId = dummyBuildingUnitTypeId, draftItemTypeId = draftItemTypeId, draftAbilityId = draftAbilityId, abilityMetaData = abilityMetaData }
 end
 
-function UnitAbilityMetaData(water, earth, fire, passive)
-    return { water = water, earth = earth, fire = fire, passive = passive }
+function UnitAbilityMetaData(water, earth, fire)
+    return { water = water, earth = earth, fire = fire }
 end
 
 local abilities = {
@@ -129,46 +129,39 @@ local abilities = {
     Volcano = AbilityMetaData(FourCC('A023'), nil, 'volcano', 800, ABILITY_TARGETING.GROUND_ENEMY), -- working
     VorpalBlades = AbilityMetaData(FourCC('A044'), nil, nil, 0, ABILITY_TARGETING.PASSIVE),
     WarStomp = AbilityMetaData(FourCC('A02M'), nil, 'stomp', 0, ABILITY_TARGETING.NO_TARGET), -- working
-    Aura_Agility = AbilityMetaData(FourCC('A006'), nil, nil, nil, nil),
-    Aura_Armor = AbilityMetaData(FourCC('A00N'), nil, nil, nil, nil),
-    Aura_Damage = AbilityMetaData(FourCC('A00G'), nil, nil, nil, nil),
-    Aura_Intelligence = AbilityMetaData(FourCC('A02X'), nil, nil, nil, nil),
-    Aura_MaxMana = AbilityMetaData(FourCC('A03W'), nil, nil, nil, nil),
-    Aura_MaxHP = AbilityMetaData(FourCC('A00R'), nil, nil, nil, nil),
-    Aura_Strength = AbilityMetaData(FourCC('A03V'), nil, nil, nil, nil),
 }
 
 local draftableUnits = {
-    akama = UnitMetaData('akama', FourCC('N009'), FourCC('h00S'), FourCC('I001'), FourCC('A01O'), UnitAbilityMetaData(abilities.Immolation, abilities.HardenedSkin, abilities.Taunt, abilities.Aura_Armor)),
-    alchemist = UnitMetaData('alchemist', FourCC('N000'), FourCC('h00O'), FourCC('I000'), FourCC('A01C'), UnitAbilityMetaData(abilities.HealingSpray, abilities.AcidBomb, abilities.Transmute, abilities.Aura_Strength)),
-    archimonde = UnitMetaData('archimonde', FourCC('U005'), FourCC('h00N'), FourCC('I002'), FourCC('A01K'), UnitAbilityMetaData(abilities.RainOfChaos, abilities.DarkPortal, abilities.Curse, abilities.Aura_MaxMana)),
-    archmage = UnitMetaData('archmage', FourCC('H002'), FourCC('h00C'), FourCC('I003'), FourCC('A011'), UnitAbilityMetaData(abilities.LifeDrain, abilities.Blizzard, abilities.SummonWaterElemental, abilities.Aura_MaxHP)),
-    beastmaster = UnitMetaData('beastmaster', FourCC('N001'), FourCC('h00T'), FourCC('I004'), FourCC('A01F'), UnitAbilityMetaData(abilities.SummonBear, abilities.SummonQuilbeast, abilities.Stampede, abilities.Aura_Agility)),
-    blademaster = UnitMetaData('blademaster', FourCC('O000'), FourCC('h00F'), FourCC('I005'), FourCC('A014'), UnitAbilityMetaData(abilities.CriticalStrike, abilities.MirrorImage, abilities.Bladestorm, abilities.Aura_Damage)),
-    bloodMage = UnitMetaData('bloodMage', FourCC('H004'), FourCC('h00E'), FourCC('I006'), FourCC('A013'), UnitAbilityMetaData(abilities.FlameStrike, abilities.Banish, abilities.Phoenix, abilities.Aura_MaxHP)),
-    brewmaster = UnitMetaData('brewmaster', FourCC('N005'), FourCC('h00U'), FourCC('I007'), FourCC('A01G'), UnitAbilityMetaData(abilities.BreathOfFire, abilities.DrunkenBrawler, abilities.StormEarthAndFire, abilities.Aura_Armor)),
-    cryptLord = UnitMetaData('cryptLord', FourCC('U003'), FourCC('h00M'), FourCC('I008'), FourCC('A01B'), UnitAbilityMetaData(abilities.Impale, abilities.SpikedCarapace, abilities.LocustSwarm, abilities.Aura_Intelligence)),
-    darkRanger = UnitMetaData('darkRanger', FourCC('N007'), FourCC('h00V'), FourCC('I009'), FourCC('A01H'), UnitAbilityMetaData(abilities.Silence, abilities.BlackArrow, abilities.Charm, abilities.Aura_Agility)),
-    deathKnight = UnitMetaData('deathKnight', FourCC('U000'), FourCC('h00J'), FourCC('I00A'), FourCC('A018'), UnitAbilityMetaData(abilities.DeathCoil, abilities.DeathPact, abilities.AnimateDead, abilities.Aura_Intelligence)),
-    demonHunter = UnitMetaData('demonHunter', FourCC('E002'), FourCC('h007'), FourCC('I00B'), FourCC('A00X'), UnitAbilityMetaData(abilities.ManaBurn, abilities.PhaseShift, abilities.Metamorphosis, abilities.Aura_Damage)),
-    dreadlord = UnitMetaData('dreadlord', FourCC('U002'), FourCC('h00L'), FourCC('I00C'), FourCC('A01A'), UnitAbilityMetaData(abilities.SpiritLink, abilities.Sleep, abilities.CarrionSwarm, abilities.Aura_Strength)),
-    farSeer = UnitMetaData('farSeer', FourCC('O001'), FourCC('h00G'), FourCC('I00D'), FourCC('A015'), UnitAbilityMetaData(abilities.FeralSpirit, abilities.ChainLightning, abilities.Earthquake, abilities.Aura_MaxMana)),
-    firelord = UnitMetaData('firelord', FourCC('N004'), FourCC('h00W'), FourCC('I00E'), FourCC('A01I'), UnitAbilityMetaData(abilities.Incinerate, abilities.SoulBurn, abilities.SummonLavaSpawn, abilities.Aura_Agility)),
-    guldan = UnitMetaData('guldan', FourCC('O003'), FourCC('h00X'), FourCC('I00F'), FourCC('A01L'), UnitAbilityMetaData(abilities.DiseaseCloud, abilities.HealingWard, abilities.Doom, abilities.Aura_Armor)),
-    jaina = UnitMetaData('jaina', FourCC('H009'), FourCC('h00Y'), FourCC('I00G'), FourCC('A01M'), UnitAbilityMetaData(abilities.RainOfFire, abilities.HealingWave, abilities.Tornado, abilities.Aura_MaxHP)),
-    keeperOfTheGrove = UnitMetaData('keeperOfTheGrove', FourCC('E000'), FourCC('h005'), FourCC('I00H'), FourCC('A00V'), UnitAbilityMetaData(abilities.EntanglingRoots, abilities.ForceOfNature, abilities.Tranquility, abilities.Aura_MaxMana)),
-    lich = UnitMetaData('lich', FourCC('U001'), FourCC('h00K'), FourCC('I00I'), FourCC('A019'), UnitAbilityMetaData(abilities.FrostNova, abilities.FrostArmor, abilities.DeathAndDecay, abilities.Aura_Armor)),
-    mountainKing = UnitMetaData('mountainKing', FourCC('H003'), FourCC('h00D'), FourCC('I00J'), FourCC('A012'), UnitAbilityMetaData(abilities.StormBolt, abilities.Bash, abilities.Avatar, abilities.Aura_Strength)),
-    murloc = UnitMetaData('murloc', FourCC('N008'), FourCC('h00P'), FourCC('I00K'), FourCC('A01N'), UnitAbilityMetaData(abilities.RaiseDead, abilities.LightningShield, abilities.AerialShackles, abilities.Aura_Agility)),
-    ogreMauler = UnitMetaData('ogreMauler', FourCC('E004'), FourCC('h008'), FourCC('I00L'), FourCC('A00Y'), UnitAbilityMetaData(abilities.Inferno, abilities.CarrionBeetles, abilities.Volcano, abilities.Aura_MaxMana)),
-    paladin = UnitMetaData('paladin', FourCC('H001'), FourCC('h00B'), FourCC('I00M'), FourCC('A010'), UnitAbilityMetaData(abilities.HolyLight, abilities.DivineShield, abilities.Resurrection, abilities.Aura_Intelligence)),
-    pitLord = UnitMetaData('pitLord', FourCC('N006'), FourCC('h00Z'), FourCC('I00N'), FourCC('A01J'), UnitAbilityMetaData(abilities.HowlOfTerror, abilities.CleavingAttack, abilities.SpellImmunity, abilities.Aura_MaxHP)),
-    priestessOfTheMoon = UnitMetaData('priestessOfTheMoon', FourCC('E001'), FourCC('h006'), FourCC('I00O'), FourCC('A00W'), UnitAbilityMetaData(abilities.ThunderClap, abilities.SearingArrows, abilities.Starfall, abilities.Aura_Damage)),
-    seaWitch = UnitMetaData('seaWitch', FourCC('N002'), FourCC('h00Q'), FourCC('I00P'), FourCC('A01D'), UnitAbilityMetaData(abilities.ForkedLightning, abilities.FrostArrows, abilities.ManaShield, abilities.Aura_MaxMana)),
-    shadowHunter = UnitMetaData('shadowHunter', FourCC('O004'), FourCC('h00I'), FourCC('I00Q'), FourCC('A017'), UnitAbilityMetaData(abilities.Hex, abilities.SerpentWard, abilities.BigBadVoodoo, abilities.Aura_MaxHP)),
-    taurenChieftain = UnitMetaData('taurenChieftain', FourCC('O002'), FourCC('h00H'), FourCC('I00R'), FourCC('A016'), UnitAbilityMetaData(abilities.Shockwave, abilities.Reincarnation, abilities.WarStomp, abilities.Aura_Damage)),
-    tinker = UnitMetaData('tinker', FourCC('N003'), FourCC('h00R'), FourCC('I00S'), FourCC('A01E'), UnitAbilityMetaData(abilities.PocketFactory, abilities.ClusterRockets, abilities.RoboGoblin, abilities.Aura_Intelligence)),
-    warden = UnitMetaData('warden', FourCC('E003'), FourCC('h00A'), FourCC('I00T'), FourCC('A00Z'), UnitAbilityMetaData(abilities.FanOfKnives, abilities.ShadowStrike, abilities.Vengeance, abilities.Aura_Strength))
+    akama = UnitMetaData('akama', FourCC('N009'), FourCC('h00S'), FourCC('I001'), FourCC('A01O'), UnitAbilityMetaData(abilities.Immolation, abilities.HardenedSkin, abilities.Taunt)),
+    alchemist = UnitMetaData('alchemist', FourCC('N000'), FourCC('h00O'), FourCC('I000'), FourCC('A01C'), UnitAbilityMetaData(abilities.HealingSpray, abilities.AcidBomb, abilities.Transmute)),
+    archimonde = UnitMetaData('archimonde', FourCC('U005'), FourCC('h00N'), FourCC('I002'), FourCC('A01K'), UnitAbilityMetaData(abilities.RainOfChaos, abilities.DarkPortal, abilities.Curse)),
+    archmage = UnitMetaData('archmage', FourCC('H002'), FourCC('h00C'), FourCC('I003'), FourCC('A011'), UnitAbilityMetaData(abilities.LifeDrain, abilities.Blizzard, abilities.SummonWaterElemental)),
+    beastmaster = UnitMetaData('beastmaster', FourCC('N001'), FourCC('h00T'), FourCC('I004'), FourCC('A01F'), UnitAbilityMetaData(abilities.SummonBear, abilities.SummonQuilbeast, abilities.Stampede)),
+    blademaster = UnitMetaData('blademaster', FourCC('O000'), FourCC('h00F'), FourCC('I005'), FourCC('A014'), UnitAbilityMetaData(abilities.CriticalStrike, abilities.MirrorImage, abilities.Bladestorm)),
+    bloodMage = UnitMetaData('bloodMage', FourCC('H004'), FourCC('h00E'), FourCC('I006'), FourCC('A013'), UnitAbilityMetaData(abilities.FlameStrike, abilities.Banish, abilities.Phoenix)),
+    brewmaster = UnitMetaData('brewmaster', FourCC('N005'), FourCC('h00U'), FourCC('I007'), FourCC('A01G'), UnitAbilityMetaData(abilities.BreathOfFire, abilities.DrunkenBrawler, abilities.StormEarthAndFire)),
+    cryptLord = UnitMetaData('cryptLord', FourCC('U003'), FourCC('h00M'), FourCC('I008'), FourCC('A01B'), UnitAbilityMetaData(abilities.Impale, abilities.SpikedCarapace, abilities.LocustSwarm)),
+    darkRanger = UnitMetaData('darkRanger', FourCC('N007'), FourCC('h00V'), FourCC('I009'), FourCC('A01H'), UnitAbilityMetaData(abilities.Silence, abilities.BlackArrow, abilities.Charm)),
+    deathKnight = UnitMetaData('deathKnight', FourCC('U000'), FourCC('h00J'), FourCC('I00A'), FourCC('A018'), UnitAbilityMetaData(abilities.DeathCoil, abilities.DeathPact, abilities.AnimateDead)),
+    demonHunter = UnitMetaData('demonHunter', FourCC('E002'), FourCC('h007'), FourCC('I00B'), FourCC('A00X'), UnitAbilityMetaData(abilities.ManaBurn, abilities.PhaseShift, abilities.Metamorphosis)),
+    dreadlord = UnitMetaData('dreadlord', FourCC('U002'), FourCC('h00L'), FourCC('I00C'), FourCC('A01A'), UnitAbilityMetaData(abilities.SpiritLink, abilities.Sleep, abilities.CarrionSwarm)),
+    farSeer = UnitMetaData('farSeer', FourCC('O001'), FourCC('h00G'), FourCC('I00D'), FourCC('A015'), UnitAbilityMetaData(abilities.FeralSpirit, abilities.ChainLightning, abilities.Earthquake)),
+    firelord = UnitMetaData('firelord', FourCC('N004'), FourCC('h00W'), FourCC('I00E'), FourCC('A01I'), UnitAbilityMetaData(abilities.Incinerate, abilities.SoulBurn, abilities.SummonLavaSpawn)),
+    guldan = UnitMetaData('guldan', FourCC('O003'), FourCC('h00X'), FourCC('I00F'), FourCC('A01L'), UnitAbilityMetaData(abilities.DiseaseCloud, abilities.HealingWard, abilities.Doom)),
+    jaina = UnitMetaData('jaina', FourCC('H009'), FourCC('h00Y'), FourCC('I00G'), FourCC('A01M'), UnitAbilityMetaData(abilities.RainOfFire, abilities.HealingWave, abilities.Tornado)),
+    keeperOfTheGrove = UnitMetaData('keeperOfTheGrove', FourCC('E000'), FourCC('h005'), FourCC('I00H'), FourCC('A00V'), UnitAbilityMetaData(abilities.EntanglingRoots, abilities.ForceOfNature, abilities.Tranquility)),
+    lich = UnitMetaData('lich', FourCC('U001'), FourCC('h00K'), FourCC('I00I'), FourCC('A019'), UnitAbilityMetaData(abilities.FrostNova, abilities.FrostArmor, abilities.DeathAndDecay)),
+    mountainKing = UnitMetaData('mountainKing', FourCC('H003'), FourCC('h00D'), FourCC('I00J'), FourCC('A012'), UnitAbilityMetaData(abilities.StormBolt, abilities.Bash, abilities.Avatar)),
+    murloc = UnitMetaData('murloc', FourCC('N008'), FourCC('h00P'), FourCC('I00K'), FourCC('A01N'), UnitAbilityMetaData(abilities.RaiseDead, abilities.LightningShield, abilities.AerialShackles)),
+    ogreMauler = UnitMetaData('ogreMauler', FourCC('E004'), FourCC('h008'), FourCC('I00L'), FourCC('A00Y'), UnitAbilityMetaData(abilities.Inferno, abilities.CarrionBeetles, abilities.Volcano)),
+    paladin = UnitMetaData('paladin', FourCC('H001'), FourCC('h00B'), FourCC('I00M'), FourCC('A010'), UnitAbilityMetaData(abilities.HolyLight, abilities.DivineShield, abilities.Resurrection)),
+    pitLord = UnitMetaData('pitLord', FourCC('N006'), FourCC('h00Z'), FourCC('I00N'), FourCC('A01J'), UnitAbilityMetaData(abilities.HowlOfTerror, abilities.CleavingAttack, abilities.SpellImmunity)),
+    priestessOfTheMoon = UnitMetaData('priestessOfTheMoon', FourCC('E001'), FourCC('h006'), FourCC('I00O'), FourCC('A00W'), UnitAbilityMetaData(abilities.ThunderClap, abilities.SearingArrows, abilities.Starfall)),
+    seaWitch = UnitMetaData('seaWitch', FourCC('N002'), FourCC('h00Q'), FourCC('I00P'), FourCC('A01D'), UnitAbilityMetaData(abilities.ForkedLightning, abilities.FrostArrows, abilities.ManaShield)),
+    shadowHunter = UnitMetaData('shadowHunter', FourCC('O004'), FourCC('h00I'), FourCC('I00Q'), FourCC('A017'), UnitAbilityMetaData(abilities.Hex, abilities.SerpentWard, abilities.BigBadVoodoo)),
+    taurenChieftain = UnitMetaData('taurenChieftain', FourCC('O002'), FourCC('h00H'), FourCC('I00R'), FourCC('A016'), UnitAbilityMetaData(abilities.Shockwave, abilities.Reincarnation, abilities.WarStomp)),
+    tinker = UnitMetaData('tinker', FourCC('N003'), FourCC('h00R'), FourCC('I00S'), FourCC('A01E'), UnitAbilityMetaData(abilities.PocketFactory, abilities.ClusterRockets, abilities.RoboGoblin)),
+    warden = UnitMetaData('warden', FourCC('E003'), FourCC('h00A'), FourCC('I00T'), FourCC('A00Z'), UnitAbilityMetaData(abilities.FanOfKnives, abilities.ShadowStrike, abilities.Vengeance))
 }
 
 local purchaseableUpgrades = {
@@ -278,7 +271,6 @@ function DEBUG_GetDuplicateAbilityIds()
         if metaData.water.abilityId then used[metaData.water.abilityId] = true end
         if metaData.earth.abilityId then used[metaData.earth.abilityId] = true end
         if metaData.fire.abilityId then used[metaData.fire.abilityId] = true end
-        if metaData.passive.abilityId then used[metaData.passive.abilityId] = true end
     end
 
     return MapListValues(get_table_keys(duplicated),
@@ -303,7 +295,6 @@ function DEBUG_GetUnusedAbilityIds()
         if metaData.water.abilityId then used[metaData.water.abilityId] = true end
         if metaData.earth.abilityId then used[metaData.earth.abilityId] = true end
         if metaData.fire.abilityId then used[metaData.fire.abilityId] = true end
-        if metaData.passive.abilityId then used[metaData.passive.abilityId] = true end
     end
 
     for _, value in pairs(abilities) do
@@ -351,20 +342,28 @@ local MOVE_ABILITY_ID = FourCC('Amov')
 --note: used to hide health bars (also requires ObjectEditor IsBuilding=true, but can still move)
 local INVULNERABLE_ABILITY_ID = FourCC('Avul')
 
+local _playerTotalKills = {}
+
+local _damageDealtPerPlayerPerUnitTypePerWave = {}
+for playerId = 0, 11 do
+    _playerTotalKills[playerId] = 0
+    _damageDealtPerPlayerPerUnitTypePerWave[playerId] = {}
+end
+
 local ORDER_IDs = {
     stop = 851972
 }
 
 local GLOBAL_ITEM_SET = {}
-table.insert(GLOBAL_ITEM_SET, FourCC('bgst')) -- Belt of Giant Strength +6
-table.insert(GLOBAL_ITEM_SET, FourCC('belv')) -- Boots of Quel'Thalas (+6 agility)
-table.insert(GLOBAL_ITEM_SET, FourCC('cnob')) -- Circlet of Nobility (+2 Strength, Agility Intelligence)
-table.insert(GLOBAL_ITEM_SET, FourCC('rat6')) -- Claws of Attack +5
-table.insert(GLOBAL_ITEM_SET, FourCC('gcel')) -- Gloves of Haste (+.15)
-table.insert(GLOBAL_ITEM_SET, FourCC('pmna')) -- Pendant of Mana (+250)
-table.insert(GLOBAL_ITEM_SET, FourCC('prvt')) -- Periapt of Vitality (+150 health) - duplicate of rhth?
-table.insert(GLOBAL_ITEM_SET, FourCC('rde4')) -- Ring of Protection (+5 armor)
-table.insert(GLOBAL_ITEM_SET, FourCC('ciri')) -- Robe of the Magi (+6 intelligence)
+table.insert(GLOBAL_ITEM_SET, FourCC('I012')) -- Belt of Giant Strength +6
+table.insert(GLOBAL_ITEM_SET, FourCC('I013')) -- Boots of Quel'Thalas (+6 agility)
+table.insert(GLOBAL_ITEM_SET, FourCC('I014')) -- Circlet of Nobility (+2 Strength, Agility Intelligence)
+table.insert(GLOBAL_ITEM_SET, FourCC('I015')) -- Claws of Attack +5
+table.insert(GLOBAL_ITEM_SET, FourCC('I016')) -- Gloves of Haste (+.15 attack speed)
+table.insert(GLOBAL_ITEM_SET, FourCC('I017')) -- Pendant of Mana (+250)
+table.insert(GLOBAL_ITEM_SET, FourCC('I018')) -- Periapt of Vitality (+150 health)
+table.insert(GLOBAL_ITEM_SET, FourCC('I019')) -- Ring of Protection (+5 armor)
+table.insert(GLOBAL_ITEM_SET, FourCC('I01A')) -- Robe of the Magi (+6 intelligence)
 
 local GLOBAL_ELEMENT_NAME_TO_COLOR = {
     water = '|cff0000ff',
@@ -378,11 +377,6 @@ local GLOBAL_ELEMENT_NAME_TO_COLORED_STRING = {
     water = GLOBAL_ELEMENT_NAME_TO_COLOR.water .. 'Water' .. COLOR_WHITE,
     earth = GLOBAL_ELEMENT_NAME_TO_COLOR.earth .. 'Earth' .. COLOR_WHITE,
     fire = GLOBAL_ELEMENT_NAME_TO_COLOR.fire .. 'Fire' .. COLOR_WHITE,
-}
-
-local GLOBAL_TILE_SETUP = {
-    itemCounts = {},
-    elementCounts = {}
 }
 
 local playerIdMapping_draftedUnitsCount = {}
@@ -487,15 +481,7 @@ end
 function InitAbilityGridPositions()
     local tooltipsAlreadySet = {}
 
-    for _, metaData in pairs(draftableUnits) do
-        if metaData.abilityMetaData.passive.abilityId then
-            BlzSetAbilityPosX(metaData.abilityMetaData.passive.abilityId, 0)
-            BlzSetAbilityPosY(metaData.abilityMetaData.passive.abilityId, 0)
-            if not tooltipsAlreadySet[metaData.abilityMetaData.passive.abilityId] then
-                BlzSetAbilityTooltip(metaData.abilityMetaData.passive.abilityId, BlzGetAbilityTooltip(metaData.abilityMetaData.passive.abilityId, 0) .. ' (passive)', 0)
-                tooltipsAlreadySet[metaData.abilityMetaData.passive.abilityId] = true
-            end
-        end
+    for _, metaData in pairs(draftableUnits) do        
         if metaData.abilityMetaData.water.abilityId then
             BlzSetAbilityPosX(metaData.abilityMetaData.water.abilityId, 1)
             BlzSetAbilityPosY(metaData.abilityMetaData.water.abilityId, 0)
@@ -540,13 +526,11 @@ function SetDraftItemTooltip(item)
     local waterName = GetAbilityName(abilityMetaData.water.abilityId)
     local earthName = GetAbilityName(abilityMetaData.earth.abilityId)
     local fireName = GetAbilityName(abilityMetaData.fire.abilityId)
-    local passiveName = GetAbilityName(abilityMetaData.passive.abilityId)
 
     local tooltip = ''
     tooltip = tooltip .. GLOBAL_ELEMENT_NAME_TO_COLOR.water .. waterName .. '|n'
     tooltip = tooltip .. GLOBAL_ELEMENT_NAME_TO_COLOR.earth .. earthName .. '|n'
     tooltip = tooltip .. GLOBAL_ELEMENT_NAME_TO_COLOR.fire .. fireName .. '|n'
-    tooltip = tooltip .. COLOR_WHITE .. 'Aura: ' .. passiveName .. '|n'
 
     BlzSetItemExtendedTooltip(item, tooltip)
 end
@@ -589,10 +573,6 @@ function SetupUnitAbilities(unit, includeDisabled)
         return
     end
 
-    if abilityMetaData.passive and abilityMetaData.passive.abilityId then
-        SetAbilityUIState(unit, abilityMetaData.passive.abilityId, false, false)
-    end
-    
     if abilityMetaData.water and abilityMetaData.water.abilityId then
         if elements.water or includeDisabled then
             SetAbilityUIState(unit, abilityMetaData.water.abilityId, not elements.water, false)
@@ -635,13 +615,17 @@ function CopyUnitGear(sourceUnit, targetUnit)
         if item then
             local clonedItem = UnitAddItemById(targetUnit, GetItemTypeId(item))
             SetItemDroppable(clonedItem, false)
+            local charges = GetItemCharges(item)
+            if charges > 1 then
+                SetItemCharges(clonedItem, charges)
+            end
         end
     end
     
-    local name
+    local name = nil
     local sourceType = GetUnitTypeId(sourceUnit)
     if sourceType == CIRCLE_OF_POWER_METADATA.unitTypeId then
-        name = GetUnitName(sourceUnit)
+        name = GetUnitName(sourceUnit):gsub(" *[[]Level [0-9]+ *[]]$", "")
     else
         name = GetHeroProperName(sourceUnit)
     end
@@ -654,6 +638,7 @@ function CopyUnitGear(sourceUnit, targetUnit)
     end
 end
 
+--[[
 function SwapUnitPositions(sourceUnit, targetUnit)
     local sourceX = GetUnitX(sourceUnit)
     local sourceY = GetUnitY(sourceUnit)
@@ -667,6 +652,7 @@ function SwapUnitPositions(sourceUnit, targetUnit)
     SetUnitPosition(targetUnit, sourceX, sourceY)
     SetUnitFacing(targetUnit, sourceFacing)
 end
+--]]
 
 function GetSpawnOffset(playerId)
     local SPAWN_OFFSET = 500
@@ -732,7 +718,6 @@ function SpawnWaveForPlayer(playerId)
             end
 
             IssuePointOrder(clonedUnit, 'attack', 0, 0)
-
             table.insert(spawnedUnitsPerPlayerPerWave[playerId][waveNumber], clonedUnit)
         end
     end)
@@ -836,29 +821,15 @@ function UnlockPlayerTiles(playerId, count)
         local circle = CreateUnit(player, CIRCLE_OF_POWER_METADATA.unitTypeId, pos.x, pos.y, lookAtAngle)
         SetUnitVertexColor(circle, 255, 50, 255, 255)
 
-        local itemCount = GLOBAL_TILE_SETUP.itemCounts[tileIndex]
-        local elementCount = GLOBAL_TILE_SETUP.elementCounts[tileIndex]
-        for itemIndex = 1, itemCount do
-            local itemType = GLOBAL_ITEM_SET[math.random(1, #GLOBAL_ITEM_SET)]
-            local item = UnitAddItemById(circle, itemType)
-            SetItemDroppable(item, false)
-        end
+        local itemType = GLOBAL_ITEM_SET[math.random(1, #GLOBAL_ITEM_SET)]
+        local item = UnitAddItemById(circle, itemType)
+        SetItemDroppable(item, false)
+        SetItemCharges(item, tileIndex)
 
-        local elements = get_table_keys(GLOBAL_ELEMENT_NAME_TO_COLORED_STRING)
-        local shuffledElements = CloneAndShuffleArray(elements)
-        local chosenElements = {}
-        for element = 1, elementCount do
-            local elementName = table.remove(shuffledElements, 1)
-            chosenElements[elementName] = true
-        end
-        
-        local name = ''
-        for elementName, elementColor in pairs(GLOBAL_ELEMENT_NAME_TO_COLORED_STRING) do
-            if chosenElements[elementName] then
-                name = name .. elementColor .. ' '
-            end
-        end
-        BlzSetUnitName(circle, name)
+        --NOTE: using name for "level" on circle to avoid making it a hero (would be awkward since it wouldn't have a valid "primary stat")
+        local elementNames = get_table_keys(GLOBAL_ELEMENT_NAME_TO_COLORED_STRING)
+        local element = GLOBAL_ELEMENT_NAME_TO_COLORED_STRING[elementNames[math.random(1, #elementNames)]]
+        BlzSetUnitName(circle, element .. ' [Level ' ..  tileIndex .. ']')
         SetupUnitAbilities(circle, false)
     end
 end
@@ -901,7 +872,7 @@ function InitPlayerBase(playerId)
     playerBuilders.altar[playerId] = altar
     playerBuilders.blacksmith[playerId] = blacksmith
 
-    UnlockPlayerTiles(playerId, 3)
+    UnlockPlayerTiles(playerId, 1)
 
     SelectUnitForPlayerSingle(builder, player)
     SetCameraPositionForPlayer(player, GetUnitX(builder), GetUnitY(builder))
@@ -916,11 +887,11 @@ function InitPlayerBases()
     end
 end
 
-function DrawChoicesFromDeck(playerId)
+function DrawChoicesFromDeck(playerId, count)
     local list = playerDecks[playerId]
     local items = {}
     
-    for i = 1, 3 do
+    for i = 1, count do
         if #list > 0 then
             table.insert(items, table.remove(list, 1))
         end
@@ -935,7 +906,7 @@ function AddDraftItemsToAltar(playerId)
         return
     end
     
-    local items = DrawChoicesFromDeck(playerId)
+    local items = DrawChoicesFromDeck(playerId, 3)
     for i = 1, #items do
         local item = UnitAddItemById(altar, items[i])
         SetDraftItemTooltip(item)
@@ -1020,19 +991,21 @@ function SwapTileUnits(caster, target)
     CopyUnitGear(target, newCaster)
     CopyUnitGear(caster, newTarget)
 
-    local newTargetHeroLevel = GetHeroLevel(target)
+    local newTargetHeroLevel = GetHeroLevel(caster)
     if newTargetHeroLevel > 1 then
         UpdateHeroLevel(newTarget, newTargetHeroLevel, false)
     end
-    local newCasterHeroLevel = GetHeroLevel(caster)
+    local newCasterHeroLevel = GetHeroLevel(target)
     if newCasterHeroLevel > 1 then
         UpdateHeroLevel(newCaster, newCasterHeroLevel, false)
     end
 
-    local targetStillHadSwap = UnitRemoveAbility(target, SWAP_UNITS_ABILITY_ID)
-    if targetStillHadSwap then
-        UnitAddAbility(newTarget, SWAP_UNITS_ABILITY_ID)
-    end
+    UnitAddAbility(newCaster, SWAP_UNITS_ABILITY_ID)
+    UnitAddAbility(newTarget, SWAP_UNITS_ABILITY_ID)
+
+    local damageStatsPerUnitPerWave = _damageDealtPerPlayerPerUnitTypePerWave[GetPlayerId(player)]
+    damageStatsPerUnitPerWave[GetUnitTypeId(caster)] = {}
+    damageStatsPerUnitPerWave[GetUnitTypeId(target)] = {}
 
     RemoveUnit(caster)
     RemoveUnit(target)
@@ -1041,6 +1014,37 @@ function SwapTileUnits(caster, target)
     SetupUnitAbilities(newTarget, true)
     HideUnitHealthAndManaBars(newCaster, true)
     HideUnitHealthAndManaBars(newTarget, true)
+end
+
+function OnUnitDamaged()
+    local damagedUnit = GetTriggerUnit()
+    local damagingUnit = GetEventDamageSource()
+    local damage = GetEventDamage()
+    local damagingUnitTypeId = GetUnitTypeId(damagingUnit)
+    
+    if not damagingUnitTypeId then
+        return
+    end
+
+    local damagingPlayer = GetOwningPlayer(damagingUnit)
+    local damagingPlayerId = GetPlayerId(damagingPlayer)
+
+    local realDamagingPlayerId = playerIdMapping_proxyToReal[damagingPlayerId]
+    if realDamagingPlayerId  then
+        damagingPlayerId = realDamagingPlayerId
+    end
+    
+    if damagingPlayerId < 0 or damagingPlayerId > 11 then
+        return
+    end
+
+    local unitDamageDealtPerWave = _damageDealtPerPlayerPerUnitTypePerWave[damagingPlayerId][damagingUnitTypeId]
+    if not unitDamageDealtPerWave then
+        unitDamageDealtPerWave = {}
+        _damageDealtPerPlayerPerUnitTypePerWave[damagingPlayerId][damagingUnitTypeId] = unitDamageDealtPerWave
+    end
+
+    unitDamageDealtPerWave[waveNumber] = (unitDamageDealtPerWave[waveNumber] or 0) + damage
 end
 
 function OnSpellEffect()
@@ -1329,6 +1333,9 @@ function DraftUnit(playerId, unitTypeId, circle)
 
     local unit = CreateUnit(player, unitTypeId, circleX, circleY, CalcUnitRotationAngle(circleX, circleY, 0, 0))
     CopyUnitGear(circle, unit)
+    if draftedCount > 1 then
+        UpdateHeroLevel(unit, draftedCount, false)    
+    end
 
     RemoveUnit(circle)
 
@@ -1338,13 +1345,11 @@ function DraftUnit(playerId, unitTypeId, circle)
     DisableAttacks(unit)
     SetupUnitAbilities(unit, true)
     HideUnitHealthAndManaBars(unit, true)
-    if draftedCount > 1 then
-        UpdateHeroLevel(unit, draftedCount, false)
-    end
-
+    
     SelectUnitForPlayerSingle(playerBuilders.primary[playerId], player)
     
     AddDraftItemsToAltar(playerId)
+    UnlockPlayerTiles(playerId, 1)
 end
 
 function PerformComputerDraft(playerId)
@@ -1377,7 +1382,6 @@ function PerformComputerDraft(playerId)
     local chosenCircle = circles[math.random(1, #circles)]
 
     DraftUnit(playerId, unitTypeId, chosenCircle)
-    UnitUseItemPoint(altar, chosenItem, GetUnitX(chosenCircle), GetUnitY(chosenCircle))
 end
 
 
@@ -1441,17 +1445,19 @@ end
 function OnUnitDeath()
     local dying = GetDyingUnit()
     local killer = GetKillingUnit()
-    
+
     if killer then
         local killerOwner = GetOwningPlayer(killer)
-        local killerIndex = GetPlayerId(killerOwner)
-        
-        local actualPlayerId = playerIdMapping_proxyToReal[killerIndex]
+        local killerPlayerId = GetPlayerId(killerOwner)
+
+        local actualPlayerId = playerIdMapping_proxyToReal[killerPlayerId]
         if actualPlayerId then
-            AdjustPlayerStateBJ(1, Player(actualPlayerId), PLAYER_STATE_RESOURCE_GOLD)
-        else
-            AdjustPlayerStateBJ(1, killerOwner, PLAYER_STATE_RESOURCE_GOLD)
+            killerPlayerId = actualPlayerId
+            killerOwner = Player(actualPlayerId)
         end
+
+        _playerTotalKills[killerPlayerId] = _playerTotalKills[killerPlayerId] + 1
+        AdjustPlayerStateBJ(1, killerOwner, PLAYER_STATE_RESOURCE_GOLD)
     end
 end
 
@@ -1488,7 +1494,7 @@ function ApplyNegativeHPRegen()
                         --NOTE: summoned unit
                         damageMultiplier = damageMultiplier * 2
                     end
-                    
+
                     local currentLife = GetUnitState(unit, UNIT_STATE_LIFE)
                     if currentLife > 0 then
                         local damage = GetUnitState(unit, UNIT_STATE_MAX_LIFE) * damageMultiplier
@@ -1544,9 +1550,6 @@ function IncreaseFoodCap()
         local player = Player(playerId)
         if GetPlayerSlotState(player) == PLAYER_SLOT_STATE_PLAYING then
             SetPlayerStateBJ(player, PLAYER_STATE_RESOURCE_FOOD_CAP, foodCap)
-            if math.fmod(foodCap, 3) == 0 and foodCap < 9 then
-                UnlockPlayerTiles(playerId, 3)
-            end
             if GetPlayerController(player) == MAP_CONTROL_COMPUTER then
                 PerformComputerDraft(playerId)
             end
@@ -1594,11 +1597,6 @@ function InitPlayerAlliances()
 end
 
 function InitPlayerTiles()
-    for i = 1, 9 do
-        table.insert(GLOBAL_TILE_SETUP.itemCounts, WeightedRandom({25, 25, 20, 15, 10, 5}))
-        table.insert(GLOBAL_TILE_SETUP.elementCounts, WeightedRandom({50, 40, 10}))
-    end
-
     for playerId = 0, 11 do
         local player = Player(playerId)
         if GetPlayerSlotState(player) == PLAYER_SLOT_STATE_PLAYING then
@@ -1653,8 +1651,193 @@ function PrintDebugInfo()
     end
 end
 
+function ShowMultiboard(mb)
+    --todo: test if minimize/maximize is necessary?
+    MultiboardDisplay(mb, true)
+    MultiboardMinimize(mb, true)
+    MultiboardMinimize(mb, false)
+end
+
+local _multiboardKills = nil
+local _multiboardPerPlayer = {}
+function InitMultiboard()
+    _multiboardKills = CreateMultiboard()
+    MultiboardSetTitleText(_multiboardKills, 'Player Kills')
+    MultiboardSetColumnCount(_multiboardKills, 2)
+    MultiboardSetRowCount(_multiboardKills, 1)
+    local playerNameColumn = MultiboardGetItem(_multiboardKills, 0, 0)
+    MultiboardSetItemStyle(playerNameColumn, true, false)
+    MultiboardSetItemWidth(playerNameColumn, 0.10)
+    MultiboardSetItemValue(playerNameColumn, 'Player')
+    MultiboardReleaseItem(playerNameColumn)
+    local killsColumn = MultiboardGetItem(_multiboardKills, 0, 1)
+    MultiboardSetItemStyle(killsColumn, true, false)
+    MultiboardSetItemWidth(killsColumn, 0.05)
+    MultiboardSetItemValue(killsColumn, 'Kills')
+    MultiboardReleaseItem(killsColumn)
+    ShowMultiboard(_multiboardKills)
+    
+    for playerId = 0, 11 do
+        local player = Player(playerId)
+        if GetPlayerSlotState(player) == PLAYER_SLOT_STATE_PLAYING then
+            local mb = CreateMultiboard()
+            _multiboardPerPlayer[playerId] = mb
+            MultiboardSetTitleText(mb, 'My Unit Damage')
+            MultiboardSetColumnCount(mb, 2)
+            MultiboardSetRowCount(mb, 1)
+
+            local unitNameColumn = MultiboardGetItem(mb, 0, 0)
+            MultiboardSetItemStyle(unitNameColumn, true, false)
+            MultiboardSetItemWidth(unitNameColumn, 0.15)
+            MultiboardSetItemValue(unitNameColumn, 'Unit Type')
+            MultiboardReleaseItem(unitNameColumn)
+
+            local avgDamageColumn = MultiboardGetItem(mb, 0, 1)
+            MultiboardSetItemStyle(avgDamageColumn, true, false)
+            MultiboardSetItemWidth(avgDamageColumn, 0.10)
+            MultiboardSetItemValue(avgDamageColumn, 'Avg. Damage')
+            MultiboardReleaseItem(avgDamageColumn)
+
+            MultiboardDisplay(mb, false)
+        end
+    end
+
+    local localPlayerId = GetPlayerId(GetLocalPlayer())
+    ShowMultiboard(_multiboardPerPlayer[localPlayerId], true)
+end
+
+local colorPerPlayer = {
+    [0] = 'FF0402',
+    [1] = '0042FF',
+    [2] = '1BE6BA',
+    [3] = '550081',
+    [4] = 'FFFC00',
+    [5] = 'FF8A0D',
+    [6] = '20BF00',
+    [7] = 'E35BAF',
+    [8] = '949697',
+    [9] = '7EBFF1',
+    [10] = '106247',
+    [11] = '4F2B05',    
+    [12] = '9C0000',    
+    [13] = '0000C2',    
+    [14] = '00EBFF',    
+    [15] = 'BD00FF',    
+    [16] = 'ECCC86',    
+    [17] = 'F7A48B',    
+    [18] = 'BFFF80',    
+    [19] = 'DBB8EC',    
+    [20] = '4F4F55',    
+    [21] = 'ECF0FF',    
+    [22] = 'A46F34'
+}
+function ConvertPlayerColorToHex(playerId)
+    return colorPerPlayer[playerId] or 'ffffff'
+end
+
+function UpdateKillsMultiboard()
+    local playerScores = {}
+    for playerId = 0, 11 do
+        local player = Player(playerId)
+        if GetPlayerSlotState(player) == PLAYER_SLOT_STATE_PLAYING then
+            table.insert(playerScores, { player = player, kills = _playerTotalKills[playerId] })
+        end
+    end
+
+    table.sort(playerScores, function(a, b)
+        return a.kills > b.kills
+    end)
+
+    MultiboardSetRowCount(_multiboardKills, #playerScores + 1)
+
+    for i, data in pairs(playerScores) do
+        local player = data.player
+        local kills = data.kills
+        local playerName = GetPlayerName(player)
+        local colorHex = ConvertPlayerColorToHex(GetPlayerId(player))
+        local coloredPlayerName = '|cff' .. colorHex .. playerName .. '|r'
+
+        local playerNameColumn = MultiboardGetItem(_multiboardKills, i, 0)
+        MultiboardSetItemStyle(playerNameColumn, true, false)
+        MultiboardSetItemWidth(playerNameColumn, 0.10)
+        MultiboardSetItemValue(playerNameColumn, coloredPlayerName)
+        MultiboardReleaseItem(playerNameColumn)
+        
+        local killsColumn = MultiboardGetItem(_multiboardKills, i, 1)
+        MultiboardSetItemStyle(killsColumn, true, false)
+        MultiboardSetItemWidth(killsColumn, 0.05)
+        MultiboardSetItemValue(killsColumn, tostring(kills))
+        MultiboardReleaseItem(killsColumn)
+    end
+end
+
+function UpdatePlayerDamageMultiboard(playerId)
+    local mb = _multiboardPerPlayer[playerId]
+    if not mb then
+        return
+    end
+
+    local playerDamageData = _damageDealtPerPlayerPerUnitTypePerWave[playerId]
+    local unitDamageStats = {}
+
+    for unitTypeId, waveData in pairs(playerDamageData) do
+        local totalDamage = 0
+        local wavesCounted = 0
+        for waveNum, damage in pairs(waveData) do
+            if waveNum ~= waveNumber then -- Exclude current wave from average
+                totalDamage = totalDamage + damage
+                wavesCounted = wavesCounted + 1
+            end
+        end
+
+        if wavesCounted > 0 then
+            local avgDamage = totalDamage / wavesCounted
+            table.insert(unitDamageStats, { unitTypeId = unitTypeId, avgDamage = avgDamage })
+        end
+    end
+
+    table.sort(unitDamageStats, function(a, b)
+        return a.avgDamage > b.avgDamage
+    end)
+
+    MultiboardSetRowCount(mb, #unitDamageStats + 1)
+
+    for i, data in pairs(unitDamageStats) do
+        local metaData = GetUnitTypeIdMetaData(data.unitTypeId)
+        --todo: replace unitName with icon MultiboardSetItemIcon
+        local unitName = nil
+        if metaData then
+            unitName = metaData.name
+        else
+            unitName = GetObjectName(data.unitTypeId)
+        end
+        
+        local unitNameColumn = MultiboardGetItem(mb, i, 0)
+        MultiboardSetItemStyle(unitNameColumn, true, false)
+        MultiboardSetItemWidth(unitNameColumn, 0.15)
+        MultiboardSetItemValue(unitNameColumn, unitName)
+        MultiboardReleaseItem(unitNameColumn)
+        
+        local avgDamageColumn = MultiboardGetItem(mb, i, 1)
+        MultiboardSetItemStyle(avgDamageColumn, true, false)
+        MultiboardSetItemWidth(avgDamageColumn, 0.10)
+        MultiboardSetItemValue(avgDamageColumn, tostring(math.floor(data.avgDamage)))
+        MultiboardReleaseItem(avgDamageColumn)
+    end
+end
+
+function UpdateAllMultiboards()
+    UpdateKillsMultiboard()
+    for playerId = 0, 11 do
+        local player = Player(playerId)
+        if GetPlayerSlotState(player) == PLAYER_SLOT_STATE_PLAYING then
+            UpdatePlayerDamageMultiboard(playerId)
+        end
+    end
+end
+
 function Init()
-    SetRandomSeed(100)
+    --SetRandomSeed(100)
 	MeleeStartingVisibility()
 	MeleeClearExcessUnits()
 	FogEnableOff()
@@ -1677,6 +1860,10 @@ function Init()
     TriggerRegisterAnyUnitEventBJ(deathTrigger, EVENT_PLAYER_UNIT_DEATH)
     TriggerAddAction(deathTrigger, OnUnitDeath)
     
+    local damageTrigger = CreateTrigger()
+    TriggerRegisterAnyUnitEventBJ(damageTrigger, EVENT_PLAYER_UNIT_DAMAGED)
+    TriggerAddAction(damageTrigger, OnUnitDamaged)
+    
     local spellTrigger = CreateTrigger()
     TriggerRegisterAnyUnitEventBJ(spellTrigger, EVENT_PLAYER_UNIT_SPELL_EFFECT)
     TriggerAddAction(spellTrigger, OnSpellEffect)
@@ -1697,6 +1884,13 @@ function Init()
     
     local aiTimer = CreateTimer()
     TimerStart(aiTimer, 1.0, true, aiLoop)
+
+    RunDelayed(function()
+        --NOTE: Can't create Multiboard during Init
+        InitMultiboard()
+        local multiboardUpdateTimer = CreateTimer()
+        TimerStart(multiboardUpdateTimer, 5.0, true, UpdateAllMultiboards)
+    end, 0)
 end
 
 --[[

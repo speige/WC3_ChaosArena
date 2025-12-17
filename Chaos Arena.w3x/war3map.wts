@@ -1266,14 +1266,6 @@ STRING 484
 Swap
 }
 
-STRING 485
-// Abilities: A03Z (Swap), Tip (Tooltip - Normal)
-{
-Swap location with another unit
-- also swaps items & unlocked elements
-- 1x use per unit
-}
-
 STRING 486
 // Units: n00A (Circle of Power), Description (Description)
 {
@@ -2228,5 +2220,12 @@ STRING 751
 // Abilities: A00D (Possession), Ubertip (Tooltip - Normal - Extended)
 {
 Displaces the soul of an enemy, giving you permanent control of it, but destroying the caster's body
+}
+
+STRING 752
+// Abilities: A03Z (Swap), Tip (Tooltip - Normal)
+{
+Swap location with another unit
+- also swaps items & unlocked elements
 }
 
