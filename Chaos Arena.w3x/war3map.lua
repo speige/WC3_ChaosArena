@@ -3,6 +3,33 @@ function InitGlobals()
 end
 
 --NOTE: copy/paste into WorldEditor triggers module before saving map
+local DEFENSE_TYPE = {
+    LIGHT = 0,
+    MEDIUM = 1,
+    LARGE = 2,
+    FORT = 3,
+    NORMAL = 4,
+    HERO = 5,
+    DIVINE = 6,
+    NONE = 7
+}
+
+local ATTACK_TYPE = {
+    NORMAL = 0,
+    MELEE = 1,
+    PIERCE = 2,
+    SIEGE = 3,
+    MAGIC = 4,
+    CHAOS = 5,
+    HERO = 6
+}
+
+local HERO_ATTRIBUTE = {
+    STRENGTH = 1,
+    INTELLIGENCE = 2,
+    AGILIITY = 3
+}
+
 local ABILITY_TARGETING = {
     PASSIVE = 0,
     AUTOCAST = 1,
@@ -14,12 +41,43 @@ local ABILITY_TARGETING = {
     GROUND_PLAYERUNITS = 7,
     GROUND_ENEMY = 8
 }        
-function AbilityMetaData(abilityId, orderOn, order, range, targetsAllowed)
-    return { abilityId = abilityId, orderOn = orderOn, order = order, range = range, targetsAllowed = targetsAllowed }
+
+function AbilityMetaData(abilityId, orderOn, order, range, targetsAllowed, manaCost, cooldownInSeconds)
+    return { abilityId = abilityId, orderOn = orderOn, order = order, range = range, targetsAllowed = targetsAllowed, manaCost = manaCost, cooldownInSeconds = cooldownInSeconds }
 end
 
-function UnitMetaData(name, unitTypeId, dummyBuildingUnitTypeId, draftItemTypeId, draftAbilityId, abilityMetaData)
-    return { name = name, unitTypeId = unitTypeId, dummyBuildingUnitTypeId = dummyBuildingUnitTypeId, draftItemTypeId = draftItemTypeId, draftAbilityId = draftAbilityId, abilityMetaData = abilityMetaData }
+function UnitMetaData(name, unitTypeId, dummyBuildingUnitTypeId, draftItemTypeId, draftAbilityId, abilityMetaData, baseStats)
+    return { name = name, unitTypeId = unitTypeId, dummyBuildingUnitTypeId = dummyBuildingUnitTypeId, draftItemTypeId = draftItemTypeId, draftAbilityId = draftAbilityId, abilityMetaData = abilityMetaData, baseStats = baseStats }
+end
+
+function UnitBaseStats(defenseType, attackType, attackDamage, maxLife, startingMana, armor, manaRegen, primaryAttribute, strengthPerLevel, agilityPerLevel, intelligencePerLevel)
+    return { defenseType = defenseType, attackType = attackType, attackDamage = attackDamage, maxLife = maxLife, startingMana = startingMana, armor = armor, manaRegen = manaRegen, primaryAttribute = primaryAttribute, strengthPerLevel = strengthPerLevel, agilityPerLevel = agilityPerLevel, intelligencePerLevel = intelligencePerLevel }
+end
+
+local StatScalingPerBalancePoint = {
+    attackDamage = 10,
+    maxLife = 100,
+    armor = 1,
+    manaRegen = .01,
+    attributePerLevel = .25
+}
+
+function BalanceStatPointAllocations(attackDamagePoints, maxLifePoints, armorPoints, manaRegenPoints, strengthPerLevelPoints, agilityPerLevelPoints, intelligencePerLevelPoints)
+    return { attackDamagePoints = attackDamagePoints, maxLifePoints = maxLifePoints, armorPoints = armorPoints, manaRegenPoints = manaRegenPoints, strengthPerLevelPoints = strengthPerLevelPoints, agilityPerLevelPoints = agilityPerLevelPoints, intelligencePerLevelPoints = intelligencePerLevelPoints }
+end
+
+function BalanceBaseStatsByPoints(defenseType, attackType, primaryAttribute, startingMana, pointAllocations)
+    local normalizedScaling = 10 / (pointAllocations.attackDamagePoints + pointAllocations.maxLifePoints + pointAllocations.armorPoints + pointAllocations.manaRegenPoints + pointAllocations.strengthPerLevelPoints + pointAllocations.agilityPerLevelPoints + pointAllocations.intelligencePerLevelPoints)
+    return {
+        defenseType = defenseType, attackType = attackType, startingMana = startingMana, primaryAttribute = primaryAttribute,
+        attackDamage = math.ceil(normalizedScaling * pointAllocations.attackDamagePoints * StatScalingPerBalancePoint.attackDamage),
+        maxLife = math.ceil(normalizedScaling * pointAllocations.maxLifePoints * StatScalingPerBalancePoint.maxLife),
+        armor = math.ceil(normalizedScaling * pointAllocations.armorPoints * StatScalingPerBalancePoint.armor),
+        manaRegen = normalizedScaling * pointAllocations.manaRegenPoints * StatScalingPerBalancePoint.manaRegen,
+        strengthPerLevel = normalizedScaling * pointAllocations.strengthPerLevelPoints * StatScalingPerBalancePoint.attributePerLevel,
+        agilityPerLevel = normalizedScaling * pointAllocations.agilityPerLevelPoints * StatScalingPerBalancePoint.attributePerLevel,
+        intelligencePerLevel = normalizedScaling * pointAllocations.intelligencePerLevelPoints * StatScalingPerBalancePoint.attributePerLevel,
+    }
 end
 
 function UnitAbilityMetaData(water, earth, fire)
@@ -27,141 +85,141 @@ function UnitAbilityMetaData(water, earth, fire)
 end
 
 local abilities = {
-    AcidBomb = AbilityMetaData(FourCC('A034'), nil, 'acidbomb', 700, ABILITY_TARGETING.ENEMY),
-    AerialShackles = AbilityMetaData(FourCC('A003'), nil, 'magicleash', 550, ABILITY_TARGETING.ENEMY), -- broken?
-    AncestralSpirit = AbilityMetaData(FourCC('A03X'), nil, 'ancestralspirit', 350, ABILITY_TARGETING.GROUND_PLAYERUNITS),
-    AnimateDead = AbilityMetaData(FourCC('A02T'), nil, 'animatedead', 400, ABILITY_TARGETING.GROUND_RANDOM),
-    AntiMagicShell = AbilityMetaData(FourCC('A00A'), nil, 'antimagicshell', 500, ABILITY_TARGETING.PLAYERUNITS),
-    Avatar = AbilityMetaData(FourCC('A028'), nil, 'avatar', 0, ABILITY_TARGETING.NO_TARGET), -- working
-    Banish = AbilityMetaData(FourCC('A02E'), nil, 'banish', 800, ABILITY_TARGETING.ENEMY), -- working
-    Bash = AbilityMetaData(FourCC('A02A'), nil, nil, 0, ABILITY_TARGETING.PASSIVE),
-    BigBadVoodoo = AbilityMetaData(FourCC('A02Q'), nil, 'voodoo', 0, ABILITY_TARGETING.NO_TARGET), -- cancelling immediately after casting because it's channeled
-    BlackArrow = AbilityMetaData(FourCC('A03I'), 'blackarrowon', nil, 600, ABILITY_TARGETING.AUTOCAST),
-    Bladestorm = AbilityMetaData(FourCC('A02H'), nil, 'whirlwind', 0, ABILITY_TARGETING.NO_TARGET), -- working
-    Blizzard = AbilityMetaData(FourCC('A027'), nil, 'blizzard', 800, ABILITY_TARGETING.ENEMY), -- working
-    Bloodlust = AbilityMetaData(FourCC('A005'), 'bloodluston', nil, 600, ABILITY_TARGETING.AUTOCAST),
-    BreathOfFire = AbilityMetaData(FourCC('A03E'), nil, 'breathoffire', 375, ABILITY_TARGETING.ENEMY), -- working
-    CarrionBeetles = AbilityMetaData(FourCC('A022'), 'Carrionscarabson', nil, 900, ABILITY_TARGETING.AUTOCAST),
-    CarrionSwarm = AbilityMetaData(FourCC('A02Z'), nil, 'carrionswarm', 700, ABILITY_TARGETING.GROUND_ENEMY), -- working
-    ChainLightning = AbilityMetaData(FourCC('A02I'), nil, 'chainlightning', 700, ABILITY_TARGETING.ENEMY), -- working
-    Charm = AbilityMetaData(FourCC('A00S'), nil, 'charm', 700, ABILITY_TARGETING.ENEMY), -- working
-    CleavingAttack = AbilityMetaData(FourCC('A03N'), nil, nil, 0, ABILITY_TARGETING.PASSIVE),
-    ClusterRockets = AbilityMetaData(FourCC('A039'), nil, 'clusterrockets', 800, ABILITY_TARGETING.ENEMY), -- working
-    CriticalStrike = AbilityMetaData(FourCC('A02F'), nil, nil, 0, ABILITY_TARGETING.PASSIVE),
-    Curse = AbilityMetaData(FourCC('A00B'), 'curseon', nil, 700, ABILITY_TARGETING.AUTOCAST), -- working
-    Cyclone = AbilityMetaData(FourCC('A00H'), nil, 'cyclone', 600, ABILITY_TARGETING.ENEMY),
-    DarkPortal = AbilityMetaData(FourCC('A03P'), nil, 'darkportal', 800, ABILITY_TARGETING.GROUND_RANDOM), -- working
-    DeathAndDecay = AbilityMetaData(FourCC('A02W'), nil, 'deathanddecay', 1000, ABILITY_TARGETING.GROUND_ENEMY),
-    DeathCoil = AbilityMetaData(FourCC('A02R'), nil, 'deathcoil', 800, ABILITY_TARGETING.ENEMY),
-    DeathPact = AbilityMetaData(FourCC('A02S'), nil, 'deathpact', 800, ABILITY_TARGETING.ENEMY),
-    DiseaseCloud = AbilityMetaData(FourCC('A00C'), nil, nil, 0, ABILITY_TARGETING.PASSIVE), -- working
-    DivineShield = AbilityMetaData(FourCC('A025'), nil, 'divineshield', 0, ABILITY_TARGETING.NO_TARGET), -- working
-    Doom = AbilityMetaData(FourCC('A03Q'), nil, 'doom', 650, ABILITY_TARGETING.ENEMY), -- working
-    DrunkenBrawler = AbilityMetaData(FourCC('A03F'), nil, nil, 0, ABILITY_TARGETING.PASSIVE),
-    Earthquake = AbilityMetaData(FourCC('A02K'), nil, 'earthquake', 1000, ABILITY_TARGETING.GROUND_ENEMY), -- working
-    EntanglingRoots = AbilityMetaData(FourCC('A00U'), nil, 'entanglingroots', 800, ABILITY_TARGETING.ENEMY), -- working
-    FaerieFire = AbilityMetaData(FourCC('A00I'), 'faeriefireon', nil, 700, ABILITY_TARGETING.AUTOCAST),
-    FanOfKnives = AbilityMetaData(FourCC('A01Y'), nil, 'fanofknives', 0, ABILITY_TARGETING.NO_TARGET), -- working
-    FeralSpirit = AbilityMetaData(FourCC('A02J'), nil, 'spiritwolf', 800, ABILITY_TARGETING.NO_TARGET), -- working
-    FlameStrike = AbilityMetaData(FourCC('A02D'), nil, 'flamestrike', 800, ABILITY_TARGETING.GROUND_ENEMY), -- working
-    ForceOfNature = AbilityMetaData(FourCC('A01P'), nil, 'forceofnature', 800, ABILITY_TARGETING.GROUND_RANDOM), -- broken
-    ForkedLightning = AbilityMetaData(FourCC('A035'), nil, 'forkedlightning', 600, ABILITY_TARGETING.ENEMY),
-    FrostArmor = AbilityMetaData(FourCC('A02V'), 'forstarmoron', nil, 800, ABILITY_TARGETING.AUTOCAST),
-    FrostArrows = AbilityMetaData(FourCC('A036'), 'coldarrowstarg', nil, 600, ABILITY_TARGETING.AUTOCAST),
-    FrostNova = AbilityMetaData(FourCC('A02U'), nil, 'frostnova', 800, ABILITY_TARGETING.ENEMY),
-    HardenedSkin = AbilityMetaData(FourCC('A00J'), nil, nil, 0, ABILITY_TARGETING.PASSIVE),
-    HealingSpray = AbilityMetaData(FourCC('A033'), nil, 'healingspray', 800, ABILITY_TARGETING.GROUND_PLAYERUNITS), -- working
-    HealingWard = AbilityMetaData(FourCC('A03R'), nil, 'healingward', 500, ABILITY_TARGETING.GROUND_PLAYERUNITS), -- working
-    HealingWave = AbilityMetaData(FourCC('A03T'), nil, 'healingwave', 700, ABILITY_TARGETING.PLAYERUNITS),
-    Hex = AbilityMetaData(FourCC('A02P'), nil, 'hex', 800, ABILITY_TARGETING.ENEMY), -- working
-    HolyLight = AbilityMetaData(FourCC('A024'), nil, 'holybolt', 800, ABILITY_TARGETING.PLAYERUNITS),
-    HowlOfTerror = AbilityMetaData(FourCC('A03M'), nil, 'howlofterror', 0, ABILITY_TARGETING.NO_TARGET), -- working
-    Immolation = AbilityMetaData(FourCC('A01V'), nil, 'immolation', 0, ABILITY_TARGETING.NO_TARGET), -- working
-    Impale = AbilityMetaData(FourCC('A030'), nil, 'impale', 700, ABILITY_TARGETING.GROUND_ENEMY), -- working
-    Incinerate = AbilityMetaData(FourCC('A03J'), nil, 'incinerate', 0, ABILITY_TARGETING.PASSIVE),
-    Inferno = AbilityMetaData(FourCC('A021'), nil, 'inferno', 900, ABILITY_TARGETING.GROUND_RANDOM),
-    LifeDrain = AbilityMetaData(FourCC('A004'), nil, 'drain', 500, ABILITY_TARGETING.ENEMY), -- working
-    LightningAttack = AbilityMetaData(FourCC('A00K'), nil, nil, 0, ABILITY_TARGETING.PASSIVE),
-    LightningShield = AbilityMetaData(FourCC('A007'), nil, 'lightningshield', 600, ABILITY_TARGETING.PLAYERUNITS), -- working
-    LocustSwarm = AbilityMetaData(FourCC('A031'), nil, 'Locustswarm', 0, ABILITY_TARGETING.NO_TARGET), -- working
-    ManaBurn = AbilityMetaData(FourCC('A01U'), nil, 'manaburn', 300, ABILITY_TARGETING.ENEMY),
-    ManaFlare = AbilityMetaData(FourCC('A00L'), nil, 'manaflareon', 200, ABILITY_TARGETING.NO_TARGET),
-    ManaShield = AbilityMetaData(FourCC('A037'), 'manashieldon', nil, 128, ABILITY_TARGETING.AUTOCAST), -- working
-    Metamorphosis = AbilityMetaData(FourCC('A01W'), nil, 'metamorphosis', 0, ABILITY_TARGETING.NO_TARGET), -- seems to cancel immediately after casting
-    MirrorImage = AbilityMetaData(FourCC('A02G'), nil, 'mirrorimage', 128, ABILITY_TARGETING.NO_TARGET), -- working
-    PhaseShift = AbilityMetaData(FourCC('A00M'), 'phaseshifton', nil, 0, ABILITY_TARGETING.AUTOCAST), -- working
-    Phoenix = AbilityMetaData(FourCC('A02C'), nil, 'summonphoenix', 0, ABILITY_TARGETING.NO_TARGET), -- working
-    PocketFactory = AbilityMetaData(FourCC('A038'), nil, 'summonfactory', 500, ABILITY_TARGETING.GROUND_RANDOM), -- working
-    Possession = AbilityMetaData(FourCC('A00D'), nil, 'possession', 200, ABILITY_TARGETING.ENEMY),
-    RainOfChaos = AbilityMetaData(FourCC('A03O'), nil, 'rainofchaos', 1000, ABILITY_TARGETING.GROUND_RANDOM), -- working
-    RainOfFire = AbilityMetaData(FourCC('A03S'), nil, 'rainoffire', 800, ABILITY_TARGETING.GROUND_ENEMY), -- working
-    RaiseDead = AbilityMetaData(FourCC('A00E'), 'raisedeadon', nil, 600, ABILITY_TARGETING.AUTOCAST), -- broken
-    Reincarnation = AbilityMetaData(FourCC('A02L'), nil, nil, 0, ABILITY_TARGETING.PASSIVE), -- working
-    Resurrection = AbilityMetaData(FourCC('A026'), nil, 'resurrection', 400, ABILITY_TARGETING.GROUND_PLAYERUNITS),
-    RoboGoblin = AbilityMetaData(FourCC('A03A'), nil, 'robogoblin', 0, ABILITY_TARGETING.NO_TARGET),
-    SearingArrows = AbilityMetaData(FourCC('A01R'), nil, 'flamingarrows', 600, ABILITY_TARGETING.NO_TARGET), -- working
-    SerpentWard = AbilityMetaData(FourCC('A02O'), nil, 'ward', 500, ABILITY_TARGETING.GROUND_ENEMY), -- working
-    ShadowStrike = AbilityMetaData(FourCC('A01Z'), nil, 'shadowstrike', 300, ABILITY_TARGETING.ENEMY), -- working
-    Shockwave = AbilityMetaData(FourCC('A02N'), nil, 'shockwave', 700, ABILITY_TARGETING.GROUND_ENEMY), -- working
-    Silence = AbilityMetaData(FourCC('A03H'), nil, 'silence', 900, ABILITY_TARGETING.GROUND_ENEMY), -- working
-    Sleep = AbilityMetaData(FourCC('A02Y'), nil, 'sleep', 800, ABILITY_TARGETING.ENEMY), -- working
-    SlowPoison = AbilityMetaData(FourCC('A00O'), nil, nil, 0, ABILITY_TARGETING.PASSIVE),
-    SoulBurn = AbilityMetaData(FourCC('A03K'), nil, 'soulburn', 700, ABILITY_TARGETING.ENEMY),
-    SpellImmunity = AbilityMetaData(FourCC('A00P'), nil, nil, 0, ABILITY_TARGETING.PASSIVE),
-    SpikedCarapace = AbilityMetaData(FourCC('A032'), nil, nil, 0, ABILITY_TARGETING.PASSIVE),
-    SpiritLink = AbilityMetaData(FourCC('A008'), nil, 'spiritlink', 750, ABILITY_TARGETING.PLAYERUNITS), -- not casting
-    SpiritTouch = AbilityMetaData(FourCC('A00F'), 'replenishmanaon', nil, 250, ABILITY_TARGETING.AUTOCAST),
-    Stampede = AbilityMetaData(FourCC('A03D'), nil, 'stampede', 300, ABILITY_TARGETING.GROUND_ENEMY), -- cancelling immediately after casting because it's channeled
-    Starfall = AbilityMetaData(FourCC('A01S'), nil, 'starfall', 0, ABILITY_TARGETING.NO_TARGET), -- cancelling immediately after casting because it's channeled
-    StatisTrap = AbilityMetaData(FourCC('A009'), nil, 'stasistrap', 500, ABILITY_TARGETING.GROUND_ENEMY),
-    StormBolt = AbilityMetaData(FourCC('A02B'), nil, 'thunderbolt', 600, ABILITY_TARGETING.ENEMY), -- working
-    StormEarthAndFire = AbilityMetaData(FourCC('A03G'), nil, 'elementalfury', 0, ABILITY_TARGETING.NO_TARGET), -- working
-    SummonBear = AbilityMetaData(FourCC('A03B'), nil, 'summongrizzly', 0, ABILITY_TARGETING.NO_TARGET), -- working
-    SummonLavaSpawn = AbilityMetaData(FourCC('A03L'), nil, 'slimemonster', 0, ABILITY_TARGETING.NO_TARGET),
-    SummonQuilbeast = AbilityMetaData(FourCC('A03C'), nil, 'summonquillbeast', 0, ABILITY_TARGETING.NO_TARGET), -- working
-    SummonWaterElemental = AbilityMetaData(FourCC('A029'), nil, 'waterelemental', 0, ABILITY_TARGETING.NO_TARGET), -- working
-    Taunt = AbilityMetaData(FourCC('A00Q'), nil, 'taunt', 0, ABILITY_TARGETING.NO_TARGET),
-    ThunderClap = AbilityMetaData(FourCC('A01T'), nil, 'thunderclap', 0, ABILITY_TARGETING.NO_TARGET), -- working
-    Tornado = AbilityMetaData(FourCC('A03U'), nil, 'tornado', 700, ABILITY_TARGETING.GROUND_ENEMY), -- working
-    Tranquility = AbilityMetaData(FourCC('A01Q'), nil, 'tranquility', 0, ABILITY_TARGETING.NO_TARGET), -- cancelling immediately after casting because it's channeled
-    Transmute = AbilityMetaData(FourCC('A00T'), nil, 'transmute', 650, ABILITY_TARGETING.ENEMY), -- working
-    Vengeance = AbilityMetaData(FourCC('A020'), nil, 'spiritofvengeance', 0, ABILITY_TARGETING.NO_TARGET), -- working
-    Volcano = AbilityMetaData(FourCC('A023'), nil, 'volcano', 800, ABILITY_TARGETING.GROUND_ENEMY), -- working
-    VorpalBlades = AbilityMetaData(FourCC('A044'), nil, nil, 0, ABILITY_TARGETING.PASSIVE),
-    WarStomp = AbilityMetaData(FourCC('A02M'), nil, 'stomp', 0, ABILITY_TARGETING.NO_TARGET), -- working
+    AcidBomb = AbilityMetaData(FourCC('A034'), nil, 'acidbomb', 700, ABILITY_TARGETING.ENEMY, 50, 10),
+    AerialShackles = AbilityMetaData(FourCC('A003'), nil, 'magicleash', 550, ABILITY_TARGETING.ENEMY, 50, 10), -- broken?
+    AncestralSpirit = AbilityMetaData(FourCC('A03X'), nil, 'ancestralspirit', 350, ABILITY_TARGETING.GROUND_PLAYERUNITS, 50, 10),
+    AnimateDead = AbilityMetaData(FourCC('A02T'), nil, 'animatedead', 400, ABILITY_TARGETING.GROUND_RANDOM, 50, 10),
+    AntiMagicShell = AbilityMetaData(FourCC('A00A'), nil, 'antimagicshell', 500, ABILITY_TARGETING.PLAYERUNITS, 50, 10),
+    Avatar = AbilityMetaData(FourCC('A028'), nil, 'avatar', 0, ABILITY_TARGETING.NO_TARGET, 50, 10), -- working
+    Banish = AbilityMetaData(FourCC('A02E'), nil, 'banish', 800, ABILITY_TARGETING.ENEMY, 50, 10), -- working
+    Bash = AbilityMetaData(FourCC('A02A'), nil, nil, 0, ABILITY_TARGETING.PASSIVE, 50, 10),
+    BigBadVoodoo = AbilityMetaData(FourCC('A02Q'), nil, 'voodoo', 0, ABILITY_TARGETING.NO_TARGET, 50, 10), -- cancelling immediately after casting because it's channeled
+    BlackArrow = AbilityMetaData(FourCC('A03I'), 'blackarrowon', nil, 600, ABILITY_TARGETING.AUTOCAST, 50, 10),
+    Bladestorm = AbilityMetaData(FourCC('A02H'), nil, 'whirlwind', 0, ABILITY_TARGETING.NO_TARGET, 50, 10), -- working
+    Blizzard = AbilityMetaData(FourCC('A027'), nil, 'blizzard', 800, ABILITY_TARGETING.ENEMY, 50, 10), -- working
+    Bloodlust = AbilityMetaData(FourCC('A005'), 'bloodluston', nil, 600, ABILITY_TARGETING.AUTOCAST, 50, 10),
+    BreathOfFire = AbilityMetaData(FourCC('A03E'), nil, 'breathoffire', 375, ABILITY_TARGETING.ENEMY, 50, 10), -- working
+    CarrionBeetles = AbilityMetaData(FourCC('A022'), 'Carrionscarabson', nil, 900, ABILITY_TARGETING.AUTOCAST, 50, 10),
+    CarrionSwarm = AbilityMetaData(FourCC('A02Z'), nil, 'carrionswarm', 700, ABILITY_TARGETING.GROUND_ENEMY, 50, 10), -- working
+    ChainLightning = AbilityMetaData(FourCC('A02I'), nil, 'chainlightning', 700, ABILITY_TARGETING.ENEMY, 50, 10), -- working
+    Charm = AbilityMetaData(FourCC('A00S'), nil, 'charm', 700, ABILITY_TARGETING.ENEMY, 50, 10), -- working
+    CleavingAttack = AbilityMetaData(FourCC('A03N'), nil, nil, 0, ABILITY_TARGETING.PASSIVE, 50, 10),
+    ClusterRockets = AbilityMetaData(FourCC('A039'), nil, 'clusterrockets', 800, ABILITY_TARGETING.ENEMY, 50, 10), -- working
+    CriticalStrike = AbilityMetaData(FourCC('A02F'), nil, nil, 0, ABILITY_TARGETING.PASSIVE, 50, 10),
+    Curse = AbilityMetaData(FourCC('A00B'), 'curseon', nil, 700, ABILITY_TARGETING.AUTOCAST, 50, 10), -- working
+    Cyclone = AbilityMetaData(FourCC('A00H'), nil, 'cyclone', 600, ABILITY_TARGETING.ENEMY, 50, 10),
+    DarkPortal = AbilityMetaData(FourCC('A03P'), nil, 'darkportal', 800, ABILITY_TARGETING.GROUND_RANDOM, 50, 10), -- working
+    DeathAndDecay = AbilityMetaData(FourCC('A02W'), nil, 'deathanddecay', 1000, ABILITY_TARGETING.GROUND_ENEMY, 50, 10),
+    DeathCoil = AbilityMetaData(FourCC('A02R'), nil, 'deathcoil', 800, ABILITY_TARGETING.ENEMY, 50, 10),
+    DeathPact = AbilityMetaData(FourCC('A02S'), nil, 'deathpact', 800, ABILITY_TARGETING.ENEMY, 50, 10),
+    DiseaseCloud = AbilityMetaData(FourCC('A00C'), nil, nil, 0, ABILITY_TARGETING.PASSIVE, 50, 10), -- working
+    DivineShield = AbilityMetaData(FourCC('A025'), nil, 'divineshield', 0, ABILITY_TARGETING.NO_TARGET, 50, 10), -- working
+    Doom = AbilityMetaData(FourCC('A03Q'), nil, 'doom', 650, ABILITY_TARGETING.ENEMY, 50, 10), -- working
+    DrunkenBrawler = AbilityMetaData(FourCC('A03F'), nil, nil, 0, ABILITY_TARGETING.PASSIVE, 50, 10),
+    Earthquake = AbilityMetaData(FourCC('A02K'), nil, 'earthquake', 1000, ABILITY_TARGETING.GROUND_ENEMY, 50, 10), -- working
+    EntanglingRoots = AbilityMetaData(FourCC('A00U'), nil, 'entanglingroots', 800, ABILITY_TARGETING.ENEMY, 50, 10), -- working
+    FaerieFire = AbilityMetaData(FourCC('A00I'), 'faeriefireon', nil, 700, ABILITY_TARGETING.AUTOCAST, 50, 10),
+    FanOfKnives = AbilityMetaData(FourCC('A01Y'), nil, 'fanofknives', 0, ABILITY_TARGETING.NO_TARGET, 50, 10), -- working
+    FeralSpirit = AbilityMetaData(FourCC('A02J'), nil, 'spiritwolf', 800, ABILITY_TARGETING.NO_TARGET, 50, 10), -- working
+    FlameStrike = AbilityMetaData(FourCC('A02D'), nil, 'flamestrike', 800, ABILITY_TARGETING.GROUND_ENEMY, 50, 10), -- working
+    ForceOfNature = AbilityMetaData(FourCC('A01P'), nil, 'forceofnature', 800, ABILITY_TARGETING.GROUND_RANDOM, 50, 10), -- broken
+    ForkedLightning = AbilityMetaData(FourCC('A035'), nil, 'forkedlightning', 600, ABILITY_TARGETING.ENEMY, 50, 10),
+    FrostArmor = AbilityMetaData(FourCC('A02V'), 'forstarmoron', nil, 800, ABILITY_TARGETING.AUTOCAST, 50, 10),
+    FrostArrows = AbilityMetaData(FourCC('A036'), 'coldarrowstarg', nil, 600, ABILITY_TARGETING.AUTOCAST, 50, 10),
+    FrostNova = AbilityMetaData(FourCC('A02U'), nil, 'frostnova', 800, ABILITY_TARGETING.ENEMY, 50, 10),
+    HardenedSkin = AbilityMetaData(FourCC('A00J'), nil, nil, 0, ABILITY_TARGETING.PASSIVE, 50, 10),
+    HealingSpray = AbilityMetaData(FourCC('A033'), nil, 'healingspray', 800, ABILITY_TARGETING.GROUND_PLAYERUNITS, 50, 10), -- working
+    HealingWard = AbilityMetaData(FourCC('A03R'), nil, 'healingward', 500, ABILITY_TARGETING.GROUND_PLAYERUNITS, 50, 10), -- working
+    HealingWave = AbilityMetaData(FourCC('A03T'), nil, 'healingwave', 700, ABILITY_TARGETING.PLAYERUNITS, 50, 10),
+    Hex = AbilityMetaData(FourCC('A02P'), nil, 'hex', 800, ABILITY_TARGETING.ENEMY, 50, 10), -- working
+    HolyLight = AbilityMetaData(FourCC('A024'), nil, 'holybolt', 800, ABILITY_TARGETING.PLAYERUNITS, 50, 10),
+    HowlOfTerror = AbilityMetaData(FourCC('A03M'), nil, 'howlofterror', 0, ABILITY_TARGETING.NO_TARGET, 50, 10), -- working
+    Immolation = AbilityMetaData(FourCC('A01V'), nil, 'immolation', 0, ABILITY_TARGETING.NO_TARGET, 50, 10), -- working
+    Impale = AbilityMetaData(FourCC('A030'), nil, 'impale', 700, ABILITY_TARGETING.GROUND_ENEMY, 50, 10), -- working
+    Incinerate = AbilityMetaData(FourCC('A03J'), nil, 'incinerate', 0, ABILITY_TARGETING.PASSIVE, 50, 10),
+    Inferno = AbilityMetaData(FourCC('A021'), nil, 'inferno', 900, ABILITY_TARGETING.GROUND_RANDOM, 50, 10),
+    LifeDrain = AbilityMetaData(FourCC('A004'), nil, 'drain', 500, ABILITY_TARGETING.ENEMY, 50, 10), -- working
+    LightningAttack = AbilityMetaData(FourCC('A00K'), nil, nil, 0, ABILITY_TARGETING.PASSIVE, 50, 10),
+    LightningShield = AbilityMetaData(FourCC('A007'), nil, 'lightningshield', 600, ABILITY_TARGETING.PLAYERUNITS, 50, 10), -- working
+    LocustSwarm = AbilityMetaData(FourCC('A031'), nil, 'Locustswarm', 0, ABILITY_TARGETING.NO_TARGET, 50, 10), -- working
+    ManaBurn = AbilityMetaData(FourCC('A01U'), nil, 'manaburn', 300, ABILITY_TARGETING.ENEMY, 50, 10),
+    ManaFlare = AbilityMetaData(FourCC('A00L'), nil, 'manaflareon', 200, ABILITY_TARGETING.NO_TARGET, 50, 10),
+    ManaShield = AbilityMetaData(FourCC('A037'), 'manashieldon', nil, 128, ABILITY_TARGETING.AUTOCAST, 50, 10), -- working
+    Metamorphosis = AbilityMetaData(FourCC('A01W'), nil, 'metamorphosis', 0, ABILITY_TARGETING.NO_TARGET, 50, 10), -- seems to cancel immediately after casting
+    MirrorImage = AbilityMetaData(FourCC('A02G'), nil, 'mirrorimage', 128, ABILITY_TARGETING.NO_TARGET, 50, 10), -- working
+    PhaseShift = AbilityMetaData(FourCC('A00M'), 'phaseshifton', nil, 0, ABILITY_TARGETING.AUTOCAST, 50, 10), -- working
+    Phoenix = AbilityMetaData(FourCC('A02C'), nil, 'summonphoenix', 0, ABILITY_TARGETING.NO_TARGET, 50, 10), -- working
+    PocketFactory = AbilityMetaData(FourCC('A038'), nil, 'summonfactory', 500, ABILITY_TARGETING.GROUND_RANDOM, 50, 10), -- working
+    Possession = AbilityMetaData(FourCC('A00D'), nil, 'possession', 200, ABILITY_TARGETING.ENEMY, 50, 10),
+    RainOfChaos = AbilityMetaData(FourCC('A03O'), nil, 'rainofchaos', 1000, ABILITY_TARGETING.GROUND_RANDOM, 50, 10), -- working
+    RainOfFire = AbilityMetaData(FourCC('A03S'), nil, 'rainoffire', 800, ABILITY_TARGETING.GROUND_ENEMY, 50, 10), -- working
+    RaiseDead = AbilityMetaData(FourCC('A00E'), 'raisedeadon', nil, 600, ABILITY_TARGETING.AUTOCAST, 50, 10), -- broken
+    Reincarnation = AbilityMetaData(FourCC('A02L'), nil, nil, 0, ABILITY_TARGETING.PASSIVE, 50, 10), -- working
+    Resurrection = AbilityMetaData(FourCC('A026'), nil, 'resurrection', 400, ABILITY_TARGETING.GROUND_PLAYERUNITS, 50, 10),
+    RoboGoblin = AbilityMetaData(FourCC('A03A'), nil, 'robogoblin', 0, ABILITY_TARGETING.NO_TARGET, 50, 10),
+    SearingArrows = AbilityMetaData(FourCC('A01R'), nil, 'flamingarrows', 600, ABILITY_TARGETING.NO_TARGET, 50, 10), -- working
+    SerpentWard = AbilityMetaData(FourCC('A02O'), nil, 'ward', 500, ABILITY_TARGETING.GROUND_ENEMY, 50, 10), -- working
+    ShadowStrike = AbilityMetaData(FourCC('A01Z'), nil, 'shadowstrike', 300, ABILITY_TARGETING.ENEMY, 50, 10), -- working
+    Shockwave = AbilityMetaData(FourCC('A02N'), nil, 'shockwave', 700, ABILITY_TARGETING.GROUND_ENEMY, 50, 10), -- working
+    Silence = AbilityMetaData(FourCC('A03H'), nil, 'silence', 900, ABILITY_TARGETING.GROUND_ENEMY, 50, 10), -- working
+    Sleep = AbilityMetaData(FourCC('A02Y'), nil, 'sleep', 800, ABILITY_TARGETING.ENEMY, 50, 10), -- working
+    SlowPoison = AbilityMetaData(FourCC('A00O'), nil, nil, 0, ABILITY_TARGETING.PASSIVE, 50, 10),
+    SoulBurn = AbilityMetaData(FourCC('A03K'), nil, 'soulburn', 700, ABILITY_TARGETING.ENEMY, 50, 10),
+    SpellImmunity = AbilityMetaData(FourCC('A00P'), nil, nil, 0, ABILITY_TARGETING.PASSIVE, 50, 10),
+    SpikedCarapace = AbilityMetaData(FourCC('A032'), nil, nil, 0, ABILITY_TARGETING.PASSIVE, 50, 10),
+    SpiritLink = AbilityMetaData(FourCC('A008'), nil, 'spiritlink', 750, ABILITY_TARGETING.PLAYERUNITS, 50, 10), -- not casting
+    SpiritTouch = AbilityMetaData(FourCC('A00F'), 'replenishmanaon', nil, 250, ABILITY_TARGETING.AUTOCAST, 50, 10),
+    Stampede = AbilityMetaData(FourCC('A03D'), nil, 'stampede', 300, ABILITY_TARGETING.GROUND_ENEMY, 50, 10), -- cancelling immediately after casting because it's channeled
+    Starfall = AbilityMetaData(FourCC('A01S'), nil, 'starfall', 0, ABILITY_TARGETING.NO_TARGET, 50, 10), -- cancelling immediately after casting because it's channeled
+    StatisTrap = AbilityMetaData(FourCC('A009'), nil, 'stasistrap', 500, ABILITY_TARGETING.GROUND_ENEMY, 50, 10),
+    StormBolt = AbilityMetaData(FourCC('A02B'), nil, 'thunderbolt', 600, ABILITY_TARGETING.ENEMY, 50, 10), -- working
+    StormEarthAndFire = AbilityMetaData(FourCC('A03G'), nil, 'elementalfury', 0, ABILITY_TARGETING.NO_TARGET, 50, 10), -- working
+    SummonBear = AbilityMetaData(FourCC('A03B'), nil, 'summongrizzly', 0, ABILITY_TARGETING.NO_TARGET, 50, 10), -- working
+    SummonLavaSpawn = AbilityMetaData(FourCC('A03L'), nil, 'slimemonster', 0, ABILITY_TARGETING.NO_TARGET, 50, 10),
+    SummonQuilbeast = AbilityMetaData(FourCC('A03C'), nil, 'summonquillbeast', 0, ABILITY_TARGETING.NO_TARGET, 50, 10), -- working
+    SummonWaterElemental = AbilityMetaData(FourCC('A029'), nil, 'waterelemental', 0, ABILITY_TARGETING.NO_TARGET, 50, 10), -- working
+    Taunt = AbilityMetaData(FourCC('A00Q'), nil, 'taunt', 0, ABILITY_TARGETING.NO_TARGET, 50, 10),
+    ThunderClap = AbilityMetaData(FourCC('A01T'), nil, 'thunderclap', 0, ABILITY_TARGETING.NO_TARGET, 50, 10), -- working
+    Tornado = AbilityMetaData(FourCC('A03U'), nil, 'tornado', 700, ABILITY_TARGETING.GROUND_ENEMY, 50, 10), -- working
+    Tranquility = AbilityMetaData(FourCC('A01Q'), nil, 'tranquility', 0, ABILITY_TARGETING.NO_TARGET, 50, 10), -- cancelling immediately after casting because it's channeled
+    Transmute = AbilityMetaData(FourCC('A00T'), nil, 'transmute', 650, ABILITY_TARGETING.ENEMY, 50, 10), -- working
+    Vengeance = AbilityMetaData(FourCC('A020'), nil, 'spiritofvengeance', 0, ABILITY_TARGETING.NO_TARGET, 50, 10), -- working
+    Volcano = AbilityMetaData(FourCC('A023'), nil, 'volcano', 800, ABILITY_TARGETING.GROUND_ENEMY, 50, 10), -- working
+    VorpalBlades = AbilityMetaData(FourCC('A044'), nil, nil, 0, ABILITY_TARGETING.PASSIVE, 50, 10),
+    WarStomp = AbilityMetaData(FourCC('A02M'), nil, 'stomp', 0, ABILITY_TARGETING.NO_TARGET, 50, 10), -- working
 }
 
 local draftableUnits = {
-    akama = UnitMetaData('akama', FourCC('N009'), FourCC('h00S'), FourCC('I001'), FourCC('A01O'), UnitAbilityMetaData(abilities.Immolation, abilities.HardenedSkin, abilities.Taunt)),
-    alchemist = UnitMetaData('alchemist', FourCC('N000'), FourCC('h00O'), FourCC('I000'), FourCC('A01C'), UnitAbilityMetaData(abilities.HealingSpray, abilities.AcidBomb, abilities.Transmute)),
-    archimonde = UnitMetaData('archimonde', FourCC('U005'), FourCC('h00N'), FourCC('I002'), FourCC('A01K'), UnitAbilityMetaData(abilities.RainOfChaos, abilities.DarkPortal, abilities.Curse)),
-    archmage = UnitMetaData('archmage', FourCC('H002'), FourCC('h00C'), FourCC('I003'), FourCC('A011'), UnitAbilityMetaData(abilities.LifeDrain, abilities.Blizzard, abilities.SummonWaterElemental)),
-    beastmaster = UnitMetaData('beastmaster', FourCC('N001'), FourCC('h00T'), FourCC('I004'), FourCC('A01F'), UnitAbilityMetaData(abilities.SummonBear, abilities.SummonQuilbeast, abilities.Stampede)),
-    blademaster = UnitMetaData('blademaster', FourCC('O000'), FourCC('h00F'), FourCC('I005'), FourCC('A014'), UnitAbilityMetaData(abilities.CriticalStrike, abilities.MirrorImage, abilities.Bladestorm)),
-    bloodMage = UnitMetaData('bloodMage', FourCC('H004'), FourCC('h00E'), FourCC('I006'), FourCC('A013'), UnitAbilityMetaData(abilities.FlameStrike, abilities.Banish, abilities.Phoenix)),
-    brewmaster = UnitMetaData('brewmaster', FourCC('N005'), FourCC('h00U'), FourCC('I007'), FourCC('A01G'), UnitAbilityMetaData(abilities.BreathOfFire, abilities.DrunkenBrawler, abilities.StormEarthAndFire)),
-    cryptLord = UnitMetaData('cryptLord', FourCC('U003'), FourCC('h00M'), FourCC('I008'), FourCC('A01B'), UnitAbilityMetaData(abilities.Impale, abilities.SpikedCarapace, abilities.LocustSwarm)),
-    darkRanger = UnitMetaData('darkRanger', FourCC('N007'), FourCC('h00V'), FourCC('I009'), FourCC('A01H'), UnitAbilityMetaData(abilities.Silence, abilities.BlackArrow, abilities.Charm)),
-    deathKnight = UnitMetaData('deathKnight', FourCC('U000'), FourCC('h00J'), FourCC('I00A'), FourCC('A018'), UnitAbilityMetaData(abilities.DeathCoil, abilities.DeathPact, abilities.AnimateDead)),
-    demonHunter = UnitMetaData('demonHunter', FourCC('E002'), FourCC('h007'), FourCC('I00B'), FourCC('A00X'), UnitAbilityMetaData(abilities.ManaBurn, abilities.PhaseShift, abilities.Metamorphosis)),
-    dreadlord = UnitMetaData('dreadlord', FourCC('U002'), FourCC('h00L'), FourCC('I00C'), FourCC('A01A'), UnitAbilityMetaData(abilities.SpiritLink, abilities.Sleep, abilities.CarrionSwarm)),
-    farSeer = UnitMetaData('farSeer', FourCC('O001'), FourCC('h00G'), FourCC('I00D'), FourCC('A015'), UnitAbilityMetaData(abilities.FeralSpirit, abilities.ChainLightning, abilities.Earthquake)),
-    firelord = UnitMetaData('firelord', FourCC('N004'), FourCC('h00W'), FourCC('I00E'), FourCC('A01I'), UnitAbilityMetaData(abilities.Incinerate, abilities.SoulBurn, abilities.SummonLavaSpawn)),
-    guldan = UnitMetaData('guldan', FourCC('O003'), FourCC('h00X'), FourCC('I00F'), FourCC('A01L'), UnitAbilityMetaData(abilities.DiseaseCloud, abilities.HealingWard, abilities.Doom)),
-    jaina = UnitMetaData('jaina', FourCC('H009'), FourCC('h00Y'), FourCC('I00G'), FourCC('A01M'), UnitAbilityMetaData(abilities.RainOfFire, abilities.HealingWave, abilities.Tornado)),
-    keeperOfTheGrove = UnitMetaData('keeperOfTheGrove', FourCC('E000'), FourCC('h005'), FourCC('I00H'), FourCC('A00V'), UnitAbilityMetaData(abilities.EntanglingRoots, abilities.ForceOfNature, abilities.Tranquility)),
-    lich = UnitMetaData('lich', FourCC('U001'), FourCC('h00K'), FourCC('I00I'), FourCC('A019'), UnitAbilityMetaData(abilities.FrostNova, abilities.FrostArmor, abilities.DeathAndDecay)),
-    mountainKing = UnitMetaData('mountainKing', FourCC('H003'), FourCC('h00D'), FourCC('I00J'), FourCC('A012'), UnitAbilityMetaData(abilities.StormBolt, abilities.Bash, abilities.Avatar)),
-    murloc = UnitMetaData('murloc', FourCC('N008'), FourCC('h00P'), FourCC('I00K'), FourCC('A01N'), UnitAbilityMetaData(abilities.RaiseDead, abilities.LightningShield, abilities.AerialShackles)),
-    ogreMauler = UnitMetaData('ogreMauler', FourCC('E004'), FourCC('h008'), FourCC('I00L'), FourCC('A00Y'), UnitAbilityMetaData(abilities.Inferno, abilities.CarrionBeetles, abilities.Volcano)),
-    paladin = UnitMetaData('paladin', FourCC('H001'), FourCC('h00B'), FourCC('I00M'), FourCC('A010'), UnitAbilityMetaData(abilities.HolyLight, abilities.DivineShield, abilities.Resurrection)),
-    pitLord = UnitMetaData('pitLord', FourCC('N006'), FourCC('h00Z'), FourCC('I00N'), FourCC('A01J'), UnitAbilityMetaData(abilities.HowlOfTerror, abilities.CleavingAttack, abilities.SpellImmunity)),
-    priestessOfTheMoon = UnitMetaData('priestessOfTheMoon', FourCC('E001'), FourCC('h006'), FourCC('I00O'), FourCC('A00W'), UnitAbilityMetaData(abilities.ThunderClap, abilities.SearingArrows, abilities.Starfall)),
-    seaWitch = UnitMetaData('seaWitch', FourCC('N002'), FourCC('h00Q'), FourCC('I00P'), FourCC('A01D'), UnitAbilityMetaData(abilities.ForkedLightning, abilities.FrostArrows, abilities.ManaShield)),
-    shadowHunter = UnitMetaData('shadowHunter', FourCC('O004'), FourCC('h00I'), FourCC('I00Q'), FourCC('A017'), UnitAbilityMetaData(abilities.Hex, abilities.SerpentWard, abilities.BigBadVoodoo)),
-    taurenChieftain = UnitMetaData('taurenChieftain', FourCC('O002'), FourCC('h00H'), FourCC('I00R'), FourCC('A016'), UnitAbilityMetaData(abilities.Shockwave, abilities.Reincarnation, abilities.WarStomp)),
-    tinker = UnitMetaData('tinker', FourCC('N003'), FourCC('h00R'), FourCC('I00S'), FourCC('A01E'), UnitAbilityMetaData(abilities.PocketFactory, abilities.ClusterRockets, abilities.RoboGoblin)),
-    warden = UnitMetaData('warden', FourCC('E003'), FourCC('h00A'), FourCC('I00T'), FourCC('A00Z'), UnitAbilityMetaData(abilities.FanOfKnives, abilities.ShadowStrike, abilities.Vengeance))
+    akama = UnitMetaData('akama', FourCC('N009'), FourCC('h00S'), FourCC('I001'), FourCC('A01O'), UnitAbilityMetaData(abilities.Immolation, abilities.HardenedSkin, abilities.Taunt), BalanceBaseStatsByPoints(DEFENSE_TYPE.LIGHT, ATTACK_TYPE.NORMAL, HERO_ATTRIBUTE.STRENGTH, 0, BalanceStatPointAllocations(5, 5, 5, 5, 5, 5, 5))),
+    alchemist = UnitMetaData('alchemist', FourCC('N000'), FourCC('h00O'), FourCC('I000'), FourCC('A01C'), UnitAbilityMetaData(abilities.HealingSpray, abilities.AcidBomb, abilities.Transmute), BalanceBaseStatsByPoints(DEFENSE_TYPE.LIGHT, ATTACK_TYPE.NORMAL, HERO_ATTRIBUTE.STRENGTH, 0, BalanceStatPointAllocations(5, 5, 5, 5, 5, 5, 5))),
+    archimonde = UnitMetaData('archimonde', FourCC('U005'), FourCC('h00N'), FourCC('I002'), FourCC('A01K'), UnitAbilityMetaData(abilities.RainOfChaos, abilities.DarkPortal, abilities.Curse), BalanceBaseStatsByPoints(DEFENSE_TYPE.LIGHT, ATTACK_TYPE.NORMAL, HERO_ATTRIBUTE.STRENGTH, 0, BalanceStatPointAllocations(5, 5, 5, 5, 5, 5, 5))),
+    archmage = UnitMetaData('archmage', FourCC('H002'), FourCC('h00C'), FourCC('I003'), FourCC('A011'), UnitAbilityMetaData(abilities.LifeDrain, abilities.Blizzard, abilities.SummonWaterElemental), BalanceBaseStatsByPoints(DEFENSE_TYPE.LIGHT, ATTACK_TYPE.NORMAL, HERO_ATTRIBUTE.STRENGTH, 0, BalanceStatPointAllocations(5, 5, 5, 5, 5, 5, 5))),
+    beastmaster = UnitMetaData('beastmaster', FourCC('N001'), FourCC('h00T'), FourCC('I004'), FourCC('A01F'), UnitAbilityMetaData(abilities.SummonBear, abilities.SummonQuilbeast, abilities.Stampede), BalanceBaseStatsByPoints(DEFENSE_TYPE.LIGHT, ATTACK_TYPE.NORMAL, HERO_ATTRIBUTE.STRENGTH, 0, BalanceStatPointAllocations(5, 5, 5, 5, 5, 5, 5))),
+    blademaster = UnitMetaData('blademaster', FourCC('O000'), FourCC('h00F'), FourCC('I005'), FourCC('A014'), UnitAbilityMetaData(abilities.CriticalStrike, abilities.MirrorImage, abilities.Bladestorm), BalanceBaseStatsByPoints(DEFENSE_TYPE.LIGHT, ATTACK_TYPE.NORMAL, HERO_ATTRIBUTE.STRENGTH, 0, BalanceStatPointAllocations(5, 5, 5, 5, 5, 5, 5))),
+    bloodMage = UnitMetaData('bloodMage', FourCC('H004'), FourCC('h00E'), FourCC('I006'), FourCC('A013'), UnitAbilityMetaData(abilities.FlameStrike, abilities.Banish, abilities.Phoenix), BalanceBaseStatsByPoints(DEFENSE_TYPE.LIGHT, ATTACK_TYPE.NORMAL, HERO_ATTRIBUTE.STRENGTH, 0, BalanceStatPointAllocations(5, 5, 5, 5, 5, 5, 5))),
+    brewmaster = UnitMetaData('brewmaster', FourCC('N005'), FourCC('h00U'), FourCC('I007'), FourCC('A01G'), UnitAbilityMetaData(abilities.BreathOfFire, abilities.DrunkenBrawler, abilities.StormEarthAndFire), BalanceBaseStatsByPoints(DEFENSE_TYPE.LIGHT, ATTACK_TYPE.NORMAL, HERO_ATTRIBUTE.STRENGTH, 0, BalanceStatPointAllocations(5, 5, 5, 5, 5, 5, 5))),
+    cryptLord = UnitMetaData('cryptLord', FourCC('U003'), FourCC('h00M'), FourCC('I008'), FourCC('A01B'), UnitAbilityMetaData(abilities.Impale, abilities.SpikedCarapace, abilities.LocustSwarm), BalanceBaseStatsByPoints(DEFENSE_TYPE.LIGHT, ATTACK_TYPE.NORMAL, HERO_ATTRIBUTE.STRENGTH, 0, BalanceStatPointAllocations(5, 5, 5, 5, 5, 5, 5))),
+    darkRanger = UnitMetaData('darkRanger', FourCC('N007'), FourCC('h00V'), FourCC('I009'), FourCC('A01H'), UnitAbilityMetaData(abilities.Silence, abilities.BlackArrow, abilities.Charm), BalanceBaseStatsByPoints(DEFENSE_TYPE.LIGHT, ATTACK_TYPE.NORMAL, HERO_ATTRIBUTE.STRENGTH, 0, BalanceStatPointAllocations(5, 5, 5, 5, 5, 5, 5))),
+    deathKnight = UnitMetaData('deathKnight', FourCC('U000'), FourCC('h00J'), FourCC('I00A'), FourCC('A018'), UnitAbilityMetaData(abilities.DeathCoil, abilities.DeathPact, abilities.AnimateDead), BalanceBaseStatsByPoints(DEFENSE_TYPE.LIGHT, ATTACK_TYPE.NORMAL, HERO_ATTRIBUTE.STRENGTH, 0, BalanceStatPointAllocations(5, 5, 5, 5, 5, 5, 5))),
+    demonHunter = UnitMetaData('demonHunter', FourCC('E002'), FourCC('h007'), FourCC('I00B'), FourCC('A00X'), UnitAbilityMetaData(abilities.ManaBurn, abilities.PhaseShift, abilities.Metamorphosis), BalanceBaseStatsByPoints(DEFENSE_TYPE.LIGHT, ATTACK_TYPE.NORMAL, HERO_ATTRIBUTE.STRENGTH, 0, BalanceStatPointAllocations(5, 5, 5, 5, 5, 5, 5))),
+    dreadlord = UnitMetaData('dreadlord', FourCC('U002'), FourCC('h00L'), FourCC('I00C'), FourCC('A01A'), UnitAbilityMetaData(abilities.SpiritLink, abilities.Sleep, abilities.CarrionSwarm), BalanceBaseStatsByPoints(DEFENSE_TYPE.LIGHT, ATTACK_TYPE.NORMAL, HERO_ATTRIBUTE.STRENGTH, 0, BalanceStatPointAllocations(5, 5, 5, 5, 5, 5, 5))),
+    farSeer = UnitMetaData('farSeer', FourCC('O001'), FourCC('h00G'), FourCC('I00D'), FourCC('A015'), UnitAbilityMetaData(abilities.FeralSpirit, abilities.ChainLightning, abilities.Earthquake), BalanceBaseStatsByPoints(DEFENSE_TYPE.LIGHT, ATTACK_TYPE.NORMAL, HERO_ATTRIBUTE.STRENGTH, 0, BalanceStatPointAllocations(5, 5, 5, 5, 5, 5, 5))),
+    firelord = UnitMetaData('firelord', FourCC('N004'), FourCC('h00W'), FourCC('I00E'), FourCC('A01I'), UnitAbilityMetaData(abilities.Incinerate, abilities.SoulBurn, abilities.SummonLavaSpawn), BalanceBaseStatsByPoints(DEFENSE_TYPE.LIGHT, ATTACK_TYPE.NORMAL, HERO_ATTRIBUTE.STRENGTH, 0, BalanceStatPointAllocations(5, 5, 5, 5, 5, 5, 5))),
+    guldan = UnitMetaData('guldan', FourCC('O003'), FourCC('h00X'), FourCC('I00F'), FourCC('A01L'), UnitAbilityMetaData(abilities.DiseaseCloud, abilities.HealingWard, abilities.Doom), BalanceBaseStatsByPoints(DEFENSE_TYPE.LIGHT, ATTACK_TYPE.NORMAL, HERO_ATTRIBUTE.STRENGTH, 0, BalanceStatPointAllocations(5, 5, 5, 5, 5, 5, 5))),
+    jaina = UnitMetaData('jaina', FourCC('H009'), FourCC('h00Y'), FourCC('I00G'), FourCC('A01M'), UnitAbilityMetaData(abilities.RainOfFire, abilities.HealingWave, abilities.Tornado), BalanceBaseStatsByPoints(DEFENSE_TYPE.LIGHT, ATTACK_TYPE.NORMAL, HERO_ATTRIBUTE.STRENGTH, 0, BalanceStatPointAllocations(5, 5, 5, 5, 5, 5, 5))),
+    keeperOfTheGrove = UnitMetaData('keeperOfTheGrove', FourCC('E000'), FourCC('h005'), FourCC('I00H'), FourCC('A00V'), UnitAbilityMetaData(abilities.EntanglingRoots, abilities.ForceOfNature, abilities.Tranquility), BalanceBaseStatsByPoints(DEFENSE_TYPE.LIGHT, ATTACK_TYPE.NORMAL, HERO_ATTRIBUTE.STRENGTH, 0, BalanceStatPointAllocations(5, 5, 5, 5, 5, 5, 5))),
+    lich = UnitMetaData('lich', FourCC('U001'), FourCC('h00K'), FourCC('I00I'), FourCC('A019'), UnitAbilityMetaData(abilities.FrostNova, abilities.FrostArmor, abilities.DeathAndDecay), BalanceBaseStatsByPoints(DEFENSE_TYPE.LIGHT, ATTACK_TYPE.NORMAL, HERO_ATTRIBUTE.STRENGTH, 0, BalanceStatPointAllocations(5, 5, 5, 5, 5, 5, 5))),
+    mountainKing = UnitMetaData('mountainKing', FourCC('H003'), FourCC('h00D'), FourCC('I00J'), FourCC('A012'), UnitAbilityMetaData(abilities.StormBolt, abilities.Bash, abilities.Avatar), BalanceBaseStatsByPoints(DEFENSE_TYPE.LIGHT, ATTACK_TYPE.NORMAL, HERO_ATTRIBUTE.STRENGTH, 0, BalanceStatPointAllocations(5, 5, 5, 5, 5, 5, 5))),
+    murloc = UnitMetaData('murloc', FourCC('N008'), FourCC('h00P'), FourCC('I00K'), FourCC('A01N'), UnitAbilityMetaData(abilities.RaiseDead, abilities.LightningShield, abilities.AerialShackles), BalanceBaseStatsByPoints(DEFENSE_TYPE.LIGHT, ATTACK_TYPE.NORMAL, HERO_ATTRIBUTE.STRENGTH, 0, BalanceStatPointAllocations(5, 5, 5, 5, 5, 5, 5))),
+    ogreMauler = UnitMetaData('ogreMauler', FourCC('E004'), FourCC('h008'), FourCC('I00L'), FourCC('A00Y'), UnitAbilityMetaData(abilities.Inferno, abilities.CarrionBeetles, abilities.Volcano), BalanceBaseStatsByPoints(DEFENSE_TYPE.LIGHT, ATTACK_TYPE.NORMAL, HERO_ATTRIBUTE.STRENGTH, 0, BalanceStatPointAllocations(5, 5, 5, 5, 5, 5, 5))),
+    paladin = UnitMetaData('paladin', FourCC('H001'), FourCC('h00B'), FourCC('I00M'), FourCC('A010'), UnitAbilityMetaData(abilities.HolyLight, abilities.DivineShield, abilities.Resurrection), BalanceBaseStatsByPoints(DEFENSE_TYPE.LIGHT, ATTACK_TYPE.NORMAL, HERO_ATTRIBUTE.STRENGTH, 0, BalanceStatPointAllocations(5, 5, 5, 5, 5, 5, 5))),
+    pitLord = UnitMetaData('pitLord', FourCC('N006'), FourCC('h00Z'), FourCC('I00N'), FourCC('A01J'), UnitAbilityMetaData(abilities.HowlOfTerror, abilities.CleavingAttack, abilities.SpellImmunity), BalanceBaseStatsByPoints(DEFENSE_TYPE.LIGHT, ATTACK_TYPE.NORMAL, HERO_ATTRIBUTE.STRENGTH, 0, BalanceStatPointAllocations(5, 5, 5, 5, 5, 5, 5))),
+    priestessOfTheMoon = UnitMetaData('priestessOfTheMoon', FourCC('E001'), FourCC('h006'), FourCC('I00O'), FourCC('A00W'), UnitAbilityMetaData(abilities.ThunderClap, abilities.SearingArrows, abilities.Starfall), BalanceBaseStatsByPoints(DEFENSE_TYPE.LIGHT, ATTACK_TYPE.NORMAL, HERO_ATTRIBUTE.STRENGTH, 0, BalanceStatPointAllocations(5, 5, 5, 5, 5, 5, 5))),
+    seaWitch = UnitMetaData('seaWitch', FourCC('N002'), FourCC('h00Q'), FourCC('I00P'), FourCC('A01D'), UnitAbilityMetaData(abilities.ForkedLightning, abilities.FrostArrows, abilities.ManaShield), BalanceBaseStatsByPoints(DEFENSE_TYPE.LIGHT, ATTACK_TYPE.NORMAL, HERO_ATTRIBUTE.STRENGTH, 0, BalanceStatPointAllocations(5, 5, 5, 5, 5, 5, 5))),
+    shadowHunter = UnitMetaData('shadowHunter', FourCC('O004'), FourCC('h00I'), FourCC('I00Q'), FourCC('A017'), UnitAbilityMetaData(abilities.Hex, abilities.SerpentWard, abilities.BigBadVoodoo), BalanceBaseStatsByPoints(DEFENSE_TYPE.LIGHT, ATTACK_TYPE.NORMAL, HERO_ATTRIBUTE.STRENGTH, 0, BalanceStatPointAllocations(5, 5, 5, 5, 5, 5, 5))),
+    taurenChieftain = UnitMetaData('taurenChieftain', FourCC('O002'), FourCC('h00H'), FourCC('I00R'), FourCC('A016'), UnitAbilityMetaData(abilities.Shockwave, abilities.Reincarnation, abilities.WarStomp), BalanceBaseStatsByPoints(DEFENSE_TYPE.LIGHT, ATTACK_TYPE.NORMAL, HERO_ATTRIBUTE.STRENGTH, 0, BalanceStatPointAllocations(5, 5, 5, 5, 5, 5, 5))),
+    tinker = UnitMetaData('tinker', FourCC('N003'), FourCC('h00R'), FourCC('I00S'), FourCC('A01E'), UnitAbilityMetaData(abilities.PocketFactory, abilities.ClusterRockets, abilities.RoboGoblin), BalanceBaseStatsByPoints(DEFENSE_TYPE.LIGHT, ATTACK_TYPE.NORMAL, HERO_ATTRIBUTE.STRENGTH, 0, BalanceStatPointAllocations(5, 5, 5, 5, 5, 5, 5))),
+    warden = UnitMetaData('warden', FourCC('E003'), FourCC('h00A'), FourCC('I00T'), FourCC('A00Z'), UnitAbilityMetaData(abilities.FanOfKnives, abilities.ShadowStrike, abilities.Vengeance), BalanceBaseStatsByPoints(DEFENSE_TYPE.LIGHT, ATTACK_TYPE.NORMAL, HERO_ATTRIBUTE.STRENGTH, 0, BalanceStatPointAllocations(5, 5, 5, 5, 5, 5, 5))),
 }
 
 local purchaseableUpgrades = {
@@ -208,10 +266,10 @@ for key, metaData in pairs(draftableUnits) do
     unitTypeIdToName[metaData.unitTypeId] = key
 end
 
-local WATER_ABILITY_PLACEHOLDER = AbilityMetaData(FourCC('A042'), nil, nil, nil, nil)
-local EARTH_ABILITY_PLACEHOLDER = AbilityMetaData(FourCC('A040'), nil, nil, nil, nil)
-local FIRE_ABILITY_PLACEHOLDER = AbilityMetaData(FourCC('A041'), nil, nil, nil, nil)
-local CIRCLE_OF_POWER_METADATA = UnitMetaData('circle_of_power', FourCC('n00A'), nil, nil, nil, UnitAbilityMetaData(WATER_ABILITY_PLACEHOLDER, EARTH_ABILITY_PLACEHOLDER, FIRE_ABILITY_PLACEHOLDER, nil))
+local WATER_ABILITY_PLACEHOLDER = AbilityMetaData(FourCC('A042'), nil, nil, nil, nil, nil, nil)
+local EARTH_ABILITY_PLACEHOLDER = AbilityMetaData(FourCC('A040'), nil, nil, nil, nil, nil, nil)
+local FIRE_ABILITY_PLACEHOLDER = AbilityMetaData(FourCC('A041'), nil, nil, nil, nil, nil, nil)
+local CIRCLE_OF_POWER_METADATA = UnitMetaData('circle_of_power', FourCC('n00A'), nil, nil, nil, UnitAbilityMetaData(WATER_ABILITY_PLACEHOLDER, EARTH_ABILITY_PLACEHOLDER, FIRE_ABILITY_PLACEHOLDER), nil)
 
 function GetUnitMetaData(unit)
     local unitTypeId = GetUnitTypeId(unit)
@@ -559,6 +617,14 @@ function SetAbilityUIState(whichUnit, abilityId, disabled, hidden)
     BlzUnitDisableAbility(whichUnit, abilityId, disabled, hidden)
 end
 
+function SetupUnitAbilityBaseStats(unit, abilityMetaData)
+    if abilityMetaData.cooldownInSeconds then
+        BlzSetUnitAbilityCooldown(unit, abilityMetaData.abilityId, 0, abilityMetaData.cooldownInSeconds)
+    end
+    if abilityMetaData.manaCost then
+        BlzSetUnitAbilityManaCost(unit, abilityMetaData.abilityId, 0, abilityMetaData.manaCost)
+    end
+end
 
 function SetupUnitAbilities(unit, includeDisabled)
     local unitType = GetUnitTypeId(unit)
@@ -577,7 +643,9 @@ function SetupUnitAbilities(unit, includeDisabled)
         if elements.water or includeDisabled then
             SetAbilityUIState(unit, abilityMetaData.water.abilityId, not elements.water, false)
             SetAbilityHotkey(unit, abilityMetaData.water.abilityId, 'W')
-            if not elements.water then
+            if elements.water then
+                SetupUnitAbilityBaseStats(unit, abilityMetaData.water)
+            else
                 SetUnitAbilityTooltip(unit, abilityMetaData.water.abilityId, GetUnitAbilityTooltip(unit, abilityMetaData.water.abilityId) .. ' (disabled)')
             end
         end
@@ -586,7 +654,9 @@ function SetupUnitAbilities(unit, includeDisabled)
         if elements.earth or includeDisabled then
             SetAbilityUIState(unit, abilityMetaData.earth.abilityId, not elements.earth, false)
             SetAbilityHotkey(unit, abilityMetaData.earth.abilityId, 'E')
-            if not elements.earth then
+            if elements.earth then
+                SetupUnitAbilityBaseStats(unit, abilityMetaData.earth)
+            else
                 SetUnitAbilityTooltip(unit, abilityMetaData.earth.abilityId, GetUnitAbilityTooltip(unit, abilityMetaData.earth.abilityId) .. ' (disabled)')
             end
         end
@@ -595,7 +665,9 @@ function SetupUnitAbilities(unit, includeDisabled)
         if elements.fire or includeDisabled then
             SetAbilityUIState(unit, abilityMetaData.fire.abilityId, not elements.fire, false)
             SetAbilityHotkey(unit, abilityMetaData.fire.abilityId, 'R')
-            if not elements.fire then
+            if elements.fire then
+                SetupUnitAbilityBaseStats(unit, abilityMetaData.fire)
+            else
                 SetUnitAbilityTooltip(unit, abilityMetaData.fire.abilityId, GetUnitAbilityTooltip(unit, abilityMetaData.fire.abilityId) .. ' (disabled)')
             end
         end
@@ -699,6 +771,7 @@ function SpawnWaveForPlayer(playerId)
             local x = GetUnitX(unit)
             local y = GetUnitY(unit)            
             local clonedUnit = CreateUnit(proxyPlayer, unitType, x + offset.x, y + offset.y, CalcUnitRotationAngle(x, y, 0, 0))
+            SetupUnitBaseStats(clonedUnit)
             UnitRemoveAbility(clonedUnit, INVULNERABLE_ABILITY_ID)
 
             local heroLevel = GetHeroLevel(unit)
@@ -980,6 +1053,9 @@ function SwapTileUnits(caster, target)
     local newCaster = CreateUnit(player, casterType, targetX, targetY, targetFacing)
     local newTarget = CreateUnit(player, targetType, casterX, casterY, casterFacing)
     
+    SetupUnitBaseStats(newCaster)
+    SetupUnitBaseStats(newTarget)
+
     UnitRemoveAbility(newCaster, MOVE_ABILITY_ID)
     UnitAddAbility(newCaster, INVULNERABLE_ABILITY_ID)
     DisableAttacks(newCaster)    
@@ -1302,6 +1378,28 @@ function OnUnitDrafted(unit)
     DraftUnit(playerId, realUnitTypeId, circle)
 end
 
+function SetupUnitBaseStats(unit)
+    local metaData = GetUnitMetaData(unit)
+    if not metaData or not metaData.baseStats then
+        return
+    end
+
+    BlzSetUnitIntegerField(unit, UNIT_IF_DEFENSE_TYPE, metaData.baseStats.defenseType)
+    BlzSetUnitWeaponIntegerField(unit, UNIT_WEAPON_IF_ATTACK_ATTACK_TYPE, 0, metaData.baseStats.attackType)
+    BlzSetUnitWeaponIntegerField(unit, UNIT_WEAPON_IF_ATTACK_DAMAGE_BASE, 0, metaData.baseStats.attackDamage)
+    SetUnitState(unit, UNIT_STATE_MAX_LIFE, metaData.baseStats.maxLife)
+    SetUnitManaBJ(unit, metaData.baseStats.startingMana)
+    BlzSetUnitArmor(unit, metaData.baseStats.armor)    
+    BlzSetUnitRealField(unit, UNIT_RF_MANA_REGENERATION, metaData.baseStats.manaRegen)
+    BlzSetUnitIntegerField(unit, UNIT_IF_PRIMARY_ATTRIBUTE, metaData.baseStats.primaryAttribute)
+    BlzSetUnitIntegerField(unit, UNIT_IF_STRENGTH, 1)
+    BlzSetUnitIntegerField(unit, UNIT_IF_AGILITY, 1)
+    BlzSetUnitIntegerField(unit, UNIT_IF_INTELLIGENCE, 1)
+    BlzSetUnitRealField(unit, UNIT_RF_STRENGTH_PER_LEVEL, metaData.baseStats.strengthPerLevel)
+    BlzSetUnitRealField(unit, UNIT_RF_AGILITY_PER_LEVEL, metaData.baseStats.agilityPerLevel)
+    BlzSetUnitRealField(unit, UNIT_RF_INTELLIGENCE_PER_LEVEL, metaData.baseStats.intelligencePerLevel)    
+end
+
 function DraftUnit(playerId, unitTypeId, circle)
     local player = Player(playerId)
     local altar = playerBuilders.altar[playerId]
@@ -1327,11 +1425,9 @@ function DraftUnit(playerId, unitTypeId, circle)
     local circleX = GetUnitX(circle)
     local circleY = GetUnitY(circle)
 
-    --todo: check if this is necessary (assuming it'll have collision issues otherwise & bump position slightly)
-    --SetUnitX(circle, MIN_X)
-    --SetUnitY(circle, MIN_Y)
-
     local unit = CreateUnit(player, unitTypeId, circleX, circleY, CalcUnitRotationAngle(circleX, circleY, 0, 0))
+    SetupUnitBaseStats(unit)
+
     CopyUnitGear(circle, unit)
     if draftedCount > 1 then
         UpdateHeroLevel(unit, draftedCount, false)    
@@ -1897,6 +1993,7 @@ end
     xpcall(function()
     end, function(error) print(error) end)
 --]]
+
 function Trig_Melee_Initialization_Actions()
     Init()
 end
