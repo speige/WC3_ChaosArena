@@ -2229,3 +2229,99 @@ Swap location with another unit
 - also swaps items & unlocked elements
 }
 
+STRING 755
+// Abilities: A048 (Reroll Hero), Name (Name)
+{
+Reroll Hero
+}
+
+STRING 756
+// Abilities: A048 (Reroll Hero), Tip (Tooltip - Normal)
+{
+Reroll All
+}
+
+STRING 757
+// Abilities: A048 (Reroll Hero), Ubertip (Tooltip - Normal - Extended)
+{
+Items, Elements, Hero
+}
+
+STRING 758
+// Abilities: A03Y (Reroll All), Name (Name)
+{
+Reroll All
+}
+
+STRING 759
+// Abilities: A03Y (Reroll All), Tip (Tooltip - Normal)
+{
+Reroll All
+}
+
+STRING 760
+// Abilities: A03Y (Reroll All), Ubertip (Tooltip - Normal - Extended)
+{
+Items, Elements, Hero
+}
+
+STRING 761
+// Abilities: A043 (Reroll Items), Name (Name)
+{
+Reroll Items
+}
+
+STRING 762
+// Abilities: A043 (Reroll Items), Tip (Tooltip - Normal)
+{
+Reroll All
+}
+
+STRING 763
+// Abilities: A043 (Reroll Items), Ubertip (Tooltip - Normal - Extended)
+{
+Items, Elements, Hero
+}
+
+STRING 764
+// Abilities: A046 (Reroll Elements), Name (Name)
+{
+Reroll Elements
+}
+
+STRING 765
+// Abilities: A046 (Reroll Elements), Tip (Tooltip - Normal)
+{
+Reroll All
+}
+
+STRING 766
+// Abilities: A046 (Reroll Elements), Ubertip (Tooltip - Normal - Extended)
+{
+Items, Elements, Hero
+}
+
+STRING 767
+// Abilities: A048 (Reroll Hero), Hotkey (Hotkey - Normal)
+{
+C
+}
+
+STRING 768
+// Abilities: A03Y (Reroll All), Hotkey (Hotkey - Normal)
+{
+V
+}
+
+STRING 769
+// Abilities: A043 (Reroll Items), Hotkey (Hotkey - Normal)
+{
+X
+}
+
+STRING 770
+// Abilities: A046 (Reroll Elements), Hotkey (Hotkey - Normal)
+{
+Z
+}
+
