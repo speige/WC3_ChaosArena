@@ -301,12 +301,89 @@ function ValueExistInTable(tbl, value)
     return false
 end
 
+function RemoveValueFromArray(arr, value)
+    for i = 1, #arr do
+        if arr[i] == value then
+            table.remove(arr, i)
+            return true
+        end
+    end
+    return false
+end
+
+function GetUnitElementDisplayString(elements, currentLevel)
+    local result = ''
+    if elements.water then result = result .. GLOBAL_ELEMENT_NAME_TO_COLORED_STRING.water end
+    if elements.earth then result = result .. GLOBAL_ELEMENT_NAME_TO_COLORED_STRING.earth end
+    if elements.fire then result = result .. GLOBAL_ELEMENT_NAME_TO_COLORED_STRING.fire end
+    if currentLevel then
+        result = result .. ' [Level ' .. currentLevel .. ']'
+    end
+    return result
+end
+
 function MapListValues(tbl, fn)
     local result = {}
     for i = 1, #tbl do
         table.insert(result, fn(tbl[i]))
     end
     return result
+end
+
+function GetRandomItemExcept(excludedItemTypeId)
+    local availableItems = {}
+    for _, itemTypeId in pairs(GLOBAL_ITEM_SET) do
+        if itemTypeId ~= excludedItemTypeId then
+            table.insert(availableItems, itemTypeId)
+        end
+    end
+    if #availableItems > 0 then
+        return availableItems[math.random(1, #availableItems)]
+    end
+    return nil
+end
+
+function GetPlayerDraftedUnitTypeIds(playerId)
+    local player = Player(playerId)
+    local playerDraftedUnits = {}
+    local group = CreateGroup()
+    GroupEnumUnitsOfPlayer(group, player, nil)
+    ForGroup(group, function()
+        local unit = GetEnumUnit()
+        local unitTypeId = GetUnitTypeId(unit)
+        if GLOBAL_DRAFT_SETS.unitTypeIds[unitTypeId] then
+            playerDraftedUnits[unitTypeId] = true
+        end
+    end)
+    DestroyGroup(group)
+
+    return playerDraftedUnits
+end
+
+function GetRandomUnitExcept(excludedUnitTypeIds)
+    local availableUnits = {}
+    for _, metaData in pairs(draftableUnits) do
+        if not excludedUnitTypeIds[metaData.unitTypeId] then
+            table.insert(availableUnits, metaData.unitTypeId)
+        end
+    end
+    return availableUnits[math.random(1, #availableUnits)]
+end
+
+function GetRandomElementExcept(excludedElement)
+    local elementNames = get_table_keys(GLOBAL_ELEMENT_NAME_TO_COLORED_STRING)
+    table.remove(elementNames, table_indexOf(elementNames, excludedElement))
+    return GLOBAL_ELEMENT_NAME_TO_COLORED_STRING[elementNames[math.random(1, #elementNames)]]
+end
+
+function table_indexOf(table, searchValue)
+    for i, value in pairs(table) do
+        if value == searchValue then
+            return i
+        end
+    end
+
+    return nil
 end
 
 function get_table_keys(t)
@@ -600,10 +677,9 @@ function SetDraftItemTooltip(item)
     BlzSetItemExtendedTooltip(item, tooltip)
 end
 
-
 function GetUnitActivatedElements(unit)
     local unitType = GetUnitTypeId(unit)
-    local name
+    local name = nil
     if unitType ~= CIRCLE_OF_POWER_METADATA.unitTypeId then
         name = GetHeroProperName(unit)
     else
@@ -704,7 +780,7 @@ function CopyUnitGear(sourceUnit, targetUnit)
     local name = nil
     local sourceType = GetUnitTypeId(sourceUnit)
     if sourceType == CIRCLE_OF_POWER_METADATA.unitTypeId then
-        name = GetUnitName(sourceUnit):gsub(" *[[]Level [0-9]+ *[]]$", "")
+        name = GetUnitName(sourceUnit):gsub(' *[[]Level [0-9]+ *[]]$', '')
     else
         name = GetHeroProperName(sourceUnit)
     end
@@ -901,16 +977,8 @@ function UnlockPlayerTiles(playerId, count)
         local circle = CreateUnit(player, CIRCLE_OF_POWER_METADATA.unitTypeId, pos.x, pos.y, lookAtAngle)
         SetUnitVertexColor(circle, 255, 50, 255, 255)
 
-        local itemType = GLOBAL_ITEM_SET[math.random(1, #GLOBAL_ITEM_SET)]
-        local item = UnitAddItemById(circle, itemType)
-        SetItemDroppable(item, false)
-        SetItemCharges(item, tileIndex)
-
-        --NOTE: using name for "level" on circle to avoid making it a hero (would be awkward since it wouldn't have a valid "primary stat")
-        local elementNames = get_table_keys(GLOBAL_ELEMENT_NAME_TO_COLORED_STRING)
-        local element = GLOBAL_ELEMENT_NAME_TO_COLORED_STRING[elementNames[math.random(1, #elementNames)]]
-        BlzSetUnitName(circle, element .. ' [Level ' ..  tileIndex .. ']')
-        SetupUnitAbilities(circle, false)
+        PerformItemReroll(circle)
+        PerformElementReroll(circle)
     end
 end
 
@@ -1037,7 +1105,6 @@ function OnIssuedOrder()
     end
 end
 
-local MIN_X, MIN_Y
 function SwapTileUnits(caster, target)
     local player = GetOwningPlayer(caster)
     
@@ -1046,12 +1113,6 @@ function SwapTileUnits(caster, target)
     local targetX = GetUnitX(target)
     local targetY = GetUnitY(target)
     
-    --todo: check if this is necessary (assuming it'll have collision issues otherwise & bump position slightly)
-    SetUnitX(caster, MIN_X)
-    SetUnitY(caster, MIN_Y)
-    SetUnitX(target, MIN_X)
-    SetUnitY(target, MIN_Y)
-
     local casterType = GetUnitTypeId(caster)
     local targetType = GetUnitTypeId(target)
     local casterFacing = GetUnitFacing(caster)
@@ -1097,6 +1158,20 @@ function SwapTileUnits(caster, target)
     SetupUnitAbilities(newTarget, true)
     HideUnitHealthAndManaBars(newCaster, true)
     HideUnitHealthAndManaBars(newTarget, true)
+    
+    UnitAddAbility(newCaster, REROLL_ITEMS_ABILITY_ID)
+    UnitAddAbility(newCaster, REROLL_HERO_ABILITY_ID)
+    UnitAddAbility(newCaster, REROLL_ELEMENTS_ABILITY_ID)
+    UnitAddAbility(newCaster, REROLL_ALL_ABILITY_ID)
+    UnitAddAbility(newTarget, REROLL_ITEMS_ABILITY_ID)
+    UnitAddAbility(newTarget, REROLL_HERO_ABILITY_ID)
+    UnitAddAbility(newTarget, REROLL_ELEMENTS_ABILITY_ID)
+    UnitAddAbility(newTarget, REROLL_ALL_ABILITY_ID)
+
+    return {
+        newCaster = newCaster,
+        newTarget = newTarget
+    }
 end
 
 function OnUnitDamaged()
@@ -1128,6 +1203,61 @@ function OnUnitDamaged()
     end
 
     unitDamageDealtPerWave[waveNumber] = (unitDamageDealtPerWave[waveNumber] or 0) + damage
+end
+
+function PerformItemReroll(unit)
+    local oldItemTyeId = nil
+    for slot = 0, 5 do
+        local item = UnitItemInSlot(unit, slot)
+        if item then
+            oldItemTyeId = GetItemTypeId(item)
+            RemoveItem(item)
+        end
+    end
+
+    local newItemTypeId = GetRandomItemExcept(oldItemTyeId) or oldItemTyeId
+    local newItem = UnitAddItemById(unit, newItemTypeId)
+    SetItemDroppable(newItem, false)
+    SetItemCharges(newItem, GetHeroLevel(unit))
+end
+
+function PerformElementReroll(unit)
+    local currentElements = GetUnitActivatedElements(unit)
+    local excludedElement = nil
+    for key, value in currentElements do
+        if value then
+            excludedElement = key
+        end
+    end
+
+    local newElement = GLOBAL_ELEMENT_NAME_TO_COLORED_STRING[GetRandomElementExcept(excludedElement)]
+    if newElement then
+        local unitTypeId = GetUnitTypeId(unit)
+        if unitTypeId == CIRCLE_OF_POWER_METADATA.unitTypeId then
+            --NOTE: using name for 'level' on circle to avoid making it a hero (would be awkward since it wouldn't have a valid 'primary stat')
+            local level = tonumber(GetUnitName(unit):match('[0-9]+'))
+            BlzSetUnitName(unit, newElement .. ' [Level ' ..  level .. ']')
+            SetupUnitAbilities(unit, false)
+        else
+            BlzSetHeroProperName(unit, newElement)
+            SetupUnitAbilities(unit, true) 
+        end
+    end
+end
+
+function PerformHeroReroll(unit)
+    local player = GetOwningPlayer(unit)
+    local playerId = GetPlayerId(player)
+    local newUnitTypeId = GetRandomUnitExcept(GetPlayerDraftedUnitTypeIds(playerId))
+    local newUnit = CreateUnit(player, newUnitTypeId, GetUnitX(unit), GetUnitY(unit), GetUnitFacing(unit))
+    local result = SwapTileUnits(newUnit, unit)
+    RemoveUnit(result.newTarget)
+end
+
+function PerformAllReroll(unit)
+    PerformItemReroll(unit)
+    PerformElementReroll(unit)
+    PerformHeroReroll(unit)
 end
 
 function OnSpellEffect()
@@ -1164,6 +1294,26 @@ function OnSpellEffect()
         local caster = GetSpellAbilityUnit()
         local target = GetSpellTargetUnit()
         SwapTileUnits(caster, target)
+        return
+    end
+
+    if abilityId == REROLL_ITEMS_ABILITY_ID then
+        PerformItemReroll(unit)
+        return
+    end
+
+    if abilityId == REROLL_HERO_ABILITY_ID then
+        PerformHeroReroll(unit)
+        return
+    end
+
+    if abilityId == REROLL_ELEMENTS_ABILITY_ID then
+        PerformElementReroll(unit)
+        return
+    end
+
+    if abilityId == REROLL_ALL_ABILITY_ID then
+        PerformAllReroll(unit)
         return
     end
 
@@ -1229,7 +1379,7 @@ end
 local ENEMY_AQUISITION_RANGE = 1000
 local aiCycle = 0
 function RunUnitAI(unit)
-    --todo: wait til teleport complete or "ghost aquisition" completed?
+    --todo: wait til teleport complete or 'ghost aquisition' completed?
     if aiCycle == 0 then
         IssuePointOrder(unit, 'attack', 0, 0)
         return
@@ -1448,7 +1598,12 @@ function DraftUnit(playerId, unitTypeId, circle)
     DisableAttacks(unit)
     SetupUnitAbilities(unit, true)
     HideUnitHealthAndManaBars(unit, true)
-    
+
+    UnitAddAbility(unit, REROLL_ITEMS_ABILITY_ID)
+    UnitAddAbility(unit, REROLL_HERO_ABILITY_ID)
+    UnitAddAbility(unit, REROLL_ELEMENTS_ABILITY_ID)
+    UnitAddAbility(unit, REROLL_ALL_ABILITY_ID)
+
     SelectUnitForPlayerSingle(playerBuilders.primary[playerId], player)
     
     AddDraftItemsToAltar(playerId)
@@ -1953,11 +2108,6 @@ function Init()
     GrantWoodPassive()
     ApplyNegativeHPRegen()
     GrantPassiveXP()
-
-    local worldBounds = GetWorldBounds()
-    MIN_X = GetRectMinX(worldBounds)
-    MIN_Y = GetRectMinY(worldBounds)
-    RemoveRect(worldBounds)
 
     local deathTrigger = CreateTrigger()
     TriggerRegisterAnyUnitEventBJ(deathTrigger, EVENT_PLAYER_UNIT_DEATH)
