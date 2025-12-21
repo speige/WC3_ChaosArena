@@ -2236,33 +2236,21 @@ Reroll Hero
 }
 
 STRING 756
-// Abilities: A048 (Reroll Hero), Tip (Tooltip - Normal)
-{
-Reroll All
-}
-
-STRING 757
-// Abilities: A048 (Reroll Hero), Ubertip (Tooltip - Normal - Extended)
-{
-Items, Elements, Hero
-}
-
-STRING 758
 // Abilities: A03Y (Reroll All), Name (Name)
 {
 Reroll All
 }
 
-STRING 759
-// Abilities: A03Y (Reroll All), Tip (Tooltip - Normal)
-{
-Reroll All
-}
-
-STRING 760
+STRING 757
 // Abilities: A03Y (Reroll All), Ubertip (Tooltip - Normal - Extended)
 {
 Items, Elements, Hero
+}
+
+STRING 758
+// Abilities: A03Y (Reroll All), Tip (Tooltip - Normal)
+{
+Reroll All
 }
 
 STRING 761
@@ -2271,57 +2259,69 @@ STRING 761
 Reroll Items
 }
 
-STRING 762
-// Abilities: A043 (Reroll Items), Tip (Tooltip - Normal)
-{
-Reroll All
-}
-
-STRING 763
-// Abilities: A043 (Reroll Items), Ubertip (Tooltip - Normal - Extended)
-{
-Items, Elements, Hero
-}
-
 STRING 764
 // Abilities: A046 (Reroll Elements), Name (Name)
 {
 Reroll Elements
 }
 
-STRING 765
-// Abilities: A046 (Reroll Elements), Tip (Tooltip - Normal)
-{
-Reroll All
-}
-
-STRING 766
-// Abilities: A046 (Reroll Elements), Ubertip (Tooltip - Normal - Extended)
-{
-Items, Elements, Hero
-}
-
-STRING 767
-// Abilities: A048 (Reroll Hero), Hotkey (Hotkey - Normal)
-{
-C
-}
-
-STRING 768
-// Abilities: A03Y (Reroll All), Hotkey (Hotkey - Normal)
-{
-V
-}
-
-STRING 769
-// Abilities: A043 (Reroll Items), Hotkey (Hotkey - Normal)
-{
-X
-}
-
 STRING 770
-// Abilities: A046 (Reroll Elements), Hotkey (Hotkey - Normal)
+// Abilities: A047 (Reroll Spell Book), Hotkey (Hotkey - Normal)
 {
 Z
+}
+
+STRING 771
+// Abilities: A048 (Reroll Hero), Tip (Tooltip - Normal)
+{
+Reroll Hero
+}
+
+STRING 773
+// Abilities: A046 (Reroll Elements), Tip (Tooltip - Normal)
+{
+Reroll Elemental Ability
+}
+
+STRING 778
+// Abilities: A043 (Reroll Items), Tip (Tooltip - Normal)
+{
+Reroll Item
+}
+
+STRING 779
+// Abilities: A047 (Reroll Spell Book), Tip (Tooltip - Normal)
+{
+Reroll
+}
+
+STRING 780
+// Abilities: A047 (Reroll Spell Book), Name (Name)
+{
+Reroll Spell Book
+}
+
+STRING 781
+// Abilities: A048 (Reroll Hero), Hotkey (Hotkey - Normal)
+{
+E
+}
+
+STRING 782
+// Abilities: A03Y (Reroll All), Hotkey (Hotkey - Normal)
+{
+R
+}
+
+STRING 783
+// Abilities: A043 (Reroll Items), Hotkey (Hotkey - Normal)
+{
+W
+}
+
+STRING 784
+// Abilities: A046 (Reroll Elements), Hotkey (Hotkey - Normal)
+{
+Q
 }
 

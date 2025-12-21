@@ -59,7 +59,9 @@ local StatScalingPerBalancePoint = {
     maxLife = 100,
     armor = 1,
     manaRegen = .01,
-    attributePerLevel = .25
+    attributePerLevel = .25,
+    attackRange = 100,
+    attackSpeed = .1
 }
 
 function BalanceStatPointAllocations(attackRangePoints, attackSpeedPoints, attackDamagePoints, maxLifePoints, armorPoints, manaRegenPoints, strengthPerLevelPoints, agilityPerLevelPoints, intelligencePerLevelPoints)
@@ -311,36 +313,12 @@ function RemoveValueFromArray(arr, value)
     return false
 end
 
-function GetUnitElementDisplayString(elements, currentLevel)
-    local result = ''
-    if elements.water then result = result .. GLOBAL_ELEMENT_NAME_TO_COLORED_STRING.water end
-    if elements.earth then result = result .. GLOBAL_ELEMENT_NAME_TO_COLORED_STRING.earth end
-    if elements.fire then result = result .. GLOBAL_ELEMENT_NAME_TO_COLORED_STRING.fire end
-    if currentLevel then
-        result = result .. ' [Level ' .. currentLevel .. ']'
-    end
-    return result
-end
-
 function MapListValues(tbl, fn)
     local result = {}
     for i = 1, #tbl do
         table.insert(result, fn(tbl[i]))
     end
     return result
-end
-
-function GetRandomItemExcept(excludedItemTypeId)
-    local availableItems = {}
-    for _, itemTypeId in pairs(GLOBAL_ITEM_SET) do
-        if itemTypeId ~= excludedItemTypeId then
-            table.insert(availableItems, itemTypeId)
-        end
-    end
-    if #availableItems > 0 then
-        return availableItems[math.random(1, #availableItems)]
-    end
-    return nil
 end
 
 function GetPlayerDraftedUnitTypeIds(playerId)
@@ -368,12 +346,6 @@ function GetRandomUnitExcept(excludedUnitTypeIds)
         end
     end
     return availableUnits[math.random(1, #availableUnits)]
-end
-
-function GetRandomElementExcept(excludedElement)
-    local elementNames = get_table_keys(GLOBAL_ELEMENT_NAME_TO_COLORED_STRING)
-    table.remove(elementNames, table_indexOf(elementNames, excludedElement))
-    return GLOBAL_ELEMENT_NAME_TO_COLORED_STRING[elementNames[math.random(1, #elementNames)]]
 end
 
 function table_indexOf(table, searchValue)
@@ -479,6 +451,7 @@ local MOVE_ABILITY_ID = FourCC('Amov')
 --note: used to hide health bars (also requires ObjectEditor IsBuilding=true, but can still move)
 local INVULNERABLE_ABILITY_ID = FourCC('Avul')
 
+local REROLL_SPELLBOOK_ABILITY_ID = FourCC('A047')
 local REROLL_ITEMS_ABILITY_ID = FourCC('A043')
 local REROLL_ELEMENTS_ABILITY_ID = FourCC('A046')
 local REROLL_HERO_ABILITY_ID = FourCC('A048')
@@ -535,6 +508,25 @@ for playerId = 12, 23 do
     playerIdMapping_proxyToReal[playerId] = playerId - 12
 end
 
+function GetUnitElementDisplayString(elements, currentLevel)
+    local result = ''
+    if elements.water then result = result .. GLOBAL_ELEMENT_NAME_TO_COLORED_STRING.water end
+    if elements.earth then result = result .. GLOBAL_ELEMENT_NAME_TO_COLORED_STRING.earth end
+    if elements.fire then result = result .. GLOBAL_ELEMENT_NAME_TO_COLORED_STRING.fire end
+    if currentLevel then
+        result = result .. ' [Level ' .. currentLevel .. ']'
+    end
+    return result
+end
+
+function GetRandomElementExcept(excludedElement)
+    local elementNames = get_table_keys(GLOBAL_ELEMENT_NAME_TO_COLORED_STRING)
+    if excludedElement then
+        table.remove(elementNames, table_indexOf(elementNames, excludedElement))
+    end
+    return elementNames[math.random(1, #elementNames)]
+end
+
 function IntegerToFourCC(i)
     local a = string.char(math.fmod(i, 256))
     i = math.floor(i / 256)
@@ -564,6 +556,20 @@ function WeightedRandom(weights)
     end
     
     return #weights
+end
+
+function GetRandomItemExcept(excludedItemTypeId)
+    local availableItems = {}
+    for i = 1, #GLOBAL_ITEM_SET do
+        local itemTypeId = GLOBAL_ITEM_SET[i]
+        if itemTypeId ~= excludedItemTypeId then
+            table.insert(availableItems, itemTypeId)
+        end
+    end
+    if #availableItems > 0 then
+        return availableItems[math.random(1, #availableItems)]
+    end
+    return nil
 end
 
 function UpdateHeroLevel(unit, level)
@@ -625,7 +631,7 @@ function InitAbilityGridPositions()
 
     for _, metaData in pairs(draftableUnits) do        
         if metaData.abilityMetaData.water.abilityId then
-            BlzSetAbilityPosX(metaData.abilityMetaData.water.abilityId, 1)
+            BlzSetAbilityPosX(metaData.abilityMetaData.water.abilityId, 0)
             BlzSetAbilityPosY(metaData.abilityMetaData.water.abilityId, 0)
             if not tooltipsAlreadySet[metaData.abilityMetaData.water.abilityId] then
                 BlzSetAbilityTooltip(metaData.abilityMetaData.water.abilityId, GLOBAL_ELEMENT_NAME_TO_COLOR.water .. BlzGetAbilityTooltip(metaData.abilityMetaData.water.abilityId, 0) .. COLOR_WHITE, 0)
@@ -633,7 +639,7 @@ function InitAbilityGridPositions()
             end
         end
         if metaData.abilityMetaData.earth.abilityId then
-            BlzSetAbilityPosX(metaData.abilityMetaData.earth.abilityId, 2)
+            BlzSetAbilityPosX(metaData.abilityMetaData.earth.abilityId, 1)
             BlzSetAbilityPosY(metaData.abilityMetaData.earth.abilityId, 0)
             if not tooltipsAlreadySet[metaData.abilityMetaData.earth.abilityId] then
                 BlzSetAbilityTooltip(metaData.abilityMetaData.earth.abilityId, GLOBAL_ELEMENT_NAME_TO_COLOR.earth .. BlzGetAbilityTooltip(metaData.abilityMetaData.earth.abilityId, 0) .. COLOR_WHITE, 0)
@@ -641,7 +647,7 @@ function InitAbilityGridPositions()
             end
         end
         if metaData.abilityMetaData.fire.abilityId then
-            BlzSetAbilityPosX(metaData.abilityMetaData.fire.abilityId, 3)
+            BlzSetAbilityPosX(metaData.abilityMetaData.fire.abilityId, 2)
             BlzSetAbilityPosY(metaData.abilityMetaData.fire.abilityId, 0)
             if not tooltipsAlreadySet[metaData.abilityMetaData.fire.abilityId] then
                 BlzSetAbilityTooltip(metaData.abilityMetaData.fire.abilityId, GLOBAL_ELEMENT_NAME_TO_COLOR.fire .. BlzGetAbilityTooltip(metaData.abilityMetaData.fire.abilityId, 0) .. COLOR_WHITE, 0)
@@ -975,7 +981,7 @@ function UnlockPlayerTiles(playerId, count)
         local tileIndex = 9 - #playerTileCoords[playerId] + 1
         local pos = table.remove(playerTileCoords[playerId], 1)
         local circle = CreateUnit(player, CIRCLE_OF_POWER_METADATA.unitTypeId, pos.x, pos.y, lookAtAngle)
-        SetUnitVertexColor(circle, 255, 50, 255, 255)
+        BlzSetUnitName(circle, ' [Level ' ..  tileIndex .. ']')
 
         PerformItemReroll(circle)
         PerformElementReroll(circle)
@@ -1088,8 +1094,18 @@ function OnItemSold()
 end
 
 local STOP_ORDER_ID = 851972
+local REROLL_ELEMENT_PSEUDO_ORDER_ID_AMBUSH = 852131
+local REROLL_ITEM_PSEUDO_ORDER_ID_AIMOVE = 851988
+local REROLL_HERO_PSEUDO_ORDER_ID_ACOLYTEHARVEST = 852185
+local REROLL_ALL_PSEUDO_ORDER_ID_ABSORB = 852529
+--local CHANNEL_ORDER_ID = 852600
 function OnIssuedOrder() 
-    if GetIssuedOrderId() == STOP_ORDER_ID then
+    local issuedOrder = GetIssuedOrderId()
+    if issuedOrder == STOP_ORDER_ID then
+        return
+    end
+
+    if issuedOrder == REROLL_ELEMENT_PSEUDO_ORDER_ID_AMBUSH or issuedOrder == REROLL_ITEM_PSEUDO_ORDER_ID_AIMOVE or issuedOrder == REROLL_HERO_PSEUDO_ORDER_ID_ACOLYTEHARVEST or issuedOrder == REROLL_ALL_PSEUDO_ORDER_ID_ABSORB then
         return
     end
 
@@ -1105,6 +1121,7 @@ function OnIssuedOrder()
     end
 end
 
+local MIN_X, MIN_Y
 function SwapTileUnits(caster, target)
     local player = GetOwningPlayer(caster)
     
@@ -1112,6 +1129,11 @@ function SwapTileUnits(caster, target)
     local casterY = GetUnitY(caster)
     local targetX = GetUnitX(target)
     local targetY = GetUnitY(target)
+    
+    SetUnitX(caster, MIN_X)
+    SetUnitY(caster, MIN_Y)
+    SetUnitX(target, MIN_X)
+    SetUnitY(target, MIN_Y)
     
     local casterType = GetUnitTypeId(caster)
     local targetType = GetUnitTypeId(target)
@@ -1159,14 +1181,8 @@ function SwapTileUnits(caster, target)
     HideUnitHealthAndManaBars(newCaster, true)
     HideUnitHealthAndManaBars(newTarget, true)
     
-    UnitAddAbility(newCaster, REROLL_ITEMS_ABILITY_ID)
-    UnitAddAbility(newCaster, REROLL_HERO_ABILITY_ID)
-    UnitAddAbility(newCaster, REROLL_ELEMENTS_ABILITY_ID)
-    UnitAddAbility(newCaster, REROLL_ALL_ABILITY_ID)
-    UnitAddAbility(newTarget, REROLL_ITEMS_ABILITY_ID)
-    UnitAddAbility(newTarget, REROLL_HERO_ABILITY_ID)
-    UnitAddAbility(newTarget, REROLL_ELEMENTS_ABILITY_ID)
-    UnitAddAbility(newTarget, REROLL_ALL_ABILITY_ID)
+    UnitAddAbility(newCaster, REROLL_SPELLBOOK_ABILITY_ID)
+    UnitAddAbility(newTarget, REROLL_SPELLBOOK_ABILITY_ID)
 
     return {
         newCaster = newCaster,
@@ -1224,24 +1240,22 @@ end
 function PerformElementReroll(unit)
     local currentElements = GetUnitActivatedElements(unit)
     local excludedElement = nil
-    for key, value in currentElements do
+    for key, value in pairs(currentElements) do
         if value then
             excludedElement = key
         end
     end
 
     local newElement = GLOBAL_ELEMENT_NAME_TO_COLORED_STRING[GetRandomElementExcept(excludedElement)]
-    if newElement then
-        local unitTypeId = GetUnitTypeId(unit)
-        if unitTypeId == CIRCLE_OF_POWER_METADATA.unitTypeId then
-            --NOTE: using name for 'level' on circle to avoid making it a hero (would be awkward since it wouldn't have a valid 'primary stat')
-            local level = tonumber(GetUnitName(unit):match('[0-9]+'))
-            BlzSetUnitName(unit, newElement .. ' [Level ' ..  level .. ']')
-            SetupUnitAbilities(unit, false)
-        else
-            BlzSetHeroProperName(unit, newElement)
-            SetupUnitAbilities(unit, true) 
-        end
+    local unitTypeId = GetUnitTypeId(unit)
+    if unitTypeId == CIRCLE_OF_POWER_METADATA.unitTypeId then
+        --NOTE: using name for 'level' on circle to avoid making it a hero (would be awkward since it wouldn't have a valid 'primary stat')
+        local level = tonumber(GetUnitName(unit):match('[0-9]+'))
+        BlzSetUnitName(unit, newElement .. ' [Level ' ..  level .. ']')
+        SetupUnitAbilities(unit, false)
+    else
+        BlzSetHeroProperName(unit, newElement)
+        SetupUnitAbilities(unit, true) 
     end
 end
 
@@ -1252,6 +1266,7 @@ function PerformHeroReroll(unit)
     local newUnit = CreateUnit(player, newUnitTypeId, GetUnitX(unit), GetUnitY(unit), GetUnitFacing(unit))
     local result = SwapTileUnits(newUnit, unit)
     RemoveUnit(result.newTarget)
+    SelectUnitForPlayerSingle(result.newCaster, player)
 end
 
 function PerformAllReroll(unit)
@@ -1291,9 +1306,9 @@ function OnSpellEffect()
     end
 
     if abilityId == SWAP_UNITS_ABILITY_ID then
-        local caster = GetSpellAbilityUnit()
         local target = GetSpellTargetUnit()
-        SwapTileUnits(caster, target)
+        local swappedUnits = SwapTileUnits(unit, target)
+        SelectUnitForPlayerSingle(swappedUnits.newCaster, player)
         return
     end
 
@@ -1582,6 +1597,9 @@ function DraftUnit(playerId, unitTypeId, circle)
     local circleX = GetUnitX(circle)
     local circleY = GetUnitY(circle)
 
+    SetUnitX(circle, MIN_X)
+    SetUnitY(circle, MIN_Y)
+
     local unit = CreateUnit(player, unitTypeId, circleX, circleY, CalcUnitRotationAngle(circleX, circleY, 0, 0))
     SetupUnitBaseStats(unit)
 
@@ -1599,10 +1617,7 @@ function DraftUnit(playerId, unitTypeId, circle)
     SetupUnitAbilities(unit, true)
     HideUnitHealthAndManaBars(unit, true)
 
-    UnitAddAbility(unit, REROLL_ITEMS_ABILITY_ID)
-    UnitAddAbility(unit, REROLL_HERO_ABILITY_ID)
-    UnitAddAbility(unit, REROLL_ELEMENTS_ABILITY_ID)
-    UnitAddAbility(unit, REROLL_ALL_ABILITY_ID)
+    UnitAddAbility(unit, REROLL_SPELLBOOK_ABILITY_ID)
 
     SelectUnitForPlayerSingle(playerBuilders.primary[playerId], player)
     
@@ -2108,6 +2123,11 @@ function Init()
     GrantWoodPassive()
     ApplyNegativeHPRegen()
     GrantPassiveXP()
+
+    local worldBounds = GetWorldBounds()
+    MIN_X = GetRectMinX(worldBounds)
+    MIN_Y = GetRectMinY(worldBounds)
+    RemoveRect(worldBounds)
 
     local deathTrigger = CreateTrigger()
     TriggerRegisterAnyUnitEventBJ(deathTrigger, EVENT_PLAYER_UNIT_DEATH)
