@@ -60,6 +60,16 @@ local StatScalingPerBalancePoint = {
     attackSpeed = .1
 }
 
+local BaseValuePerStat = {
+    attackDamage = 1,
+    maxLife = 100,
+    armor = 0,
+    manaRegen = .01,
+    attribute = 1,
+    attackRange = 100,
+    attackSpeed = .1
+}
+
 function BalanceStatPointAllocations(attackRangePoints, attackSpeedPoints, attackDamagePoints, maxLifePoints, armorPoints, manaRegenPoints, strengthPerLevelPoints, agilityPerLevelPoints, intelligencePerLevelPoints)
     return { attackRangePoints = attackRangePoints, attackSpeedPoints = attackSpeedPoints, attackDamagePoints = attackDamagePoints, maxLifePoints = maxLifePoints, armorPoints = armorPoints, manaRegenPoints = manaRegenPoints, strengthPerLevelPoints = strengthPerLevelPoints, agilityPerLevelPoints = agilityPerLevelPoints, intelligencePerLevelPoints = intelligencePerLevelPoints }
 end
@@ -68,15 +78,15 @@ function BalanceBaseStatsByPoints(defenseType, attackType, primaryAttribute, sta
     local normalizedScaling = 10 / (pointAllocations.attackRangePoints + pointAllocations.attackSpeedPoints + pointAllocations.attackDamagePoints + pointAllocations.maxLifePoints + pointAllocations.armorPoints + pointAllocations.manaRegenPoints + pointAllocations.strengthPerLevelPoints + pointAllocations.agilityPerLevelPoints + pointAllocations.intelligencePerLevelPoints)
     return {
         defenseType = defenseType, attackType = attackType, startingMana = startingMana, primaryAttribute = primaryAttribute,
-        attackRange = math.ceil(normalizedScaling * pointAllocations.attackRangePoints * StatScalingPerBalancePoint.attackRange),
-        attackSpeed = math.ceil(normalizedScaling * pointAllocations.attackSpeedPoints * StatScalingPerBalancePoint.attackSpeed),
-        attackDamage = math.ceil(normalizedScaling * pointAllocations.attackDamagePoints * StatScalingPerBalancePoint.attackDamage),
-        maxLife = math.ceil(normalizedScaling * pointAllocations.maxLifePoints * StatScalingPerBalancePoint.maxLife),
-        armor = math.ceil(normalizedScaling * pointAllocations.armorPoints * StatScalingPerBalancePoint.armor),
-        manaRegen = normalizedScaling * pointAllocations.manaRegenPoints * StatScalingPerBalancePoint.manaRegen,
-        strengthPerLevel = normalizedScaling * pointAllocations.strengthPerLevelPoints * StatScalingPerBalancePoint.attributePerLevel,
-        agilityPerLevel = normalizedScaling * pointAllocations.agilityPerLevelPoints * StatScalingPerBalancePoint.attributePerLevel,
-        intelligencePerLevel = normalizedScaling * pointAllocations.intelligencePerLevelPoints * StatScalingPerBalancePoint.attributePerLevel,
+        attackRange = math.ceil(normalizedScaling * pointAllocations.attackRangePoints * StatScalingPerBalancePoint.attackRange + BaseValuePerStat.attackRange),
+        attackSpeed = math.ceil(normalizedScaling * pointAllocations.attackSpeedPoints * StatScalingPerBalancePoint.attackSpeed + BaseValuePerStat.attackSpeed),
+        attackDamage = math.ceil(normalizedScaling * pointAllocations.attackDamagePoints * StatScalingPerBalancePoint.attackDamage + BaseValuePerStat.attackDamage),
+        maxLife = math.ceil(normalizedScaling * pointAllocations.maxLifePoints * StatScalingPerBalancePoint.maxLife + BaseValuePerStat.maxLife),
+        armor = math.ceil(normalizedScaling * pointAllocations.armorPoints * StatScalingPerBalancePoint.armor + BaseValuePerStat.armor),
+        manaRegen = normalizedScaling * pointAllocations.manaRegenPoints * StatScalingPerBalancePoint.manaRegen + BaseValuePerStat.manaRegen,
+        strengthPerLevel = normalizedScaling * pointAllocations.strengthPerLevelPoints * StatScalingPerBalancePoint.attributePerLevel + BaseValuePerStat.attribute,
+        agilityPerLevel = normalizedScaling * pointAllocations.agilityPerLevelPoints * StatScalingPerBalancePoint.attributePerLevel + BaseValuePerStat.attribute,
+        intelligencePerLevel = normalizedScaling * pointAllocations.intelligencePerLevelPoints * StatScalingPerBalancePoint.attributePerLevel + BaseValuePerStat.attribute,
     }
 end
 
