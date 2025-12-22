@@ -730,6 +730,7 @@ function SetupUnitAbilities(unit, includeDisabled)
             SetAbilityHotkey(unit, abilityMetaData.water.abilityId, 'W')
             if elements.water then
                 SetupUnitAbilityBaseStats(unit, abilityMetaData.water)
+                SetUnitColor(unit, ElementToPlayerColor('water'))
             else
                 SetUnitAbilityTooltip(unit, abilityMetaData.water.abilityId, GetUnitAbilityTooltip(unit, abilityMetaData.water.abilityId) .. ' (disabled)')
             end
@@ -741,6 +742,7 @@ function SetupUnitAbilities(unit, includeDisabled)
             SetAbilityHotkey(unit, abilityMetaData.earth.abilityId, 'E')
             if elements.earth then
                 SetupUnitAbilityBaseStats(unit, abilityMetaData.earth)
+                SetUnitColor(unit, ElementToPlayerColor('earth'))
             else
                 SetUnitAbilityTooltip(unit, abilityMetaData.earth.abilityId, GetUnitAbilityTooltip(unit, abilityMetaData.earth.abilityId) .. ' (disabled)')
             end
@@ -752,6 +754,7 @@ function SetupUnitAbilities(unit, includeDisabled)
             SetAbilityHotkey(unit, abilityMetaData.fire.abilityId, 'R')
             if elements.fire then
                 SetupUnitAbilityBaseStats(unit, abilityMetaData.fire)
+                SetUnitColor(unit, ElementToPlayerColor('fire'))
             else
                 SetUnitAbilityTooltip(unit, abilityMetaData.fire.abilityId, GetUnitAbilityTooltip(unit, abilityMetaData.fire.abilityId) .. ' (disabled)')
             end
@@ -1233,6 +1236,20 @@ function PerformItemReroll(unit)
     SetItemCharges(newItem, GetHeroLevel(unit))
 end
 
+function ElementToPlayerColor(element)
+    if element == 'water' then
+        return PLAYER_COLOR_BLUE
+    end
+    if element == 'earth' then
+        return PLAYER_COLOR_GREEN
+    end
+    if element == 'fire' then
+        return PLAYER_COLOR_RED
+    end
+
+    return nil
+end
+
 function PerformElementReroll(unit)
     local currentElements = GetUnitActivatedElements(unit)
     local excludedElement = nil
@@ -1242,17 +1259,20 @@ function PerformElementReroll(unit)
         end
     end
 
-    local newElement = GLOBAL_ELEMENT_NAME_TO_COLORED_STRING[GetRandomElementExcept(excludedElement)]
+    local newElement = GetRandomElementExcept(excludedElement)
+    local newElementColored = GLOBAL_ELEMENT_NAME_TO_COLORED_STRING[newElement]
     local unitTypeId = GetUnitTypeId(unit)
     if unitTypeId == CIRCLE_OF_POWER_METADATA.unitTypeId then
         --NOTE: using name for 'level' on circle to avoid making it a hero (would be awkward since it wouldn't have a valid 'primary stat')
         local level = tonumber(GetUnitName(unit):match('[0-9]+'))
-        BlzSetUnitName(unit, newElement .. ' [Level ' ..  level .. ']')
+        BlzSetUnitName(unit, newElementColored .. ' [Level ' ..  level .. ']')
         SetupUnitAbilities(unit, false)
     else
-        BlzSetHeroProperName(unit, newElement)
+        BlzSetHeroProperName(unit, newElementColored)
         SetupUnitAbilities(unit, true) 
     end
+
+    SetUnitColor(unit, ElementToPlayerColor(newElement))
 end
 
 function PerformHeroReroll(unit)
